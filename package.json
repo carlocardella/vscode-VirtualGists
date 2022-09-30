@@ -1,0 +1,83 @@
+{
+    "name": "vscode-virtualgists",
+    "displayName": "vscode-VirtualGists",
+    "description": "Easily manage your GitHub Gists from VSCode",
+    "publisher": "carlocardella",
+    "version": "0.0.1",
+    "preview": true,
+    "engines": {
+        "vscode": "^1.63.0"
+    },
+    "icon": "assets/book.png",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/carlocardella/vscode-VirtualGists.git"
+    },
+    "bugs": {
+        "url": "https://github.com/carlocardella/vscode-VirtualGists/issues"
+    },
+    "categories": [
+        "Other"
+    ],
+    "capabilities": {
+        "untrustedWorkspaces": {
+            "supported": true
+        }
+    },
+    "keywords": [
+        "git",
+        "github",
+        "gist",
+        "gists",
+        "virtual file system",
+        "virtual gists"
+    ],
+    "activationEvents": [
+        "onView:virtualGistsView"
+    ],
+    "main": "./dist/extension-node.js",
+    "browser": "./dist/extension-web.js",
+    "contributes": {
+        "commands": []
+    },
+    "scripts": {
+        "webpack": "webpack --mode development",
+        "webpack-dev": "webpack --mode development --watch",
+        "test-compile": "tsc -p ./",
+        "unit-tests": "tsc -w -p ./",
+        "vscode:prepublish": "npm run package-web",
+        "compile-web": "webpack",
+        "watch-web": "webpack --watch",
+        "package-web": "webpack --mode production --devtool hidden-source-map"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.63.0",
+        "@types/glob": "^7.2.0",
+        "@types/mocha": "^9.1.1",
+        "@types/node": "16.x",
+        "@typescript-eslint/eslint-plugin": "^5.38.0",
+        "@typescript-eslint/parser": "^5.38.0",
+        "@vscode/test-electron": "^2.1.5",
+        "eslint": "^8.24.0",
+        "glob": "^8.0.3",
+        "mocha": "^10.0.0",
+        "octokit": "^2.0.7",
+        "ts-loader": "^9.4.1",
+        "typescript": "^4.8.3",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0"
+    },
+    "dependencies": {
+        "@octokit/core": "^4.0.5",
+        "@octokit/openapi-types": "^13.12.0",
+        "@octokit/plugin-rest-endpoint-methods": "^6.6.2",
+        "@octokit/request": "^6.2.1",
+        "@octokit/rest": "^19.0.4",
+        "@octokit/types": "^7.5.0",
+        "is-binary-path": "^2.1.0",
+        "os-browserify": "^0.3.0",
+        "path-browserify": "^1.0.1",
+        "process": "^0.11.10"
+    }
+}

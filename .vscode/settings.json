@@ -1,0 +1,35 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "files.exclude": {
+        "out": false, // set this to true to hide the "out" folder with the compiled JS files
+        "dist": false // set this to true to hide the "dist" folder with the compiled JS files
+    },
+    "search.exclude": {
+        "out": true, // set this to false to include "out" folder in search results
+        "dist": true // set this to false to include "dist" folder in search results
+    },
+    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+    "typescript.tsc.autoDetect": "off",
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#ff971a",
+        "activityBar.background": "#ff971a",
+        "activityBar.foreground": "#15202b",
+        "activityBar.inactiveForeground": "#15202b99",
+        "activityBarBadge.background": "#dffff1",
+        "activityBarBadge.foreground": "#15202b",
+        "commandCenter.border": "#15202b99",
+        "sash.hoverBorder": "#ff971a",
+        "statusBar.background": "#e67e00",
+        "statusBar.foreground": "#15202b",
+        "statusBarItem.hoverBackground": "#b36200",
+        "statusBarItem.remoteBackground": "#e67e00",
+        "statusBarItem.remoteForeground": "#15202b",
+        "tab.activeBorder": "#ff971a",
+        "titleBar.activeBackground": "#e67e00",
+        "titleBar.activeForeground": "#15202b",
+        "titleBar.inactiveBackground": "#e67e0099",
+        "titleBar.inactiveForeground": "#15202b99"
+    },
+    "peacock.color": "#e67e00",
+    "task.allowAutomaticTasks": "on"
+}
