@@ -3,6 +3,10 @@
     "displayName": "vscode-VirtualGists",
     "description": "Easily manage your GitHub Gists from VSCode",
     "publisher": "carlocardella",
+    "author": {
+        "name": "Carlo Cardella",
+        "url": "https://cloudnotes.io"
+    },
     "version": "0.0.1",
     "preview": true,
     "engines": {
@@ -39,7 +43,27 @@
     "main": "./dist/extension-node.js",
     "browser": "./dist/extension-web.js",
     "contributes": {
-        "commands": []
+        "commands": [],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "VirtualRepositoriesContainer",
+                    "title": "Virtual Repositories",
+                    "icon": "assets/repo.svg"
+                }
+            ]
+        },
+        "views": {
+            "VirtualRepositoriesContainer": [
+                {
+                    "id": "virtualReposView",
+                    "name": "Virtual Repositories",
+                    "icon": "assets/repo.svg",
+                    "type": "tree",
+                    "visibility": "collapsed"
+                }
+            ]
+        }
     },
     "scripts": {
         "webpack": "webpack --mode development",
