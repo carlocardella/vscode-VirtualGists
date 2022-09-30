@@ -11,10 +11,10 @@ import {
     TextDocument,
     Uri,
 } from "vscode";
-import { repoProvider } from "../extension";
+import { gistProvider } from "../extension";
 import { deleteGitHubFile, refreshGitHubTree, createOrUpdateFile } from "../GitHub/api";
 import { TGitHubUpdateContent, TContent } from "../GitHub/types";
-import { RepoNode } from "../Tree/nodes";
+import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";
 
 export const REPO_SCHEME = "github-repo";
@@ -69,7 +69,7 @@ export class RepoFileSystemProvider implements FileSystemProvider {
         return await getRepoFileContent(repository, file);
     }
 
-    static getRepoInfo(uri: Uri): [RepoNode, TContent] | undefined {
+    static getRepoInfo(uri: Uri): [GistNode, TContent] | undefined {
         const match = RepoFileSystemProvider.getFileInfo(uri);
 
         if (!match) {
@@ -136,7 +136,7 @@ export class RepoFileSystemProvider implements FileSystemProvider {
         await deleteGitHubFile(repository!.repo!, file);
 
         this._onDidChangeFile.fire([{ type: FileChangeType.Deleted, uri }]); // investigate: needed?
-        repoProvider.refresh();
+        gistProvider.refresh();
     }
 
     async rename(uri: Uri): Promise<void> {
@@ -175,7 +175,7 @@ export class RepoFileSystemProvider implements FileSystemProvider {
                 });
 
             this._onDidChangeFile.fire([{ type: FileChangeType.Created, uri }]); // investigate: needed?
-            repoProvider.refresh();
+            gistProvider.refresh();
         } else {
             file.path = uri.path.substring(1);
             createOrUpdateFile(repository, file, content).then((response: TGitHubUpdateContent) => {

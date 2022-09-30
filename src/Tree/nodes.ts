@@ -5,7 +5,7 @@ import { store, getReposFromGlobalStorage } from "../FileSystem/storage";
 import { getGitHubBranch, getGitHubRepoContent, getGitHubTree, openRepository } from "../GitHub/api";
 import { TRepo, ContentType, TContent, TTree } from "../GitHub/types";
 
-export class RepoNode extends TreeItem {
+export class GistNode extends TreeItem {
     owner: string;
     tree?: TTree;
     name: string;
@@ -54,7 +54,7 @@ export class ContentNode extends TreeItem {
     }
 }
 
-export class RepoProvider implements TreeDataProvider<ContentNode> {
+export class GistProvider implements TreeDataProvider<ContentNode> {
     getTreeItem = (node: ContentNode) => node;
 
     async getChildren(element?: ContentNode): Promise<any[]> {
@@ -92,7 +92,7 @@ export class RepoProvider implements TreeDataProvider<ContentNode> {
                         try {
                             let branch = await getGitHubBranch(repo!, repo!.default_branch);
                             let tree = (await getGitHubTree(repo!, branch!.commit.sha)) ?? undefined;
-                            return new RepoNode(repo!, tree);
+                            return new GistNode(repo!, tree);
                         } catch (error: any) {
                             if (error.name === "HttpError") {
                                 output?.appendLine(`Error reading repo ${repo!.name}: ${error.response.data.message}`, output.messageType.error);

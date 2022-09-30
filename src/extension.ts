@@ -2,10 +2,10 @@ import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
-import { RepoProvider } from "./Tree/nodes";
-import { RepoFileSystemProvider, REPO_SCHEME } from "./FileSystem/fileSystem";
+import { GistProvider } from "./Tree/nodes";
+import { RepoFileSystemProvider as GistFileSystemProvider, REPO_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import { clearGlobalStorage, getReposFromGlobalStorage, purgeGlobalStorage, removeFromGlobalStorage } from "./FileSystem/storage";
+import { clearGlobalStorage, getReposFromGlobalStorage as getGistsFromGlobalStorage, purgeGlobalStorage, removeFromGlobalStorage } from "./FileSystem/storage";
 import { GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -13,7 +13,7 @@ export let output: trace.Output;
 export const credentials = new Credentials();
 export let gitHubAuthenticatedUser: TGitHubUser;
 export let extensionContext: ExtensionContext;
-export const repoProvider = new RepoProvider();
+export const gistProvider = new GistProvider();
 
 export async function activate(context: ExtensionContext) {
     extensionContext = context;
@@ -23,7 +23,7 @@ export async function activate(context: ExtensionContext) {
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
-    output?.appendLine("Virtual Repositories: extension is now active!", output.messageType.info);
+    output?.appendLine("Virtual Gists: extension is now active!", output.messageType.info);
 
     await credentials.initialize(context);
     if (!credentials.isAuthenticated) {
@@ -38,13 +38,13 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.refreshTree", async () => {
-            repoProvider.refresh();
+            gistProvider.refresh();
         })
     );
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.getGlobalStorage", async () => {
-            const reposFromGlobalStorage = await getReposFromGlobalStorage(context);
+            const reposFromGlobalStorage = await getGistsFromGlobalStorage(context);
             if (reposFromGlobalStorage.length > 0) {
                 output?.appendLine(`Global storage: ${reposFromGlobalStorage}`, output.messageType.info);
             } else {
@@ -61,14 +61,14 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.removeFromGlobalStorage", async () => {
-            const reposFromGlobalStorage = await getReposFromGlobalStorage(context);
-            const repoToRemove = await window.showQuickPick(reposFromGlobalStorage, {
-                placeHolder: "Select repository to remove from global storage",
+            const gistsFromGlobalStorage = await getGistsFromGlobalStorage(context);
+            const gistToRemove = await window.showQuickPick(gistsFromGlobalStorage, {
+                placeHolder: "Select gist to remove from global storage",
                 ignoreFocusOut: true,
                 canPickMany: false,
             });
-            if (repoToRemove) {
-                removeFromGlobalStorage(context, repoToRemove);
+            if (gistToRemove) {
+                removeFromGlobalStorage(context, gistToRemove);
             }
         })
     );
@@ -79,9 +79,9 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
-    const repoFileSystemProvider = new RepoFileSystemProvider();
+    const gistFileSystemProvider = new GistFileSystemProvider();
     context.subscriptions.push(
-        workspace.registerFileSystemProvider(REPO_SCHEME, repoFileSystemProvider, {
+        workspace.registerFileSystemProvider(REPO_SCHEME, gistFileSystemProvider, {
             isCaseSensitive: true,
         })
     );
@@ -102,8 +102,8 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
-    window.createTreeView("virtualReposView", {
-        treeDataProvider: repoProvider,
+    window.createTreeView("virtualGistsView", {
+        treeDataProvider: gistProvider,
         showCollapseAll: true,
         canSelectMany: true,
     });

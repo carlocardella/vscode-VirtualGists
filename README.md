@@ -1,70 +1,80 @@
-# vscode-virtualgists README
+# Virtual Gists
 
-This is the README for your extension "vscode-virtualgists". After writing up a brief description, we recommend including the following sections.
+![preview](https://img.shields.io/badge/-preview-orange)
 
-## Features
+[![Publish Extension](https://github.com/carlocardella/vscode-VirtualGists/actions/workflows/PublishExtension.yml/badge.svg)](https://github.com/carlocardella/vscode-VirtualGists/actions/workflows/PublishExtension.yml)
+![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/carlocardella.vscode-virtualGists)
+![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/carlocardella.vscode-virtualGists)
+![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/carlocardella.vscode-virtualGists)
+![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/r/carlocardella.vscode-virtualGists)
+[![GitHub issues](https://img.shields.io/github/issues/carlocardella/vscode-VirtualGists.svg)](https://github.com/carlocardella/vscode-VirtualGists/issues)
+[![GitHub license](https://img.shields.io/github/license/carlocardella/vscode-VirtualGists.svg)](https://github.com/carlocardella/vscode-VirtualGists/blob/master/LICENSE.md)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/carlocardella/vscode-VirtualGists.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Fcarlocardella%2Fvscode-VirtualGists)
+<!-- [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/carlocardella/vscode-texttoolbox) -->
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+[Download for VS Code](https://marketplace.visualstudio.com/items?itemName=CarloCardella.vscode-virtualgists)
 
-For example if there is an image subfolder under your extension project workspace:
+<!-- [Download for VS Codium](https://open-vsx.org/extension/carlocardella/vscode-texttoolbox) -->
 
-\!\[feature X\]\(images/feature-x.png\)
+Virtual Gists is a Visual Studio Code extension that allows to open and edit a remote gist (e.g. on GitHub) without cloning, committing or pushing your changes. It all happens automatically.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+The extension is still missing lots of features I want to add (as time permits) and you can expect bugs (but hopefully nothing destructive), anyway this is a `preview` extension and you can expect bugs here and there. Please report bugs or issues and ask for features you would like to see. Check [Changelog](CHANGELOG.md) for the latest status, what's planned and what has already been released.
 
-## Requirements
+## Getting started
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Install the extension from the VSCode Marketplace.
 
-## Extension Settings
+## Gist management
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### Open a repo
 
-For example:
+Use the `Open gist` command to open an existing repo from GitHub, you can choose from three options:
 
-This extension contributes the following settings:
+1. `Open gist`: open any gist you have access to, enter the name as `owner/repoName`
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+   *Note: If you just enter the repo name, the extension assumes you own it, this is the same as using `Open my gist`*
 
-## Known Issues
+2. `Open my gist`: open a gist from a list of repos you own
+3. `Open starred gist`: open one of your Starred repos
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+The gist will load automatically (of course, make sure you are connected to the Internet), you can then browse it, open, edit, add, delete files as if they where on your local file system even without cloning the repo.
 
-## Release Notes
+_open gist_
 
-Users appreciate release notes as you update your extension.
+![open gist](https://user-images.githubusercontent.com/5784415/192892207-46f5418e-5696-4373-ae80-71cb160e8e25.gif)
 
-### 1.0.0
+_open my gist_
 
-Initial release of ...
+![open my gist](https://user-images.githubusercontent.com/5784415/192892464-bee3d23f-5688-4dfd-a343-c844ae39e135.gif)
 
-### 1.0.1
+#### Sync repositories across devices
 
-Fixed issue #.
+You can sync your open repositories across multiple devices by enabling [Settings Sync](https://code.visualstudio.com/docs/editor/settings-sync) in Visual Studio Code.
 
-### 1.1.0
+*Node: you may need to Refresh the Virtual Repos view to see the latest repos added or removed from another machine.*
 
-Added features X, Y, and Z.
+### Create new repo
 
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
+You can create a new gist (public or private), other repo operations (delete, star, fork, clone, download) will come in future releases.
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+![create private repo](https://user-images.githubusercontent.com/5784415/192894098-2cb95397-6696-467a-ab9c-6ca272f460b0.gif)
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+## Automatic commits
 
-## Working with Markdown
+Changes are committed automatically after the file is saved. The commit message is `VirtualGists: update file <filePath>`.
 
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+## Tracing
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
+You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Repositories` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
 
-### For more information
+![image](https://user-images.githubusercontent.com/5784415/192893074-ffeb0ec1-1932-45ed-a961-1c15492c1a9e.png)
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+## Acknowledgements
 
-**Enjoy!**
+Virtual Gists is freely inspired by these fine extensions:
+
+* [GistPad](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.gistfs)
+* [WikiLens](https://marketplace.visualstudio.com/items?itemName=lostintangent.wikilens)
+* [GitDoc](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.gitdoc)
+* [Dendron](https://marketplace.visualstudio.com/items?itemName=dendron.dendron)
+* [Foam](https://marketplace.visualstudio.com/items?itemName=foam.foam-vscode)

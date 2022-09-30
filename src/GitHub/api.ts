@@ -1,9 +1,9 @@
 import * as rest from "@octokit/rest";
 import { TextDecoder } from "util";
 import { credentials, output } from "../extension";
-import { RepoNode } from "../Tree/nodes";
+import { GistNode } from "../Tree/nodes";
 import { COMMIT_MESSAGE } from "./constants";
-import { TBranch, TContent, TGitHubUpdateContent, TGitHubUser, TRepo, TTree } from "./types";
+import { TBranch, TContent, TGist, TGitHubUpdateContent, TGitHubUser, TRepo, TTree } from "./types";
 
 /**
  * Get the authenticated GitHub user
@@ -23,21 +23,21 @@ export async function getGitHubAuthenticatedUser(): Promise<TGitHubUser> {
 }
 
 /**
- * Get the list of repositories for the authenticated user.
+ * Get the list of gists for the authenticated user.
  *
  * @export
  * @async
- * @returns {Promise<TRepo[]>}
+ * @returns {Promise<TGist[]>}
  */
-export async function getGitHubReposForAuthenticatedUser(): Promise<TRepo[] | undefined> {
+export async function getGitHubGistsForAuthenticatedUser(): Promise<TGist[] | undefined> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
 
     try {
-        const data = await octokit.paginate(octokit.repos.listForAuthenticatedUser, {type: "owner"}, (response) => {
-             return response.data;
-         });
+        const data = await octokit.paginate(octokit.gists.listForUser, (response) => {
+            return response.data;
+        });
 
         return Promise.resolve(data);
     } catch (e: any) {
@@ -78,12 +78,12 @@ export async function getGitHubRepoContent(owner: string, repoName: string, path
  *
  * @export
  * @async
- * @param {RepoNode} repo The repository to create the file in.
+ * @param {GistNode} repo The repository to create the file in.
  * @param {TContent} file The file to create or update.
  * @param {Uint8Array} content The content of the file.
  * @returns {Promise<TGitHubUpdateContent>}
  */
-export async function createOrUpdateFile(repo: RepoNode, file: TContent, content: Uint8Array): Promise<TGitHubUpdateContent> {
+export async function createOrUpdateFile(repo: GistNode, file: TContent, content: Uint8Array): Promise<TGitHubUpdateContent> {
     const fileContentString = new TextDecoder().decode(content);
     file!.content = fileContentString;
 

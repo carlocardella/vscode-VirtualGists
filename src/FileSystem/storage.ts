@@ -1,11 +1,11 @@
-import { RepoNode } from "../Tree/nodes";
+import { GistNode } from "../Tree/nodes";
 import { ExtensionContext } from "vscode";
 import { GLOBAL_STORAGE_KEY } from "../GitHub/constants";
-import { credentials, output, repoProvider } from "../extension";
+import { credentials, output, gistProvider } from "../extension";
 import { openRepository } from "../GitHub/api";
 
 export const store = {
-    repos: [] as (RepoNode | undefined)[],
+    repos: [] as (GistNode | undefined)[],
 };
 
 /**
@@ -17,7 +17,7 @@ export const store = {
  */
 export async function addToGlobalStorage(context: ExtensionContext, value: string): Promise<void> {
     let globalStorage = await getReposFromGlobalStorage(context);
-    
+
     let [owner, repoName] = ["", ""];
     if (value.indexOf("/") === -1) {
         owner = credentials.authenticatedUser.login;
@@ -29,7 +29,7 @@ export async function addToGlobalStorage(context: ExtensionContext, value: strin
     globalStorage.push(`${owner}/${repoName}`);
     context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
 
-    repoProvider.refresh();
+    gistProvider.refresh();
 
     output?.appendLine(`Added ${value} to global storage`, output.messageType.info);
     output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
@@ -48,7 +48,7 @@ export function removeFromGlobalStorage(context: ExtensionContext, repoFullName:
         globalStorage = globalStorage.filter((item) => item.toLocaleLowerCase() !== repoFullName.toLocaleLowerCase());
         context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
 
-        repoProvider.refresh();
+        gistProvider.refresh();
 
         output?.appendLine(`Removed ${repoFullName} from global storage`, output.messageType.info);
         output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
@@ -76,7 +76,7 @@ export async function getReposFromGlobalStorage(context: ExtensionContext): Prom
 export function clearGlobalStorage(context: ExtensionContext) {
     context.globalState.update(GLOBAL_STORAGE_KEY, []);
     output?.appendLine(`Cleared global storage`, output.messageType.info);
-    repoProvider.refresh();
+    gistProvider.refresh();
 }
 
 /**

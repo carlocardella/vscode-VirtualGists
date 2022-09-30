@@ -12,7 +12,7 @@
     "engines": {
         "vscode": "^1.63.0"
     },
-    "icon": "assets/book.png",
+    "icon": "assets/notebook.png",
     "license": "MIT",
     "repository": {
         "type": "git",
@@ -43,24 +43,250 @@
     "main": "./dist/extension-node.js",
     "browser": "./dist/extension-web.js",
     "contributes": {
-        "commands": [],
+        "configuration": {
+            "title": "VirtualGists",
+            "properties": {
+                "VirtualGists.EnableTracing": {
+                    "type": "boolean",
+                    "description": "Enable tracing of the extension",
+                    "default": false
+                }
+            }
+        },
+        "commands": [
+            {
+                "title": "Close repository",
+                "command": "VirtualGists.closeRepository",
+                "category": "Virtual Gists",
+                "icon": "$(close)"
+            },
+            {
+                "title": "Remove from Global Storage",
+                "command": "VirtualGists.removeFromGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "New public repository",
+                "command": "VirtualGists.newPublicRepository",
+                "category": "Virtual Gists",
+                "icon": "$(repo-create)"
+            },
+            {
+                "title": "New private repository",
+                "command": "VirtualGists.newPrivateRepository",
+                "category": "Virtual Gists",
+                "icon": "$(lock)"
+            },
+            {
+                "title": "Clone repository",
+                "command": "VirtualGists.cloneRepository",
+                "category": "Virtual Gists",
+                "icon": "$(repo-clone)"
+            },
+            {
+                "title": "Fork repository",
+                "command": "VirtualGists.forkRepository",
+                "category": "Virtual Gists",
+                "icon": "$(repo-forked)"
+            },
+            {
+                "title": "Download repository",
+                "command": "VirtualGists.downloadRepository",
+                "category": "Virtual Gists",
+                "icon": "$(cloud-download)"
+            },
+            {
+                "title": "Open Repository",
+                "command": "VirtualGists.openRepository",
+                "icon": "$(plug)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Delete Repository",
+                "command": "VirtualGists.deleteRepository",
+                "icon": "$(trash)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "New file",
+                "command": "VirtualGists.addFile",
+                "icon": "$(new-file)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Upload file(s)...",
+                "command": "VirtualGists.uploadFile",
+                "icon": "$(cloud-upload)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Delete",
+                "command": "VirtualGists.deleteNode",
+                "icon": "$(trash)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Refresh",
+                "command": "VirtualGists.refreshTree",
+                "icon": "$(refresh)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Clear global storage",
+                "command": "VirtualGists.clearGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Get Global Storage",
+                "command": "VirtualGists.getGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Purge Global Storage",
+                "command": "VirtualGists.purgeGlobalStorage",
+                "category": "Virtual Gists"
+            }
+        ],
         "viewsContainers": {
             "activitybar": [
                 {
-                    "id": "VirtualRepositoriesContainer",
-                    "title": "Virtual Repositories",
+                    "id": "VirtualGistsContainer",
+                    "title": "Virtual Gists",
                     "icon": "assets/repo.svg"
                 }
             ]
         },
         "views": {
-            "VirtualRepositoriesContainer": [
+            "VirtualGistsContainer": [
                 {
-                    "id": "virtualReposView",
-                    "name": "Virtual Repositories",
+                    "id": "virtualGistsView",
+                    "name": "Virtual Gists",
                     "icon": "assets/repo.svg",
                     "type": "tree",
                     "visibility": "collapsed"
+                }
+            ]
+        },
+        "menus": {
+            
+            "commandPalette": [
+                {
+                    "command": "VirtualGists.closeRepository",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.openRepository"
+                },
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.uploadFile",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.downloadRepository",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.forkRepository",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.cloneRepository",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.deleteRepository",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.refreshTree"
+                },
+                {
+                    "command": "VirtualGists.clearGlobalStorage"
+                },
+                {
+                    "command": "VirtualGists.purgeGlobalStorage"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "VirtualGists.refreshTree",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "VirtualGists.openRepository",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "VirtualGists.newPublicRepository",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "VirtualGists.newPrivateRepository",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "viewItem == folder || viewItem == repo",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.closeRepository",
+                    "when": "viewItem == repo",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "viewItem == folder || viewItem == file",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "viewItem == folder || viewItem == repo",
+                    "group": "1_add@1"
+                },
+                {
+                    "command": "VirtualGists.uploadFile",
+                    "when": "viewItem == folder || viewItem == repo",
+                    "group": "1_add@2"
+                },
+                {
+                    "command": "VirtualGists.newPublicRepository",
+                    "when": "viewItem == repo",
+                    "group": "2_repoOperations@1"
+                },
+                {
+                    "command": "VirtualGists.newPrivateRepository",
+                    "when": "viewItem == repo",
+                    "group": "2_repoOperations@2"
+                },
+                {
+                    "command": "VirtualGists.deleteRepository",
+                    "when": "viewItem == repo",
+                    "group": "2_repoOperations@6"
+                },
+                {
+                    "command": "VirtualGists.closeRepository",
+                    "when": "viewItem == repo",
+                    "group": "2_close@1"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "viewItem == folder || viewItem == file",
+                    "group": "3_delete@1"
                 }
             ]
         }
