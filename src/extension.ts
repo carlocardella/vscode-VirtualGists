@@ -3,9 +3,14 @@ import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
 import { GistProvider } from "./Tree/nodes";
-import { RepoFileSystemProvider as GistFileSystemProvider, REPO_SCHEME } from "./FileSystem/fileSystem";
+import { GistFileSystemProvider as GistFileSystemProvider, REPO_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import { clearGlobalStorage, getReposFromGlobalStorage as getGistsFromGlobalStorage, purgeGlobalStorage, removeFromGlobalStorage } from "./FileSystem/storage";
+import {
+    clearGlobalStorage,
+    getFollowedUsersFromGlobalStorage as getFollowedUsersFromGlobalStorage,
+    purgeGlobalStorage,
+    removeFromGlobalStorage,
+} from "./FileSystem/storage";
 import { GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -44,7 +49,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.getGlobalStorage", async () => {
-            const reposFromGlobalStorage = await getGistsFromGlobalStorage(context);
+            const reposFromGlobalStorage = await getFollowedUsersFromGlobalStorage(context);
             if (reposFromGlobalStorage.length > 0) {
                 output?.appendLine(`Global storage: ${reposFromGlobalStorage}`, output.messageType.info);
             } else {
@@ -61,7 +66,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.removeFromGlobalStorage", async () => {
-            const gistsFromGlobalStorage = await getGistsFromGlobalStorage(context);
+            const gistsFromGlobalStorage = await getFollowedUsersFromGlobalStorage(context);
             const gistToRemove = await window.showQuickPick(gistsFromGlobalStorage, {
                 placeHolder: "Select gist to remove from global storage",
                 ignoreFocusOut: true,
@@ -85,6 +90,18 @@ export async function activate(context: ExtensionContext) {
             isCaseSensitive: true,
         })
     );
+
+    // context.subscriptions.push(
+    //     commands.registerCommand("VirtualRepos.openRepository", async () => {
+    //         const pick = (await pickRepository()) as string;
+    //         if (pick) {
+    //             output?.appendLine(`Picked repository: ${pick}`, output.messageType.info);
+    //             await addToGlobalStorage(context, pick);
+    //         } else {
+    //             output?.appendLine("Open repository cancelled by uer", output.messageType.info);
+    //         }
+    //     })
+    // );
 
     // register global storage
     const keysForSync = [GLOBAL_STORAGE_KEY];

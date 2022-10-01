@@ -2,10 +2,9 @@ import { GistNode } from "../Tree/nodes";
 import { ExtensionContext } from "vscode";
 import { GLOBAL_STORAGE_KEY } from "../GitHub/constants";
 import { credentials, output, gistProvider } from "../extension";
-import { openRepository } from "../GitHub/api";
 
 export const store = {
-    repos: [] as (GistNode | undefined)[],
+    gists: [] as (GistNode | undefined)[],
 };
 
 /**
@@ -16,17 +15,17 @@ export const store = {
  * @param {string} value Repository to add
  */
 export async function addToGlobalStorage(context: ExtensionContext, value: string): Promise<void> {
-    let globalStorage = await getReposFromGlobalStorage(context);
+    let globalStorage = await getFollowedUsersFromGlobalStorage(context);
 
-    let [owner, repoName] = ["", ""];
+    let [owner, gistName] = ["", ""];
     if (value.indexOf("/") === -1) {
         owner = credentials.authenticatedUser.login;
-        repoName = value;
+        gistName = value;
     } else {
-        [owner, repoName] = value.split("/");
+        [owner, gistName] = value.split("/");
     }
 
-    globalStorage.push(`${owner}/${repoName}`);
+    globalStorage.push(`${owner}/${gistName}`);
     context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
 
     gistProvider.refresh();
@@ -62,7 +61,7 @@ export function removeFromGlobalStorage(context: ExtensionContext, repoFullName:
  * @param {ExtensionContext} context Extension context
  * @returns {string[]}
  */
-export async function getReposFromGlobalStorage(context: ExtensionContext): Promise<string[]> {
+export async function getFollowedUsersFromGlobalStorage(context: ExtensionContext): Promise<string[]> {
     return context.globalState.get(GLOBAL_STORAGE_KEY, []);
     // return await purgeGlobalStorage(context);
 }

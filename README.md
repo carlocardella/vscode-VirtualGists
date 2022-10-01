@@ -51,7 +51,7 @@ _open my gist_
 
 You can sync your open repositories across multiple devices by enabling [Settings Sync](https://code.visualstudio.com/docs/editor/settings-sync) in Visual Studio Code.
 
-*Node: you may need to Refresh the Virtual Repos view to see the latest repos added or removed from another machine.*
+*Node: you may need to Refresh the Virtual Gists view to see the latest repos added or removed from another machine.*
 
 ### Create new repo
 
@@ -65,7 +65,7 @@ Changes are committed automatically after the file is saved. The commit message 
 
 ## Tracing
 
-You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Repositories` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
+You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Gists` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
 
 ![image](https://user-images.githubusercontent.com/5784415/192893074-ffeb0ec1-1932-45ed-a961-1c15492c1a9e.png)
 

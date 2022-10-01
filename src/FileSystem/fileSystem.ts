@@ -13,6 +13,7 @@ import {
 } from "vscode";
 import { gistProvider } from "../extension";
 import { deleteGitHubFile, refreshGitHubTree, createOrUpdateFile } from "../GitHub/api";
+import { getGistFileContent } from "../GitHub/commands";
 import { TGitHubUpdateContent, TContent } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";
@@ -20,7 +21,7 @@ import { store } from "./storage";
 export const REPO_SCHEME = "github-repo";
 const REPO_QUERY = `${REPO_SCHEME}=`;
 
-export class RepoFile implements FileStat {
+export class GistFile implements FileStat {
     type: FileType;
     ctime: number;
     mtime: number;
@@ -38,7 +39,7 @@ export class RepoFile implements FileStat {
     }
 }
 
-export class RepoDirectory implements FileStat {
+export class GistDirectory implements FileStat {
     type: FileType;
     ctime: number;
     mtime: number;
@@ -56,7 +57,7 @@ export class RepoDirectory implements FileStat {
     }
 }
 
-export class RepoFileSystemProvider implements FileSystemProvider {
+export class GistFileSystemProvider implements FileSystemProvider {
     private _onDidChangeFile = new EventEmitter<FileChangeEvent[]>();
     readonly onDidChangeFile: Event<FileChangeEvent[]> = this._onDidChangeFile.event;
 
@@ -65,19 +66,19 @@ export class RepoFileSystemProvider implements FileSystemProvider {
     }
 
     async readFile(uri: Uri): Promise<Uint8Array> {
-        const [repository, file] = RepoFileSystemProvider.getRepoInfo(uri)!;
-        return await getRepoFileContent(repository, file);
+        const [gist, file] = GistFileSystemProvider.getGistInfo(uri)!;
+        return await getGistFileContent(gist, file);
     }
 
-    static getRepoInfo(uri: Uri): [GistNode, TContent] | undefined {
-        const match = RepoFileSystemProvider.getFileInfo(uri);
+    static getGistInfo(uri: Uri): [GistNode, TContent] | undefined {
+        const match = GistFileSystemProvider.getFileInfo(uri);
 
         if (!match) {
             // investigate: really needed? This likely always matches since getFileInfo does nothing more that parse the uri
             return;
         }
 
-        const repository = store.repos.find((repo) => repo!.name === match[0])!;
+        const repository = store.gists.find((repo) => repo!.name === match[0])!;
         const file: TContent = repository!.tree?.tree.find((file: TContent) => file?.path === match[1]);
 
         return [repository, file];
@@ -99,7 +100,7 @@ export class RepoFileSystemProvider implements FileSystemProvider {
         return [repoName, path];
     }
 
-    static isRepoDocument(document: TextDocument, repo?: string) {
+    static isGistDocument(document: TextDocument, repo?: string) {
         return document.uri.scheme === REPO_SCHEME && (!repo || document.uri.query === `${REPO_QUERY}${repo}`);
     }
 
@@ -113,7 +114,7 @@ export class RepoFileSystemProvider implements FileSystemProvider {
             };
         }
 
-        const fileInfo = RepoFileSystemProvider.getRepoInfo(uri);
+        const fileInfo = GistFileSystemProvider.getGistInfo(uri);
 
         if (fileInfo && fileInfo[1]) {
             const type = fileInfo[1].type === "blob" ? FileType.File : FileType.Directory;
@@ -130,7 +131,7 @@ export class RepoFileSystemProvider implements FileSystemProvider {
     }
 
     async delete(uri: Uri): Promise<void> {
-        const repository = store.repos.find((repo) => repo!.name === uri.authority);
+        const repository = store.gists.find((repo) => repo!.name === uri.authority);
         const file = repository!.tree?.tree.find((file: TContent) => file!.path === uri.path.substring(1));
 
         await deleteGitHubFile(repository!.repo!, file);
@@ -156,7 +157,7 @@ export class RepoFileSystemProvider implements FileSystemProvider {
     }
 
     writeFile(uri: Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
-        let repository = store.repos.find((repo) => repo!.name === uri.authority)!;
+        let repository = store.gists.find((repo) => repo!.name === uri.authority)!;
         let file: TContent = repository!.tree?.tree.find((file: TContent) => file?.path === uri.path.substring(1));
 
         if (!file) {

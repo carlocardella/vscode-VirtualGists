@@ -232,6 +232,7 @@ export type TGist = {
     comments_url: string;
     owner?: TUser | null | undefined;
     truncated?: boolean | undefined;
+    starred?: boolean;
 };
 
 export type TGistFile = {

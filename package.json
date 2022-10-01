@@ -1,6 +1,6 @@
 {
     "name": "vscode-virtualgists",
-    "displayName": "vscode-VirtualGists",
+    "displayName": "Virtual Gists for Visual Studio Code",
     "description": "Easily manage your GitHub Gists from VSCode",
     "publisher": "carlocardella",
     "author": {
@@ -55,8 +55,8 @@
         },
         "commands": [
             {
-                "title": "Close repository",
-                "command": "VirtualGists.closeRepository",
+                "title": "Close gist",
+                "command": "VirtualGists.closeGist",
                 "category": "Virtual Gists",
                 "icon": "$(close)"
             },
@@ -66,44 +66,44 @@
                 "category": "Virtual Gists"
             },
             {
-                "title": "New public repository",
-                "command": "VirtualGists.newPublicRepository",
+                "title": "New public gist",
+                "command": "VirtualGists.newPublicGist",
                 "category": "Virtual Gists",
                 "icon": "$(repo-create)"
             },
             {
-                "title": "New private repository",
-                "command": "VirtualGists.newPrivateRepository",
+                "title": "New private gist",
+                "command": "VirtualGists.newPrivateGist",
                 "category": "Virtual Gists",
                 "icon": "$(lock)"
             },
             {
-                "title": "Clone repository",
-                "command": "VirtualGists.cloneRepository",
+                "title": "Clone gist",
+                "command": "VirtualGists.cloneGist",
                 "category": "Virtual Gists",
                 "icon": "$(repo-clone)"
             },
             {
-                "title": "Fork repository",
-                "command": "VirtualGists.forkRepository",
+                "title": "Fork gist",
+                "command": "VirtualGists.forkGist",
                 "category": "Virtual Gists",
                 "icon": "$(repo-forked)"
             },
             {
-                "title": "Download repository",
-                "command": "VirtualGists.downloadRepository",
+                "title": "Download gist",
+                "command": "VirtualGists.downloadGist",
                 "category": "Virtual Gists",
                 "icon": "$(cloud-download)"
             },
             {
-                "title": "Open Repository",
-                "command": "VirtualGists.openRepository",
+                "title": "Open Gist...",
+                "command": "VirtualGists.openGist",
                 "icon": "$(plug)",
                 "category": "Virtual Gists"
             },
             {
-                "title": "Delete Repository",
-                "command": "VirtualGists.deleteRepository",
+                "title": "Delete Gist",
+                "command": "VirtualGists.deleteGist",
                 "icon": "$(trash)",
                 "category": "Virtual Gists"
             },
@@ -171,11 +171,11 @@
             
             "commandPalette": [
                 {
-                    "command": "VirtualGists.closeRepository",
+                    "command": "VirtualGists.closeGist",
                     "when": "false"
                 },
                 {
-                    "command": "VirtualGists.openRepository"
+                    "command": "VirtualGists.openGist"
                 },
                 {
                     "command": "VirtualGists.addFile",
@@ -190,19 +190,19 @@
                     "when": "false"
                 },
                 {
-                    "command": "VirtualGists.downloadRepository",
+                    "command": "VirtualGists.downloadGist",
                     "when": "false"
                 },
                 {
-                    "command": "VirtualGists.forkRepository",
+                    "command": "VirtualGists.forkGist",
                     "when": "false"
                 },
                 {
-                    "command": "VirtualGists.cloneRepository",
+                    "command": "VirtualGists.cloneGist",
                     "when": "false"
                 },
                 {
-                    "command": "VirtualGists.deleteRepository",
+                    "command": "VirtualGists.deleteGist",
                     "when": "false"
                 },
                 {
@@ -222,17 +222,17 @@
                     "group": "navigation"
                 },
                 {
-                    "command": "VirtualGists.openRepository",
+                    "command": "VirtualGists.openGist",
                     "when": "view == virtualGistsView",
                     "group": "navigation"
                 },
                 {
-                    "command": "VirtualGists.newPublicRepository",
+                    "command": "VirtualGists.newPublicGist",
                     "when": "view == virtualGistsView",
                     "group": "navigation"
                 },
                 {
-                    "command": "VirtualGists.newPrivateRepository",
+                    "command": "VirtualGists.newPrivateGist",
                     "when": "view == virtualGistsView",
                     "group": "navigation"
                 }
@@ -244,7 +244,7 @@
                     "group": "inline"
                 },
                 {
-                    "command": "VirtualGists.closeRepository",
+                    "command": "VirtualGists.closeGist",
                     "when": "viewItem == repo",
                     "group": "inline"
                 },
@@ -264,22 +264,22 @@
                     "group": "1_add@2"
                 },
                 {
-                    "command": "VirtualGists.newPublicRepository",
+                    "command": "VirtualGists.newPublicGist",
                     "when": "viewItem == repo",
                     "group": "2_repoOperations@1"
                 },
                 {
-                    "command": "VirtualGists.newPrivateRepository",
+                    "command": "VirtualGists.newPrivateGist",
                     "when": "viewItem == repo",
                     "group": "2_repoOperations@2"
                 },
                 {
-                    "command": "VirtualGists.deleteRepository",
+                    "command": "VirtualGists.deleteGist",
                     "when": "viewItem == repo",
                     "group": "2_repoOperations@6"
                 },
                 {
-                    "command": "VirtualGists.closeRepository",
+                    "command": "VirtualGists.closeGist",
                     "when": "viewItem == repo",
                     "group": "2_close@1"
                 },

@@ -29,19 +29,34 @@ export async function getGitHubAuthenticatedUser(): Promise<TGitHubUser> {
  * @async
  * @returns {Promise<TGist[]>}
  */
-export async function getGitHubGistsForAuthenticatedUser(): Promise<TGist[] | undefined> {
+export async function getGitHubGistsForAuthenticatedUser(starred: boolean): Promise<TGist[] | undefined> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
 
     try {
-        const data = await octokit.paginate(octokit.gists.listForUser, (response) => {
+        // let data: TGist[] = [];
+        let endpointOptions = starred ? octokit.gists.listStarred : octokit.gists.list;
+        // if (starred) {
+        //     data = await octokit.paginate(octokit.gists.listStarred, (response) => {
+        //         return response.data;
+        //     });
+        //     // const response = await octokit.gists.listStarred();
+        // } else {
+        //     data = await octokit.paginate(octokit.gists.list, (response) => {
+        //         return response.data;
+        //     });
+        //     // data = (await octokit.gists.list()).data;
+        // }
+
+        let data = await octokit.paginate(endpointOptions, (response) => {
             return response.data;
         });
 
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Could not get repositories for the authenticated user. ${e.message}`, output.messageType.error);
+        let starredText = starred ? "starred " : "";
+        output?.appendLine(`Could not get ${starredText}gists for the authenticated user. ${e.message}`, output.messageType.error);
     }
 
     return Promise.reject(undefined);
@@ -57,7 +72,7 @@ export async function getGitHubGistsForAuthenticatedUser(): Promise<TGist[] | un
  * @param {?string} [path] Path to the directory (or file)
  * @returns {Promise<any>}
  */
-export async function getGitHubRepoContent(owner: string, repoName: string, path?: string): Promise<any> {
+export async function getGitHubGistContent(owner: string, repoName: string, path?: string): Promise<any> {
     // @update: any
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
@@ -267,38 +282,6 @@ export async function listGitHubBranches(repo: TRepo): Promise<TBranch[] | undef
     return Promise.reject(undefined);
 }
 
-export async function createFolder(): Promise<void> {
-    throw new Error("Not implemented");
-}
-
-/**
- * Open a new GitHub repository
- *
- * @export
- * @async
- * @param {string} owner The owner of the repository
- * @param {string} repoName The name of the repository
- * @returns {(Promise<TRepo | undefined>)}
- */
-export async function openRepository(owner: string, repoName: string): Promise<TRepo | undefined> {
-    const octokit = new rest.Octokit({
-        auth: await credentials.getAccessToken(),
-    });
-
-    try {
-        const { data } = await octokit.repos.get({
-            owner,
-            repo: repoName,
-        });
-
-        return Promise.resolve(data);
-    } catch (e: any) {
-        output?.appendLine(`${e.message}: ${owner}/${repoName}`, output.messageType.error);
-    }
-
-    return undefined;
-}
-
 /**
  * Delete the selected files from GitHub
  *
@@ -326,68 +309,68 @@ export async function deleteGitHubFile(repo: TRepo, file: TContent) {
     }
 }
 
-/**
- * Create a new GitHub repository
- *
- * @export
- * @async
- * @param {string} owner The owner of the repository
- * @param {string} repoName The name of the repository
- * @param {boolean} isPrivate Whether the repository should be private
- * @returns {(Promise<TRepo | undefined>)}
- */
-export async function newGitHubRepository(owner: string, repoName: string, isPrivate: boolean): Promise<TRepo | undefined> {
-    const octokit = new rest.Octokit({
-        auth: await credentials.getAccessToken(),
-    });
+// /**
+//  * Create a new GitHub repository
+//  *
+//  * @export
+//  * @async
+//  * @param {string} owner The owner of the repository
+//  * @param {string} repoName The name of the repository
+//  * @param {boolean} isPrivate Whether the repository should be private
+//  * @returns {(Promise<TRepo | undefined>)}
+//  */
+// export async function newGitHubRepository(owner: string, repoName: string, isPrivate: boolean): Promise<TRepo | undefined> {
+//     const octokit = new rest.Octokit({
+//         auth: await credentials.getAccessToken(),
+//     });
 
-    try {
-        let newRepo = await octokit.repos.createForAuthenticatedUser({
-            name: repoName,
-            private: isPrivate,
-            auto_init: true,
-            headers: {
-                Accept: "application/vnd.github.v3+json",
-            },
-        });
+//     try {
+//         let newRepo = await octokit.repos.createForAuthenticatedUser({
+//             name: repoName,
+//             private: isPrivate,
+//             auto_init: true,
+//             headers: {
+//                 Accept: "application/vnd.github.v3+json",
+//             },
+//         });
 
-        return Promise.resolve(newRepo.data);
-    } catch (e: any) {
-        output?.appendLine(`${e.message}: ${owner}/${repoName}`, output.messageType.error);
-    }
+//         return Promise.resolve(newRepo.data);
+//     } catch (e: any) {
+//         output?.appendLine(`${e.message}: ${owner}/${repoName}`, output.messageType.error);
+//     }
 
-    return Promise.reject(undefined);
-}
+//     return Promise.reject(undefined);
+// }
 
-/**
- * Delete a GitHub repository
- * @date 9/26/2022 - 9:39:39 AM
- *
- * @export
- * @async
- * @param {TRepo} repo The repository to delete
- * @returns {Promise<boolean>}
- */
-// export async function deleteGitHubRepository(repo: TRepo): Promise<boolean>;
-// export async function deleteGitHubRepository(owner: string, repoName: string): Promise<boolean>;
-export async function deleteGitHubRepository(repo: TRepo): Promise<boolean> {
-    const octokit = new rest.Octokit({
-        auth: await credentials.getAccessToken(),
-    });
+// /**
+//  * Delete a GitHub repository
+//  * @date 9/26/2022 - 9:39:39 AM
+//  *
+//  * @export
+//  * @async
+//  * @param {TRepo} repo The repository to delete
+//  * @returns {Promise<boolean>}
+//  */
+// // export async function deleteGitHubRepository(repo: TRepo): Promise<boolean>;
+// // export async function deleteGitHubRepository(owner: string, repoName: string): Promise<boolean>;
+// export async function deleteGitHubRepository(repo: TRepo): Promise<boolean> {
+//     const octokit = new rest.Octokit({
+//         auth: await credentials.getAccessToken(),
+//     });
 
-    try {
-        await octokit.repos.delete({
-            owner: repo.owner.login,
-            repo: repo.name,
-        });
+//     try {
+//         await octokit.repos.delete({
+//             owner: repo.owner.login,
+//             repo: repo.name,
+//         });
 
-        return Promise.resolve(true);
-    } catch (e: any) {
-        output?.logError(repo, e);
-    }
+//         return Promise.resolve(true);
+//     } catch (e: any) {
+//         output?.logError(repo, e);
+//     }
 
-    return Promise.reject(false);
-}
+//     return Promise.reject(false);
+// }
 
 /**
  * Get starred repositories for the current user
@@ -407,31 +390,6 @@ export async function getStarredGitHubRepositories(): Promise<TRepo[]> {
         });
 
         return Promise.resolve(starredRepos as TRepo[]);
-    } catch (e: any) {
-        output?.appendLine(e.message, output.messageType.error);
-    }
-
-    return Promise.reject([]);
-}
-
-/**
- * Get the current user's GitHub repositories
- *
- * @export
- * @async
- * @returns {Promise<TRepo[]>}
- */
-export async function getAuthenticatedUserRepositories(): Promise<TRepo[]> {
-    const octokit = new rest.Octokit({
-        auth: await credentials.getAccessToken(),
-    });
-
-    try {
-        const repos = await octokit.paginate(octokit.repos.listForAuthenticatedUser, (response) => {
-            return response.data;
-        });
-
-        return Promise.resolve(repos as TRepo[]);
     } catch (e: any) {
         output?.appendLine(e.message, output.messageType.error);
     }

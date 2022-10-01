@@ -15,7 +15,7 @@ export class Output {
     public messageType = MessageType;
 
     constructor() {
-        this._outputChannel = vscode.window.createOutputChannel("Virtual Repositories");
+        this._outputChannel = vscode.window.createOutputChannel("Virtual Gists");
     }
 
     private getDate(): string {
