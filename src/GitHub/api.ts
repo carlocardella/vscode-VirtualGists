@@ -3,7 +3,7 @@ import { TextDecoder } from "util";
 import { credentials, output } from "../extension";
 import { GistNode } from "../Tree/nodes";
 import { COMMIT_MESSAGE } from "./constants";
-import { TBranch, TContent, TGist, TGitHubUpdateContent, TGitHubUser, TRepo, TTree } from "./types";
+import { TBranch, TContent, TGist,  TGitHubUpdateContent, TGitHubUser, TRepo, TTree } from "./types";
 
 /**
  * Get the authenticated GitHub user
@@ -35,19 +35,7 @@ export async function getGitHubGistsForAuthenticatedUser(starred: boolean): Prom
     });
 
     try {
-        // let data: TGist[] = [];
         let endpointOptions = starred ? octokit.gists.listStarred : octokit.gists.list;
-        // if (starred) {
-        //     data = await octokit.paginate(octokit.gists.listStarred, (response) => {
-        //         return response.data;
-        //     });
-        //     // const response = await octokit.gists.listStarred();
-        // } else {
-        //     data = await octokit.paginate(octokit.gists.list, (response) => {
-        //         return response.data;
-        //     });
-        //     // data = (await octokit.gists.list()).data;
-        // }
 
         let data = await octokit.paginate(endpointOptions, (response) => {
             return response.data;
@@ -62,30 +50,20 @@ export async function getGitHubGistsForAuthenticatedUser(starred: boolean): Prom
     return Promise.reject(undefined);
 }
 
-/**
- * Lists the contents of a directory (or file) in a repository.
- *
- * @export
- * @async
- * @param {string} owner Owner of the repository
- * @param {string} repoName Name of the repository
- * @param {?string} [path] Path to the directory (or file)
- * @returns {Promise<any>}
- */
-export async function getGitHubGistContent(owner: string, repoName: string, path?: string): Promise<any> {
+export async function getGitHubGist(gistId: string): Promise<TGist | undefined> {
     // @update: any
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
 
-    path = path ?? "";
-    const { data } = await octokit.repos.getContent({
-        owner,
-        repo: repoName,
-        path: path,
-    });
+    try {
+        const { data } = await octokit.gists.get({ gist_id: gistId });
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Could not get gist ${gistId}. ${e.message}`, output.messageType.error);
+    }
 
-    return Promise.resolve(data);
+    return Promise.reject();
 }
 
 /**
@@ -93,12 +71,12 @@ export async function getGitHubGistContent(owner: string, repoName: string, path
  *
  * @export
  * @async
- * @param {GistNode} repo The repository to create the file in.
+ * @param {GistNode} gist The repository to create the file in.
  * @param {TContent} file The file to create or update.
  * @param {Uint8Array} content The content of the file.
  * @returns {Promise<TGitHubUpdateContent>}
  */
-export async function createOrUpdateFile(repo: GistNode, file: TContent, content: Uint8Array): Promise<TGitHubUpdateContent> {
+export async function createOrUpdateFile(gist: GistNode, file: TContent, content: Uint8Array): Promise<TGitHubUpdateContent> {
     const fileContentString = new TextDecoder().decode(content);
     file!.content = fileContentString;
 
@@ -111,8 +89,8 @@ export async function createOrUpdateFile(repo: GistNode, file: TContent, content
         if (!file?.sha) {
             // new file
             ({ data } = await octokit.repos.createOrUpdateFileContents({
-                owner: repo.owner,
-                repo: repo.name,
+                owner: gist.owner,
+                repo: gist.name,
                 path: file!.path!,
                 message: `${COMMIT_MESSAGE} ${file!.path}`,
                 content: Buffer.from(fileContentString).toString("base64"),
@@ -120,8 +98,8 @@ export async function createOrUpdateFile(repo: GistNode, file: TContent, content
         } else {
             // the file already exists, update it
             ({ data } = await octokit.repos.createOrUpdateFileContents({
-                owner: repo.owner,
-                repo: repo.name,
+                owner: gist.owner,
+                repo: gist.name,
                 path: file!.path!,
                 message: `${COMMIT_MESSAGE} ${file!.path}`,
                 content: Buffer.from(fileContentString).toString("base64"),
@@ -133,7 +111,7 @@ export async function createOrUpdateFile(repo: GistNode, file: TContent, content
 
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.logError(repo.repo, e);
+        output?.logError(gist.gist, e);
     }
 
     return Promise.reject();
@@ -372,27 +350,27 @@ export async function deleteGitHubFile(repo: TRepo, file: TContent) {
 //     return Promise.reject(false);
 // }
 
-/**
- * Get starred repositories for the current user
- *
- * @export
- * @async
- * @returns {Promise<TRepo[]>}
- */
-export async function getStarredGitHubRepositories(): Promise<TRepo[]> {
-    const octokit = new rest.Octokit({
-        auth: await credentials.getAccessToken(),
-    });
+// /**
+//  * Get starred repositories for the current user
+//  *
+//  * @export
+//  * @async
+//  * @returns {Promise<TRepo[]>}
+//  */
+// export async function getStarredGitHubRepositories(): Promise<TRepo[]> {
+//     const octokit = new rest.Octokit({
+//         auth: await credentials.getAccessToken(),
+//     });
 
-    try {
-        const starredRepos = await octokit.paginate(octokit.activity.listReposStarredByAuthenticatedUser, (response) => {
-            return response.data;
-        });
+//     try {
+//         const starredRepos = await octokit.paginate(octokit.activity.listReposStarredByAuthenticatedUser, (response) => {
+//             return response.data;
+//         });
 
-        return Promise.resolve(starredRepos as TRepo[]);
-    } catch (e: any) {
-        output?.appendLine(e.message, output.messageType.error);
-    }
+//         return Promise.resolve(starredRepos as TRepo[]);
+//     } catch (e: any) {
+//         output?.appendLine(e.message, output.messageType.error);
+//     }
 
-    return Promise.reject([]);
-}
+//     return Promise.reject([]);
+// }

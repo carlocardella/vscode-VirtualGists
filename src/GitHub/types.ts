@@ -214,25 +214,26 @@ export type TRef = {
 };
 
 export type TGist = {
-    url: string;
-    forks_url: string;
-    commits_url: string;
-    id: string;
-    node_id: string;
-    git_pull_url: string;
-    git_push_url: string;
-    html_url: string;
-    files: TGistFile;
-    public: boolean;
-    created_at: string;
-    updated_at: string;
-    description: string | null;
-    comments: number;
-    user?: TUser | null | undefined;
-    comments_url: string;
+    url?: string | undefined;
+    forks_url?: string | undefined;
+    commits_url?: string | undefined;
+    id?: string | undefined;
+    node_id?: string | undefined;
+    git_pull_url?: string | undefined;
+    git_push_url?: string | undefined;
+    html_url?: string | undefined;
+    files?: TGistFile | undefined | null;
+    public?: boolean | undefined;
+    created_at?: string | undefined;
+    updated_at?: string | undefined;
+    description?: string | null | undefined;
+    comments?: number | undefined;
+    user?: TUser | string | null | undefined;
+    comments_url?: string | undefined;
     owner?: TUser | null | undefined;
     truncated?: boolean | undefined;
     starred?: boolean;
+    forks?: TForks[] | unknown | undefined;
 };
 
 export type TGistFile = {
@@ -242,5 +243,29 @@ export type TGistFile = {
         language?: string | undefined;
         raw_url?: string | undefined;
         size?: number | undefined;
-    };
+        truncated?: boolean | undefined;
+        content?: string | undefined;
+    } | null;
+};
+
+export type TGistHistory = {
+    user: TUser;
+    version: string;
+    committed_at: string;
+    change_status: TGistChangeStatus;
+    url: string;
+};
+
+export type TGistChangeStatus = {
+    total: number;
+    additions: number;
+    deletions: number;
+};
+
+export type TForks = {
+    id: string;
+    url: string;
+    user: TUser;
+    created_at: string;
+    updated_at: string;
 };

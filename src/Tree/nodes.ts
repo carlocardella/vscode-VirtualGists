@@ -1,10 +1,10 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { extensionContext } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import { getFollowedUsersFromGlobalStorage } from "../FileSystem/storage";
-import { getGitHubGistContent } from "../GitHub/api";
-import { getOwnedGists, getStarredGists } from "../GitHub/commands";
-import { TRepo, ContentType, TContent, TGist } from "../GitHub/types";
+import { getFollowedUsersFromGlobalStorage, store, updateStoredGist } from "../FileSystem/storage";
+import { getGitHubGist } from "../GitHub/api";
+import { getGist, getOwnedGists, getStarredGists } from "../GitHub/commands";
+import { ContentType, TContent, TGist, TGistFile } from "../GitHub/types";
 
 enum GistsGroupType {
     myGists = "My Gists",
@@ -14,12 +14,14 @@ enum GistsGroupType {
 
 export class GistsGroupNode extends TreeItem {
     gists: GistNode[] | undefined;
+    groupType: GistsGroupType;
 
     constructor(groupType: GistsGroupType | string, gists?: GistNode[] | undefined) {
         super(groupType, TreeItemCollapsibleState.Collapsed);
 
         this.tooltip = groupType;
         this.label = groupType;
+        this.groupType = groupType as GistsGroupType;
         switch (groupType) {
             case GistsGroupType.myGists:
                 this.iconPath = new ThemeIcon("output");
@@ -40,45 +42,52 @@ export class GistsGroupNode extends TreeItem {
 }
 
 export class GistNode extends TreeItem {
-    name: string | null;
+    name: string | null | undefined;
+    gist: TGist;
+    groupType: GistsGroupType;
 
-    constructor(gist: TGist) {
+    constructor(gist: TGist, groupType: GistsGroupType) {
         super(gist.description!, TreeItemCollapsibleState.Collapsed);
 
+        this.groupType = groupType;
         this.tooltip = gist.description!;
         this.iconPath = gist.public ? new ThemeIcon("gist") : new ThemeIcon("gist-secret");
         this.name = gist.description;
+        this.gist = gist;
+        this.description = Object.values(gist.files).length.toString();
     }
 }
 
 export class ContentNode extends TreeItem {
     owner: string;
-    repo: TRepo;
+    gist: TGist;
     path: string;
     uri: Uri;
-    sha: string;
+    // sha: string;
+    name: string;
+    nodeContent: TContent;
 
-    constructor(public nodeContent: TContent, repo: TRepo) {
-        super(nodeContent!.name!, nodeContent?.type === ContentType.file ? TreeItemCollapsibleState.None : TreeItemCollapsibleState.Collapsed);
+    constructor(nodeContent: TGistFile, gist: TGist) {
+        super(nodeContent[0]!.filename!, TreeItemCollapsibleState.None);
 
-        this.tooltip = nodeContent?.path;
-        this.iconPath = nodeContent?.type === ContentType.file ? ThemeIcon.File : ThemeIcon.Folder;
-        this.contextValue = nodeContent?.type === ContentType.file ? "file" : "folder";
-        this.path = nodeContent?.path ?? "";
-        this.uri = GistFileSystemProvider.getFileUri(repo.name, this.path);
-        this.resourceUri = this.uri;
-        this.owner = repo.owner.login;
+        this.iconPath = new ThemeIcon("file");
+        this.contextValue = "file";
+        this.owner = gist.owner?.login ?? "";
         this.nodeContent = nodeContent;
-        this.repo = repo;
-        this.sha = nodeContent?.sha ?? "";
+        this.gist = gist;
+        // this.sha = nodeContent?.sha ?? "";
+        this.name = nodeContent[0]!.filename!;
+        this.path = this.name;
+        this.uri = GistFileSystemProvider.getFileUri(gist.id, this.path);
+        this.resourceUri = this.uri;
+        this.tooltip = this.name;
+        this.label = this.name;
 
-        if (nodeContent?.type === ContentType.file) {
-            this.command = {
-                command: "vscode.open",
-                title: "Open file",
-                arguments: [this.uri, { preview: true }],
-            };
-        }
+        this.command = {
+            command: "vscode.open",
+            title: "Open file",
+            arguments: [this.uri, { preview: true }],
+        };
     }
 }
 
@@ -90,20 +99,27 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
         if (element) {
             let childNodes: any[] = [];
             if (element instanceof GistNode) {
-                const content = await getGitHubGistContent(element.owner, element.repo.name, element?.nodeContent?.path);
-                childNodes = Object.values(content)
-                    .map((node) => new ContentNode(<TContent>node, element.repo))
-                    .sort((a, b) => a.nodeContent!.name!.localeCompare(b.nodeContent!.name!))
-                    .sort((a, b) => a.nodeContent!.type!.localeCompare(b.nodeContent!.type!));
+                const content = (await getGist(element.gist.id)) as TGist;
+                store.gists.find((gistToUpdate) => gistToUpdate?.id === element.gist.id); // investigate: why is store undefined?
+
+                // updateStoredGist(content);
+                if (content?.files) {
+                    childNodes = Object.values(content.files)
+                        .map((node) => new ContentNode(<TContent>node, element.gist))
+                        .sort((a, b) => a.nodeContent!.name!.localeCompare(b.nodeContent!.name!))
+                        .sort((a, b) => a.nodeContent!.type!.localeCompare(b.nodeContent!.type!));
+                }
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
                     case GistsGroupType.myGists:
                         let ownedGists = await getOwnedGists();
-                        childNodes = ownedGists?.map((gist) => new GistNode(gist)) ?? [];
+                        childNodes = ownedGists?.map((gist) => new GistNode(gist, element.groupType)) ?? [];
+                        store.gists.push(...childNodes);
                         break;
                     case GistsGroupType.starredGists:
                         let starredGists = await getStarredGists();
-                        childNodes = starredGists?.map((gist) => new GistNode(gist)) ?? [];
+                        childNodes = starredGists?.map((gist) => new GistNode(gist, element.groupType)) ?? [];
+                        store.gists.push(...childNodes);
                         break;
                     case GistsGroupType.notepad:
                         throw new Error("Notepad is not implemented yet");
@@ -120,7 +136,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 // ownedGists?.map((gist) => new GistNode(gist))
             );
             let starredGistsNode = new GistsGroupNode(
-                GistsGroupType.starredGists,
+                GistsGroupType.starredGists
                 // starredGists?.map((gist) => new GistNode(gist))
             );
             // let notepadNode = new GistsGroupNode(GistsGroupType.notepad);

@@ -11,15 +11,15 @@ import {
     TextDocument,
     Uri,
 } from "vscode";
-import { gistProvider } from "../extension";
+import { gistProvider, gistFileSystemProvider } from '../extension';
 import { deleteGitHubFile, refreshGitHubTree, createOrUpdateFile } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
-import { TGitHubUpdateContent, TContent } from "../GitHub/types";
+import { TGitHubUpdateContent, TContent, TGistFile } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";
 
-export const REPO_SCHEME = "github-repo";
-const REPO_QUERY = `${REPO_SCHEME}=`;
+export const GIST_SCHEME = "github-gist";
+const GIST_QUERY = `${GIST_SCHEME}=`;
 
 export class GistFile implements FileStat {
     type: FileType;
@@ -78,10 +78,10 @@ export class GistFileSystemProvider implements FileSystemProvider {
             return;
         }
 
-        const repository = store.gists.find((repo) => repo!.name === match[0])!;
-        const file: TContent = repository!.tree?.tree.find((file: TContent) => file?.path === match[1]);
+        const gistNode = store.gists.find((gist) => gist!.gist.id === match[0]);
+        const file: TContent = Object.values(gistNode!.gist.files).find((file) => file.filename === match[1]);
 
-        return [repository, file];
+        return [gistNode!, file];
     }
 
     watch(_resource: Uri): Disposable {
@@ -89,19 +89,19 @@ export class GistFileSystemProvider implements FileSystemProvider {
         return new Disposable(() => {});
     }
 
-    static getFileUri(repoName: string, filePath: string = "") {
-        return Uri.parse(`${REPO_SCHEME}://${repoName}/${filePath}`);
+    static getFileUri(gistId: string, filePath: string = "") {
+        return Uri.parse(`${GIST_SCHEME}://${gistId}/${filePath}`);
     }
 
     static getFileInfo(uri: Uri): [string, string] | undefined {
-        const repoName = uri.authority;
+        const gistId = uri.authority;
         const path = uri.path.startsWith("/") ? uri.path.substring(1) : uri.path;
 
-        return [repoName, path];
+        return [gistId, path];
     }
 
     static isGistDocument(document: TextDocument, repo?: string) {
-        return document.uri.scheme === REPO_SCHEME && (!repo || document.uri.query === `${REPO_QUERY}${repo}`);
+        return document.uri.scheme === GIST_SCHEME && (!repo || document.uri.query === `${GIST_QUERY}${repo}`);
     }
 
     stat(uri: Uri): FileStat {
@@ -131,13 +131,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
     }
 
     async delete(uri: Uri): Promise<void> {
-        const repository = store.gists.find((repo) => repo!.name === uri.authority);
-        const file = repository!.tree?.tree.find((file: TContent) => file!.path === uri.path.substring(1));
-
-        await deleteGitHubFile(repository!.repo!, file);
-
-        this._onDidChangeFile.fire([{ type: FileChangeType.Deleted, uri }]); // investigate: needed?
-        gistProvider.refresh();
+        throw new Error("Method not implemented.");
     }
 
     async rename(uri: Uri): Promise<void> {

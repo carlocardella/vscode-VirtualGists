@@ -2,6 +2,8 @@ import { GistNode } from "../Tree/nodes";
 import { ExtensionContext } from "vscode";
 import { GLOBAL_STORAGE_KEY } from "../GitHub/constants";
 import { credentials, output, gistProvider } from "../extension";
+import { getGist } from "../GitHub/commands";
+import { TGist } from '../GitHub/types';
 
 export const store = {
     gists: [] as (GistNode | undefined)[],
@@ -78,37 +80,45 @@ export function clearGlobalStorage(context: ExtensionContext) {
     gistProvider.refresh();
 }
 
-/**
- * Remove invalid repositories from Global Storage
- *
- * @export
- * @async
- * @param {ExtensionContext} context Extension context
- * @param {?string[]} [repos] Repositories to check
- * @returns {Promise<string[]>}
- */
-export async function purgeGlobalStorage(context: ExtensionContext, repos?: string[]): Promise<string[]> {
-    let cleanedGlobalStorage: string[] = [];
-    if (repos) {
-        cleanedGlobalStorage = repos.filter((item) => item !== undefined);
-        context.globalState.update(GLOBAL_STORAGE_KEY, cleanedGlobalStorage);
-    } else {
-        const globalStorage = context.globalState.get(GLOBAL_STORAGE_KEY, []) as string[];
-        cleanedGlobalStorage = await Promise.all(
-            globalStorage.map(async (repo) => {
-                let repoOwner = repo.split("/")[0];
-                let repoName = repo.split("/")[1];
-                let validRepo = await openRepository(repoOwner, repoName);
-                if (!validRepo) {
-                    removeFromGlobalStorage(context, repo);
-                    output?.appendLine(`Removed ${repo} from global storage`, output.messageType.info);
-                    return Promise.resolve(repo);
-                } else {
-                    return Promise.reject();
-                }
-            })
-        );
-    }
+// /**
+//  * Remove invalid repositories from Global Storage
+//  *
+//  * @export
+//  * @async
+//  * @param {ExtensionContext} context Extension context
+//  * @param {?string[]} [gistId] Repositories to check
+//  * @returns {Promise<string[]>}
+//  */
+// export async function purgeGlobalStorage(context: ExtensionContext, gistId?: string): Promise<string[]> {
+//     let cleanedGlobalStorage: string[] = [];
+//     if (gistId) {
+//         cleanedGlobalStorage = store.gists.find((gist) => gist?.id !== gistId)?.id;
+//         context.globalState.update(GLOBAL_STORAGE_KEY, cleanedGlobalStorage);
+//     } else {
+//         const globalStorage = context.globalState.get(GLOBAL_STORAGE_KEY, []) as string[];
+//         cleanedGlobalStorage = await Promise.all(
+//             globalStorage.map(async (gist:TGist) => {
+//                 // let repoOwner = gist.split("/")[0];
+//                 // let repoName = gist.split("/")[1];
+//                 let validGist = await getGist(gist.id);
+//                 if (!validGist) {
+//                     removeFromGlobalStorage(context, gist.id);
+//                     output?.appendLine(`Removed ${gist} from global storage`, output.messageType.info);
+//                     return Promise.resolve(gist);
+//                 } else {
+//                     return Promise.reject();
+//                 }
+//             })
+//         );
+//     }
 
-    return cleanedGlobalStorage;
+//     return cleanedGlobalStorage;
+// }
+
+export async function updateStoredGist(updatedGist: GistNode): Promise<boolean> {
+    let currentGist = store.gists.find((storedGist) => storedGist?.id === updatedGist?.id);
+
+    currentGist = updatedGist;
+
+    return Promise.reject(false);
 }

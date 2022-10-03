@@ -3,14 +3,9 @@ import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
 import { GistProvider } from "./Tree/nodes";
-import { GistFileSystemProvider as GistFileSystemProvider, REPO_SCHEME } from "./FileSystem/fileSystem";
+import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import {
-    clearGlobalStorage,
-    getFollowedUsersFromGlobalStorage as getFollowedUsersFromGlobalStorage,
-    purgeGlobalStorage,
-    removeFromGlobalStorage,
-} from "./FileSystem/storage";
+import { clearGlobalStorage, getFollowedUsersFromGlobalStorage,  removeFromGlobalStorage } from "./FileSystem/storage";
 import { GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -19,6 +14,7 @@ export const credentials = new Credentials();
 export let gitHubAuthenticatedUser: TGitHubUser;
 export let extensionContext: ExtensionContext;
 export const gistProvider = new GistProvider();
+export const gistFileSystemProvider = new GistFileSystemProvider();
 
 export async function activate(context: ExtensionContext) {
     extensionContext = context;
@@ -60,7 +56,8 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.purgeGlobalStorage", async () => {
-            purgeGlobalStorage(extensionContext);
+            // purgeGlobalStorage(extensionContext);
+            throw new Error("Not implemented");
         })
     );
 
@@ -84,9 +81,8 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
-    const gistFileSystemProvider = new GistFileSystemProvider();
     context.subscriptions.push(
-        workspace.registerFileSystemProvider(REPO_SCHEME, gistFileSystemProvider, {
+        workspace.registerFileSystemProvider(GIST_SCHEME, gistFileSystemProvider, {
             isCaseSensitive: true,
         })
     );

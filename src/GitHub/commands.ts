@@ -1,15 +1,23 @@
-import { TextEncoder } from "util";
-import { ProgressLocation, QuickPickItem, QuickPickItemKind, Uri, window, workspace } from "vscode";
-import { GistFile, GistFileSystemProvider, REPO_SCHEME } from "../FileSystem/fileSystem";
-import { ContentNode, GistNode } from "../Tree/nodes";
-import { getGitHubGistContent, newGitHubRepository, deleteGitHubRepository, getGitHubGistsForAuthenticatedUser, getStarredGitHubRepositories } from "./api";
-import { TContent, TGist, TRepo } from "./types";
-import { credentials, extensionContext, output } from "../extension";
-import { addToGlobalStorage, removeFromGlobalStorage } from "../FileSystem/storage";
+import { store } from "../FileSystem/storage";
+import { GistNode } from "../Tree/nodes";
+import { getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
+import { TContent, TGist } from "./types";
 
-export async function getGistFileContent(gist: GistNode, file: TContent): Uint8Array {}
+export async function getGistFileContent(file: TContent): Promise<Uint8Array | undefined> {
+    if (file?.content) {
+        return Promise.resolve(new Uint8Array(Buffer.from(file?.content, "base64").toString("latin1").split("").map(charCodeAt)));
+    }
 
-export async function getGistDetails(gist: string): [string, string] {}
+    return Promise.reject();
+}
+
+// export async function getGistDetails(gist: string): [string, string] {}
+
+export async function getGist(gistId: string): Promise<TContent | undefined> {
+    const gistContent = await getGitHubGist(gistId);
+
+    return Promise.resolve(getGitHubGist(gistId));
+}
 
 export async function getOwnedGists(): Promise<TGist[] | undefined> {
     let gistsForAuthenticatedUser = await getGitHubGistsForAuthenticatedUser(false);
@@ -29,4 +37,14 @@ export async function getStarredGists(): Promise<TGist[] | undefined> {
     });
 
     return Promise.resolve(gists);
+}
+
+/**
+ * Helper function, returns the character an position zero of a string.
+ *
+ * @param {string} c The string to filter
+ * @returns {*}
+ */
+function charCodeAt(c: string) {
+    return c.charCodeAt(0);
 }
