@@ -66,7 +66,7 @@ export class ContentNode extends TreeItem {
     nodeContent: TContent;
 
     constructor(nodeContent: TGistFile, gist: TGist) {
-        super(nodeContent.filename, TreeItemCollapsibleState.None);
+        super(nodeContent.filename as string, TreeItemCollapsibleState.None);
 
         this.iconPath = new ThemeIcon("file");
         this.contextValue = "file";
@@ -74,7 +74,7 @@ export class ContentNode extends TreeItem {
         this.nodeContent = nodeContent;
         this.gist = gist;
         // this.sha = nodeContent?.sha ?? "";
-        this.name = nodeContent.filename!;
+        this.name = nodeContent.filename as string;
         this.path = this.name;
         this.uri = GistFileSystemProvider.getFileUri(gist.id!, this.path);
         this.resourceUri = this.uri;
@@ -102,7 +102,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 if (content?.files) {
                     childNodes = Object.values(content.files)
                         .map((node) => new ContentNode(<TGistFile>node, element.gist))
-                        .sort((a: TContent, b) => a?.nodeContent!.filename!.localeCompare(b.nodeContent!.filename!))
+                        .sort((a, b) => a.name.localeCompare(b.name!))
                         .sort((a, b) => a.nodeContent!.type!.localeCompare(b.nodeContent!.type!));
                 }
             } else if (element instanceof GistsGroupNode) {
