@@ -1,15 +1,14 @@
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
+import { ZERO_WIDTH_SPACE } from "./constants";
 import { TContent, TGist } from "./types";
 
 export async function getGistFileContent(file: TContent): Promise<Uint8Array> {
-    let content = file?.content ?? "";
- 
-    return Promise.resolve(new Uint8Array(Buffer.from(content, "base64").toString("latin1").split("").map(charCodeAt)));
+    let content = file?.content === ZERO_WIDTH_SPACE ? "" : file?.content;
+
+    return Promise.resolve(new Uint8Array(content!.split("").map(charCodeAt)));
 }
 
 export async function getGist(gistId: string): Promise<TContent | undefined> {
-    const gistContent = await getGitHubGist(gistId);
-
     return Promise.resolve(getGitHubGist(gistId));
 }
 

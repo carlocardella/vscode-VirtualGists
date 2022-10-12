@@ -1,6 +1,6 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import { store } from "../FileSystem/storage";
+import { store, updateStoredGist } from "../FileSystem/storage";
 import { getGist, getOwnedGists, getStarredGists } from "../GitHub/commands";
 import { TContent, TGist, TGistFile } from "../GitHub/types";
 
@@ -97,14 +97,17 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
         if (element) {
             let childNodes: any[] = [];
             if (element instanceof GistNode) {
-                const content = (await getGist(element.gist.id!)) as TGist;
+                const gist = (await getGist(element.gist.id!)) as TGist;
 
-                if (content?.files) {
-                    childNodes = Object.values(content.files)
+                if (gist?.files) {
+                    childNodes = Object.values(gist.files)
                         .map((node) => new ContentNode(<TGistFile>node, element.gist))
                         .sort((a, b) => a.name.localeCompare(b.name!))
                         .sort((a, b) => a.nodeContent!.type!.localeCompare(b.nodeContent!.type!));
                 }
+
+                // update storage, we already have gist files content
+                await updateStoredGist(gist);
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
                     case GistsGroupType.myGists:

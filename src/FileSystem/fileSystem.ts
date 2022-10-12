@@ -1,20 +1,6 @@
-import {
-    Disposable,
-    Event,
-    EventEmitter,
-    FileChangeEvent,
-    FileChangeType,
-    FileStat,
-    FileSystemError,
-    FileSystemProvider,
-    FileType,
-    TextDocument,
-    Uri,
-} from "vscode";
-import { gistProvider, gistFileSystemProvider } from "../extension";
-import { deleteGitHubFile, refreshGitHubTree, createOrUpdateFile } from "../GitHub/api";
+import { Disposable, Event, EventEmitter, FileChangeEvent, FileStat, FileSystemError, FileSystemProvider, FileType, TextDocument, Uri } from "vscode";
 import { getGistFileContent } from "../GitHub/commands";
-import { TGitHubUpdateContent, TContent, TGistFile } from "../GitHub/types";
+import { TContent } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";
 
@@ -33,24 +19,6 @@ export class GistFile implements FileStat {
     constructor(name: string) {
         this.name = name;
         this.type = FileType.File;
-        this.ctime = Date.now();
-        this.mtime = Date.now();
-        this.size = 0;
-    }
-}
-
-export class GistDirectory implements FileStat {
-    type: FileType;
-    ctime: number;
-    mtime: number;
-    size: number;
-
-    name: string;
-    data?: Uint8Array;
-
-    constructor(name: string) {
-        this.name = name;
-        this.type = FileType.Directory;
         this.ctime = Date.now();
         this.mtime = Date.now();
         this.size = 0;
@@ -109,10 +77,10 @@ export class GistFileSystemProvider implements FileSystemProvider {
             };
         }
 
-        const fileInfo = GistFileSystemProvider.getGistInfo(uri);
+        const [gistNode, file] = GistFileSystemProvider.getGistInfo(uri)!;
 
-        if (fileInfo && fileInfo[1]) {
-            const type = fileInfo[1].type === "blob" ? FileType.File : FileType.Directory;
+        if (gistNode && file) {
+            const type = FileType.File;
 
             return {
                 type,
