@@ -1,5 +1,3 @@
-import { store } from "../FileSystem/storage";
-import { GistNode } from "../Tree/nodes";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
 import { TContent, TGist } from "./types";
 

@@ -1,10 +1,8 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { extensionContext } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import { getFollowedUsersFromGlobalStorage, store, updateStoredGist } from "../FileSystem/storage";
-import { getGitHubGist } from "../GitHub/api";
+import { store } from "../FileSystem/storage";
 import { getGist, getOwnedGists, getStarredGists } from "../GitHub/commands";
-import { ContentType, TContent, TGist, TGistFile } from "../GitHub/types";
+import { TContent, TGist, TGistFile } from "../GitHub/types";
 
 enum GistsGroupType {
     myGists = "My Gists",
