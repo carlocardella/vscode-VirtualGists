@@ -11,7 +11,7 @@ import {
     TextDocument,
     Uri,
 } from "vscode";
-import { gistProvider, gistFileSystemProvider } from '../extension';
+import { gistProvider, gistFileSystemProvider } from "../extension";
 import { deleteGitHubFile, refreshGitHubTree, createOrUpdateFile } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
 import { TGitHubUpdateContent, TContent, TGistFile } from "../GitHub/types";
@@ -67,19 +67,14 @@ export class GistFileSystemProvider implements FileSystemProvider {
 
     async readFile(uri: Uri): Promise<Uint8Array> {
         const [gist, file] = GistFileSystemProvider.getGistInfo(uri)!;
-        return await getGistFileContent(gist, file);
+        return await getGistFileContent(file);
     }
 
     static getGistInfo(uri: Uri): [GistNode, TContent] | undefined {
-        const match = GistFileSystemProvider.getFileInfo(uri);
+        const [gistId, path] = GistFileSystemProvider.getFileInfo(uri);
 
-        if (!match) {
-            // investigate: really needed? This likely always matches since getFileInfo does nothing more that parse the uri
-            return;
-        }
-
-        const gistNode = store.gists.find((gist) => gist!.gist.id === match[0]);
-        const file: TContent = Object.values(gistNode!.gist.files).find((file) => file.filename === match[1]);
+        const gistNode = store.gists.find((gist) => gist!.gist.id === gistId);
+        const file: TContent = Object.values(gistNode!.gist.files!).find((file) => file!.filename === path)!;
 
         return [gistNode!, file];
     }
@@ -93,7 +88,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
         return Uri.parse(`${GIST_SCHEME}://${gistId}/${filePath}`);
     }
 
-    static getFileInfo(uri: Uri): [string, string] | undefined {
+    static getFileInfo(uri: Uri): [string, string] {
         const gistId = uri.authority;
         const path = uri.path.startsWith("/") ? uri.path.substring(1) : uri.path;
 
@@ -151,41 +146,41 @@ export class GistFileSystemProvider implements FileSystemProvider {
     }
 
     writeFile(uri: Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
-        let repository = store.gists.find((repo) => repo!.name === uri.authority)!;
-        let file: TContent = repository!.tree?.tree.find((file: TContent) => file?.path === uri.path.substring(1));
+        // let repository = store.gists.find((repo) => repo!.name === uri.authority)!;
+        // let file: TContent = repository!.tree?.tree.find((file: TContent) => file?.path === uri.path.substring(1));
 
-        if (!file) {
-            file = {};
-            file.path = uri.path.substring(1);
-            createOrUpdateFile(repository, file, content)
-                .then((response: TGitHubUpdateContent) => {
-                    file!.sha = response.content?.sha;
-                    file!.size = response.content?.size;
-                    file!.url = response.content?.git_url;
-                })
-                .then(() => {
-                    refreshGitHubTree(repository.repo, repository.repo.default_branch).then((tree) => {
-                        repository.repo.tree = tree;
-                    });
-                });
+        // if (!file) {
+        //     file = {};
+        //     file.path = uri.path.substring(1);
+        //     createOrUpdateFile(repository, file, content)
+        //         .then((response: TGitHubUpdateContent) => {
+        //             file!.sha = response.content?.sha;
+        //             file!.size = response.content?.size;
+        //             file!.url = response.content?.git_url;
+        //         })
+        //         .then(() => {
+        //             refreshGitHubTree(repository.repo, repository.repo.default_branch).then((tree) => {
+        //                 repository.repo.tree = tree;
+        //             });
+        //         });
 
-            this._onDidChangeFile.fire([{ type: FileChangeType.Created, uri }]); // investigate: needed?
-            gistProvider.refresh();
-        } else {
-            file.path = uri.path.substring(1);
-            createOrUpdateFile(repository, file, content).then((response: TGitHubUpdateContent) => {
-                file!.sha = response.content?.sha;
-                file!.size = response.content?.size;
-                file!.url = response.content?.git_url;
-            });
+        //     this._onDidChangeFile.fire([{ type: FileChangeType.Created, uri }]); // investigate: needed?
+        //     gistProvider.refresh();
+        // } else {
+        //     file.path = uri.path.substring(1);
+        //     createOrUpdateFile(repository, file, content).then((response: TGitHubUpdateContent) => {
+        //         file!.sha = response.content?.sha;
+        //         file!.size = response.content?.size;
+        //         file!.url = response.content?.git_url;
+        //     });
 
-            refreshGitHubTree(repository.repo, repository.repo.default_branch).then((tree) => {
-                repository.repo.tree = tree;
-            });
+        //     refreshGitHubTree(repository.repo, repository.repo.default_branch).then((tree) => {
+        //         repository.repo.tree = tree;
+        //     });
 
-            this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]); // investigate: needed?
-            // repoProvider.refresh();
-        }
+        //     this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]); // investigate: needed?
+        //     // repoProvider.refresh();
+        // }
 
         return Promise.resolve();
     }

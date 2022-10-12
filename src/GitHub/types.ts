@@ -223,6 +223,7 @@ export type TGist = {
     git_push_url?: string | undefined;
     html_url?: string | undefined;
     files?: TGistFile | undefined | null;
+    history?: TGistHistory[] | undefined;
     public?: boolean | undefined;
     created_at?: string | undefined;
     updated_at?: string | undefined;

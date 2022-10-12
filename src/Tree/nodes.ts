@@ -52,7 +52,7 @@ export class GistNode extends TreeItem {
         this.iconPath = gist.public ? new ThemeIcon("gist") : new ThemeIcon("gist-secret");
         this.name = gist.description;
         this.gist = gist;
-        this.description = Object.values(gist.files).length.toString();
+        this.description = Object.values(gist.files!).length.toString();
     }
 }
 
@@ -66,7 +66,7 @@ export class ContentNode extends TreeItem {
     nodeContent: TContent;
 
     constructor(nodeContent: TGistFile, gist: TGist) {
-        super(nodeContent[0]!.filename!, TreeItemCollapsibleState.None);
+        super(nodeContent.filename, TreeItemCollapsibleState.None);
 
         this.iconPath = new ThemeIcon("file");
         this.contextValue = "file";
@@ -74,9 +74,9 @@ export class ContentNode extends TreeItem {
         this.nodeContent = nodeContent;
         this.gist = gist;
         // this.sha = nodeContent?.sha ?? "";
-        this.name = nodeContent[0]!.filename!;
+        this.name = nodeContent.filename!;
         this.path = this.name;
-        this.uri = GistFileSystemProvider.getFileUri(gist.id, this.path);
+        this.uri = GistFileSystemProvider.getFileUri(gist.id!, this.path);
         this.resourceUri = this.uri;
         this.tooltip = this.name;
         this.label = this.name;
@@ -97,14 +97,12 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
         if (element) {
             let childNodes: any[] = [];
             if (element instanceof GistNode) {
-                const content = (await getGist(element.gist.id)) as TGist;
-                store.gists.find((gistToUpdate) => gistToUpdate?.id === element.gist.id); // investigate: why is store undefined?
+                const content = (await getGist(element.gist.id!)) as TGist;
 
-                // updateStoredGist(content);
                 if (content?.files) {
                     childNodes = Object.values(content.files)
-                        .map((node) => new ContentNode(<TContent>node, element.gist))
-                        .sort((a, b) => a.nodeContent!.name!.localeCompare(b.nodeContent!.name!))
+                        .map((node) => new ContentNode(<TGistFile>node, element.gist))
+                        .sort((a: TContent, b) => a?.nodeContent!.filename!.localeCompare(b.nodeContent!.filename!))
                         .sort((a, b) => a.nodeContent!.type!.localeCompare(b.nodeContent!.type!));
                 }
             } else if (element instanceof GistsGroupNode) {
