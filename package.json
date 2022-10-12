@@ -1,53 +1,333 @@
 {
-  "name": "vscode-Gists",
-  "displayName": "Gists for Visual Studio Code",
-  "description": "Work with GitHub Gists in Visual Studio Code",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.63.0"
-  },
-  "preview": true,
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "vscode-Gists.helloWorld",
-        "title": "Hello World"
-      }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
-  },
-  "devDependencies": {
-    "@types/glob": "^7.2.0",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "16.x",
-    "@types/vscode": "^1.63.0",
-    "@typescript-eslint/eslint-plugin": "^5.30.0",
-    "@typescript-eslint/parser": "^5.30.0",
-    "@vscode/test-electron": "^2.1.5",
-    "eslint": "^8.18.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.0.0",
-    "octokit": "^2.0.7",
-    "ts-loader": "^9.3.1",
-    "typescript": "^4.7.4",
-    "webpack": "^5.73.0",
-    "webpack-cli": "^4.10.0"
-  }
+    "name": "vscode-virtualgists",
+    "displayName": "Virtual Gists for Visual Studio Code",
+    "description": "Easily manage your GitHub Gists from VSCode",
+    "publisher": "carlocardella",
+    "author": {
+        "name": "Carlo Cardella",
+        "url": "https://cloudnotes.io"
+    },
+    "version": "0.0.1",
+    "preview": true,
+    "engines": {
+        "vscode": "^1.63.0"
+    },
+    "icon": "assets/notebook.png",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/carlocardella/vscode-VirtualGists.git"
+    },
+    "bugs": {
+        "url": "https://github.com/carlocardella/vscode-VirtualGists/issues"
+    },
+    "categories": [
+        "Other"
+    ],
+    "capabilities": {
+        "untrustedWorkspaces": {
+            "supported": true
+        }
+    },
+    "keywords": [
+        "git",
+        "github",
+        "gist",
+        "gists",
+        "virtual file system",
+        "virtual gists"
+    ],
+    "activationEvents": [
+        "onView:virtualGistsView"
+    ],
+    "main": "./dist/extension-node.js",
+    "browser": "./dist/extension-web.js",
+    "contributes": {
+        "configuration": {
+            "title": "VirtualGists",
+            "properties": {
+                "VirtualGists.EnableTracing": {
+                    "type": "boolean",
+                    "description": "Enable tracing of the extension",
+                    "default": false
+                }
+            }
+        },
+        "commands": [
+            {
+                "title": "Close gist",
+                "command": "VirtualGists.closeGist",
+                "category": "Virtual Gists",
+                "icon": "$(close)"
+            },
+            {
+                "title": "Remove from Global Storage",
+                "command": "VirtualGists.removeFromGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "New public gist",
+                "command": "VirtualGists.newPublicGist",
+                "category": "Virtual Gists",
+                "icon": "$(repo-create)"
+            },
+            {
+                "title": "New private gist",
+                "command": "VirtualGists.newPrivateGist",
+                "category": "Virtual Gists",
+                "icon": "$(lock)"
+            },
+            {
+                "title": "Clone gist",
+                "command": "VirtualGists.cloneGist",
+                "category": "Virtual Gists",
+                "icon": "$(repo-clone)"
+            },
+            {
+                "title": "Fork gist",
+                "command": "VirtualGists.forkGist",
+                "category": "Virtual Gists",
+                "icon": "$(repo-forked)"
+            },
+            {
+                "title": "Download gist",
+                "command": "VirtualGists.downloadGist",
+                "category": "Virtual Gists",
+                "icon": "$(cloud-download)"
+            },
+            {
+                "title": "Open Gist...",
+                "command": "VirtualGists.openGist",
+                "icon": "$(plug)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Delete Gist",
+                "command": "VirtualGists.deleteGist",
+                "icon": "$(trash)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "New file",
+                "command": "VirtualGists.addFile",
+                "icon": "$(new-file)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Upload file(s)...",
+                "command": "VirtualGists.uploadFile",
+                "icon": "$(cloud-upload)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Delete",
+                "command": "VirtualGists.deleteNode",
+                "icon": "$(trash)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Refresh",
+                "command": "VirtualGists.refreshTree",
+                "icon": "$(refresh)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Clear global storage",
+                "command": "VirtualGists.clearGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Get Global Storage",
+                "command": "VirtualGists.getGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Purge Global Storage",
+                "command": "VirtualGists.purgeGlobalStorage",
+                "category": "Virtual Gists"
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "VirtualGistsContainer",
+                    "title": "Virtual Gists",
+                    "icon": "assets/repo.svg"
+                }
+            ]
+        },
+        "views": {
+            "VirtualGistsContainer": [
+                {
+                    "id": "virtualGistsView",
+                    "name": "Virtual Gists",
+                    "icon": "assets/repo.svg",
+                    "type": "tree",
+                    "visibility": "collapsed"
+                }
+            ]
+        },
+        "menus": {
+            
+            "commandPalette": [
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.openGist"
+                },
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.uploadFile",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.downloadGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.forkGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.cloneGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.deleteGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.refreshTree"
+                },
+                {
+                    "command": "VirtualGists.clearGlobalStorage"
+                },
+                {
+                    "command": "VirtualGists.purgeGlobalStorage"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "VirtualGists.refreshTree",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "VirtualGists.openGist",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "VirtualGists.newPublicGist",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "VirtualGists.newPrivateGist",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "viewItem == folder || viewItem == repo",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "viewItem == repo",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "viewItem == folder || viewItem == file",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "viewItem == folder || viewItem == repo",
+                    "group": "1_add@1"
+                },
+                {
+                    "command": "VirtualGists.uploadFile",
+                    "when": "viewItem == folder || viewItem == repo",
+                    "group": "1_add@2"
+                },
+                {
+                    "command": "VirtualGists.newPublicGist",
+                    "when": "viewItem == repo",
+                    "group": "2_repoOperations@1"
+                },
+                {
+                    "command": "VirtualGists.newPrivateGist",
+                    "when": "viewItem == repo",
+                    "group": "2_repoOperations@2"
+                },
+                {
+                    "command": "VirtualGists.deleteGist",
+                    "when": "viewItem == repo",
+                    "group": "2_repoOperations@6"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "viewItem == repo",
+                    "group": "2_close@1"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "viewItem == folder || viewItem == file",
+                    "group": "3_delete@1"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "webpack": "webpack --mode development",
+        "webpack-dev": "webpack --mode development --watch",
+        "test-compile": "tsc -p ./",
+        "unit-tests": "tsc -w -p ./",
+        "vscode:prepublish": "npm run package-web",
+        "compile-web": "webpack",
+        "watch-web": "webpack --watch",
+        "package-web": "webpack --mode production --devtool hidden-source-map"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.63.0",
+        "@types/glob": "^7.2.0",
+        "@types/mocha": "^9.1.1",
+        "@types/node": "16.x",
+        "@typescript-eslint/eslint-plugin": "^5.38.0",
+        "@typescript-eslint/parser": "^5.38.0",
+        "@vscode/test-electron": "^2.1.5",
+        "eslint": "^8.24.0",
+        "glob": "^8.0.3",
+        "mocha": "^10.0.0",
+        "octokit": "^2.0.7",
+        "ts-loader": "^9.4.1",
+        "typescript": "^4.8.3",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0"
+    },
+    "dependencies": {
+        "@octokit/core": "^4.0.5",
+        "@octokit/openapi-types": "^13.12.0",
+        "@octokit/plugin-rest-endpoint-methods": "^6.6.2",
+        "@octokit/request": "^6.2.1",
+        "@octokit/rest": "^19.0.4",
+        "@octokit/types": "^7.5.0",
+        "is-binary-path": "^2.1.0",
+        "os-browserify": "^0.3.0",
+        "path-browserify": "^1.0.1",
+        "process": "^0.11.10"
+    }
 }
