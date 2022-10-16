@@ -43,8 +43,9 @@ export class GistNode extends TreeItem {
     name: string | null | undefined;
     gist: TGist;
     groupType: GistsGroupType;
+    readOnly: boolean;
 
-    constructor(gist: TGist, groupType: GistsGroupType) {
+    constructor(gist: TGist, groupType: GistsGroupType, readOnly?: boolean) {
         super(gist.description!, TreeItemCollapsibleState.Collapsed);
 
         this.groupType = groupType;
@@ -53,6 +54,7 @@ export class GistNode extends TreeItem {
         this.name = gist.description;
         this.gist = gist;
         this.description = Object.values(gist.files!).length.toString();
+        this.readOnly = readOnly ?? false;
     }
 }
 
@@ -73,7 +75,6 @@ export class ContentNode extends TreeItem {
         this.owner = gist.owner?.login ?? "";
         this.nodeContent = nodeContent;
         this.gist = gist;
-        // this.sha = nodeContent?.sha ?? "";
         this.name = nodeContent.filename as string;
         this.path = this.name;
         this.uri = GistFileSystemProvider.getFileUri(gist.id!, this.path);

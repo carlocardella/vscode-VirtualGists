@@ -1,4 +1,18 @@
-import { Disposable, Event, EventEmitter, FileChangeEvent, FileStat, FileSystemError, FileSystemProvider, FileType, TextDocument, Uri } from "vscode";
+import {
+    Disposable,
+    Event,
+    EventEmitter,
+    FileChangeEvent,
+    FileChangeType,
+    FileStat,
+    FileSystemError,
+    FileSystemProvider,
+    FileType,
+    TextDocument,
+    Uri,
+} from "vscode";
+import { gistProvider } from "../extension";
+import { createOrUpdateFile, refreshGitHubTree } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
 import { TContent } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
@@ -34,11 +48,11 @@ export class GistFileSystemProvider implements FileSystemProvider {
     }
 
     async readFile(uri: Uri): Promise<Uint8Array> {
-        const [gist, file] = GistFileSystemProvider.getGistInfo(uri)!;
+        const [gist, file] = GistFileSystemProvider.findGist(uri)!;
         return await getGistFileContent(file);
     }
 
-    static getGistInfo(uri: Uri): [GistNode, TContent] {
+    static findGist(uri: Uri): [GistNode, TContent] {
         const [gistId, path] = GistFileSystemProvider.getFileInfo(uri);
 
         const gistNode = store.gists.find((gist) => gist!.gist.id === gistId);
@@ -77,7 +91,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
             };
         }
 
-        const [gistNode, file] = GistFileSystemProvider.getGistInfo(uri)!;
+        const [gistNode, file] = GistFileSystemProvider.findGist(uri)!;
 
         if (gistNode && file) {
             const type = FileType.File;
@@ -106,7 +120,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
     }
 
     readDirectory(uri: Uri): [string, FileType][] {
-        throw new Error("Method not implemented.");
+        throw new Error("FileSystem.readDirectory method not implemented.");
     }
 
     createDirectory(uri: Uri): void {
@@ -114,41 +128,21 @@ export class GistFileSystemProvider implements FileSystemProvider {
     }
 
     writeFile(uri: Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
-        // let repository = store.gists.find((repo) => repo!.name === uri.authority)!;
-        // let file: TContent = repository!.tree?.tree.find((file: TContent) => file?.path === uri.path.substring(1));
+        let [gist, file] = GistFileSystemProvider.findGist(uri)!;
 
-        // if (!file) {
-        //     file = {};
-        //     file.path = uri.path.substring(1);
-        //     createOrUpdateFile(repository, file, content)
-        //         .then((response: TGitHubUpdateContent) => {
-        //             file!.sha = response.content?.sha;
-        //             file!.size = response.content?.size;
-        //             file!.url = response.content?.git_url;
-        //         })
-        //         .then(() => {
-        //             refreshGitHubTree(repository.repo, repository.repo.default_branch).then((tree) => {
-        //                 repository.repo.tree = tree;
-        //             });
-        //         });
+        if (!gist || !file) {
+            // create a new file
+            throw FileSystemError.FileNotFound(uri);
+        } else {
+            // update an existing file
+            createOrUpdateFile(gist, file, content).then((response) => {
+                gist.gist = response;
+            });
+        }
 
-        //     this._onDidChangeFile.fire([{ type: FileChangeType.Created, uri }]); // investigate: needed?
-        //     gistProvider.refresh();
-        // } else {
-        //     file.path = uri.path.substring(1);
-        //     createOrUpdateFile(repository, file, content).then((response: TGitHubUpdateContent) => {
-        //         file!.sha = response.content?.sha;
-        //         file!.size = response.content?.size;
-        //         file!.url = response.content?.git_url;
-        //     });
+        gistProvider.refresh();
 
-        //     refreshGitHubTree(repository.repo, repository.repo.default_branch).then((tree) => {
-        //         repository.repo.tree = tree;
-        //     });
-
-        //     this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]); // investigate: needed?
-        //     // repoProvider.refresh();
-        // }
+        this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
 
         return Promise.resolve();
     }

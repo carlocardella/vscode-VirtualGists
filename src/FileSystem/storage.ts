@@ -2,7 +2,6 @@ import { GistNode } from "../Tree/nodes";
 import { ExtensionContext } from "vscode";
 import { GLOBAL_STORAGE_KEY } from "../GitHub/constants";
 import { credentials, output, gistProvider } from "../extension";
-import { getGist } from "../GitHub/commands";
 import { TGist } from "../GitHub/types";
 
 export const store = {

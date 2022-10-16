@@ -24,7 +24,7 @@ export async function activate(context: ExtensionContext) {
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
-    output?.appendLine("Virtual Gists: extension is now active!", output.messageType.info);
+    output?.appendLine("Virtual Gists extension is active", output.messageType.info);
 
     await credentials.initialize(context);
     if (!credentials.isAuthenticated) {
@@ -45,9 +45,9 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.getGlobalStorage", async () => {
-            const reposFromGlobalStorage = await getFollowedUsersFromGlobalStorage(context);
-            if (reposFromGlobalStorage.length > 0) {
-                output?.appendLine(`Global storage: ${reposFromGlobalStorage}`, output.messageType.info);
+            const followedUsersFromGlobalStorage = await getFollowedUsersFromGlobalStorage(context);
+            if (followedUsersFromGlobalStorage.length > 0) {
+                output?.appendLine(`Global storage: ${followedUsersFromGlobalStorage}`, output.messageType.info);
             } else {
                 output?.appendLine(`Global storage is empty`, output.messageType.info);
             }

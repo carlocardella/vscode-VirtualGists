@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as config from "./config";
-import { TRepo } from "./GitHub/types";
+import { TGist } from "./GitHub/types";
 
 export enum MessageType {
     info = "Info",
@@ -43,27 +43,27 @@ export class Output {
         this._outputChannel.dispose();
     }
 
-    public logError(repo: TRepo, error: any) {
-        this.log(repo, error, this.messageType.error);
+    public logError(gist: TGist, error: any) {
+        this.log(gist, error, this.messageType.error);
     }
-    public logWarning(repo: TRepo, error: any) {
-        this.log(repo, error, this.messageType.warning);
+    public logWarning(gist: TGist, error: any) {
+        this.log(gist, error, this.messageType.warning);
     }
-    public logInfo(repo: TRepo, error: any) {
-        this.log(repo, error, this.messageType.info);
+    public logInfo(gist: TGist, error: any) {
+        this.log(gist, error, this.messageType.info);
     }
-    public logDebug(repo: TRepo, error: any) {
-        this.log(repo, error, this.messageType.debug);
+    public logDebug(gist: TGist, error: any) {
+        this.log(gist, error, this.messageType.debug);
     }
-    public logVerbose(repo: TRepo, error: any) {
-        this.log(repo, error, this.messageType.verbose);
+    public logVerbose(gist: TGist, error: any) {
+        this.log(gist, error, this.messageType.verbose);
     }
 
-    private log(repo: TRepo, error: any, messageType: MessageType) {
+    private log(gist: TGist, error: any, messageType: MessageType) {
         if (error.name === "HttpError") {
-            this.appendLine(`Error reading repo ${repo.name}: ${error.response.data.message}`, messageType);
+            this.appendLine(`Error reading repo ${gist.id}: ${error.response.data.message}`, messageType);
         } else {
-            this.appendLine(`${repo.name}: ${error.response}`, this.messageType.error);
+            this.appendLine(`${gist.id}: ${error.response}`, this.messageType.error);
         }
     }
 }
