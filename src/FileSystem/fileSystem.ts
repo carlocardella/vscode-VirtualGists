@@ -38,7 +38,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
         return await getGistFileContent(file);
     }
 
-    static getGistInfo(uri: Uri): [GistNode, TContent] | undefined {
+    static getGistInfo(uri: Uri): [GistNode, TContent] {
         const [gistId, path] = GistFileSystemProvider.getFileInfo(uri);
 
         const gistNode = store.gists.find((gist) => gist!.gist.id === gistId);

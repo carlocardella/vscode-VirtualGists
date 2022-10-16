@@ -57,7 +57,7 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
     });
 
     try {
-        const { data } = await octokit.gists.get({ gist_id: gistId });
+        const { data } = await octokit.gists.get({ gist_id: gistId, headers: { Accept: "application/vnd.github.base64" } });
         return Promise.resolve(data);
     } catch (e: any) {
         output?.appendLine(`Could not get gist ${gistId}. ${e.message}`, output.messageType.error);

@@ -1,11 +1,14 @@
+import { Uri } from "vscode";
+import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
-import { ZERO_WIDTH_SPACE } from "./constants";
 import { TContent, TGist } from "./types";
 
 export async function getGistFileContent(file: TContent): Promise<Uint8Array> {
-    let content = file?.content === ZERO_WIDTH_SPACE ? "" : file?.content;
+    return Promise.resolve(new Uint8Array(Buffer.from(file?.content!, "base64").toString("latin1").split("").map(charCodeAt)));
+}
 
-    return Promise.resolve(new Uint8Array(content!.split("").map(charCodeAt)));
+export function fileNameToUri(gistId: string, filePath: string = ""): Uri {
+    return Uri.parse(`${GIST_SCHEME}://${gistId}/${filePath}`);
 }
 
 export async function getGist(gistId: string): Promise<TContent | undefined> {
@@ -34,7 +37,7 @@ export async function getStarredGists(): Promise<TGist[] | undefined> {
 
 /**
  * Helper function, returns the character an position zero of a string.
- *
+ *loo
  * @param {string} c The string to filter
  * @returns {*}
  */
