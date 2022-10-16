@@ -77,42 +77,42 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
  * @returns {Promise<TGitHubUpdateContent>}
  */
 export async function createOrUpdateFile(gist: GistNode, file: TContent, content: Uint8Array): Promise<TGitHubUpdateContent> {
-    const fileContentString = new TextDecoder().decode(content);
-    file!.content = fileContentString;
+    // const fileContentString = new TextDecoder().decode(content);
+    // file!.content = fileContentString;
 
-    const octokit = new rest.Octokit({
-        auth: await credentials.getAccessToken(),
-    });
+    // const octokit = new rest.Octokit({
+    //     auth: await credentials.getAccessToken(),
+    // });
 
-    try {
-        let data: any;
-        if (!file?.sha) {
-            // new file
-            ({ data } = await octokit.repos.createOrUpdateFileContents({
-                owner: gist.owner,
-                repo: gist.name,
-                path: file!.path!,
-                message: `${COMMIT_MESSAGE} ${file!.path}`,
-                content: Buffer.from(fileContentString).toString("base64"),
-            }));
-        } else {
-            // the file already exists, update it
-            ({ data } = await octokit.repos.createOrUpdateFileContents({
-                owner: gist.owner,
-                repo: gist.name,
-                path: file!.path!,
-                message: `${COMMIT_MESSAGE} ${file!.path}`,
-                content: Buffer.from(fileContentString).toString("base64"),
-                sha: file!.sha,
-            }));
+    // try {
+    //     let data: any;
+    //     if (!file?.sha) {
+    //         // new file
+    //         ({ data } = await octokit.repos.createOrUpdateFileContents({
+    //             owner: gist.owner,
+    //             repo: gist.name,
+    //             path: file!.path!,
+    //             message: `${COMMIT_MESSAGE} ${file!.path}`,
+    //             content: Buffer.from(fileContentString).toString("base64"),
+    //         }));
+    //     } else {
+    //         // the file already exists, update it
+    //         ({ data } = await octokit.repos.createOrUpdateFileContents({
+    //             owner: gist.owner,
+    //             repo: gist.name,
+    //             path: file!.path!,
+    //             message: `${COMMIT_MESSAGE} ${file!.path}`,
+    //             content: Buffer.from(fileContentString).toString("base64"),
+    //             sha: file!.sha,
+    //         }));
 
-            // file = data.commit;
-        }
+    //         // file = data.commit;
+    //     }
 
-        return Promise.resolve(data);
-    } catch (e: any) {
-        output?.logError(gist.gist, e);
-    }
+    //     return Promise.resolve(data);
+    // } catch (e: any) {
+    //     output?.logError(gist.gist, e);
+    // }
 
     return Promise.reject();
 }

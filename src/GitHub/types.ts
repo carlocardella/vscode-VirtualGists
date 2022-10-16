@@ -223,7 +223,7 @@ export type TGist = {
     git_push_url?: string | undefined;
     html_url?: string | undefined;
     files?: TGistFile | undefined | null;
-    history?: TGistHistory[] | undefined | null;
+    history?: TGistHistory[] | undefined | null | unknown;
     public?: boolean | undefined;
     created_at?: string | undefined;
     updated_at?: string | undefined;
@@ -250,18 +250,20 @@ export type TGistFile = {
 };
 
 export type TGistHistory = {
-    user: TUser;
-    version: string;
-    committed_at: string;
-    change_status: TGistChangeStatus;
-    url: string;
+    user?: TUser | null | undefined;
+    version?: string | undefined | null;
+    committed_at?: string | null | undefined;
+    change_status?: TGistChangeStatus | null | undefined;
+    url?: string | null | undefined;
 };
 
-export type TGistChangeStatus = {
-    total: number;
-    additions: number;
-    deletions: number;
-};
+export type TGistChangeStatus =
+    | {
+          total?: number | undefined;
+          additions?: number | undefined;
+          deletions?: number | undefined;
+      }
+    | undefined;
 
 export type TForks = {
     id: string;
