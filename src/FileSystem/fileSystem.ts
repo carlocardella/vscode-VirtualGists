@@ -14,7 +14,7 @@ import {
 import { gistProvider } from "../extension";
 import { createOrUpdateFile, refreshGitHubTree } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
-import { TContent } from "../GitHub/types";
+import { TContent, TGistFileNoKey, TGistFile } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";
 
@@ -52,11 +52,11 @@ export class GistFileSystemProvider implements FileSystemProvider {
         return await getGistFileContent(file);
     }
 
-    static findGist(uri: Uri): [GistNode, TContent] {
+    static findGist(uri: Uri): [GistNode, TGistFileNoKey] {
         const [gistId, path] = GistFileSystemProvider.getFileInfo(uri);
 
         const gistNode = store.gists.find((gist) => gist!.gist.id === gistId);
-        const file: TContent = Object.values(gistNode!.gist.files!).find((file) => file!.filename === path)!;
+        const file: TGistFileNoKey = Object.values(gistNode!.gist.files!).find((gistFile) => gistFile!.filename === path)!;
 
         return [gistNode!, file];
     }

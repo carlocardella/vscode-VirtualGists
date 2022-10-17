@@ -104,68 +104,68 @@ export type TBranch = {
 };
 
 export type TGitHubUpdateContent = {
-//     commit?:
-//         | {
-//               sha?: string | undefined;
-//               node_id?: string | undefined;
-//               url?: string | undefined;
-//               html_url?: string | undefined;
-//               author?:
-//                   | {
-//                         name?: string | undefined;
-//                         email?: string | undefined;
-//                         date?: string | undefined;
-//                     }
-//                   | undefined;
-//               committer?:
-//                   | {
-//                         name?: string | undefined;
-//                         email?: string | undefined;
-//                         date?: string | undefined;
-//                     }
-//                   | undefined;
-//               tree?:
-//                   | {
-//                         sha?: string | undefined;
-//                         url?: string | undefined;
-//                     }
-//                   | undefined;
-//               message?: string | undefined;
-//               parents?:
-//                   | {
-//                         url?: string | undefined;
-//                         html_url?: string | undefined;
-//                         sha?: string | undefined;
-//                     }[]
-//                   | undefined;
-//               verification?:
-//                   | {
-//                         verified?: boolean | undefined;
-//                         reason?: string | undefined;
-//                         signature?: string | null | undefined;
-//                         payload?: string | null | undefined;
-//                     }
-//                   | undefined;
-//           }
-//         | undefined;
-//     content: {
-//         name?: string | undefined;
-//         path?: string | undefined;
-//         sha?: string | undefined;
-//         size?: number | undefined;
-//         url?: string | undefined;
-//         html_url?: string | undefined;
-//         git_url?: string | undefined;
-//         download_url?: string | undefined;
-//         type?: string | undefined;
-//         _links?:
-//             | {
-//                   self?: string | undefined;
-//                   git?: string | undefined;
-//                   html?: string | undefined;
-//               }
-//             | undefined;
-//     } | null;
+    //     commit?:
+    //         | {
+    //               sha?: string | undefined;
+    //               node_id?: string | undefined;
+    //               url?: string | undefined;
+    //               html_url?: string | undefined;
+    //               author?:
+    //                   | {
+    //                         name?: string | undefined;
+    //                         email?: string | undefined;
+    //                         date?: string | undefined;
+    //                     }
+    //                   | undefined;
+    //               committer?:
+    //                   | {
+    //                         name?: string | undefined;
+    //                         email?: string | undefined;
+    //                         date?: string | undefined;
+    //                     }
+    //                   | undefined;
+    //               tree?:
+    //                   | {
+    //                         sha?: string | undefined;
+    //                         url?: string | undefined;
+    //                     }
+    //                   | undefined;
+    //               message?: string | undefined;
+    //               parents?:
+    //                   | {
+    //                         url?: string | undefined;
+    //                         html_url?: string | undefined;
+    //                         sha?: string | undefined;
+    //                     }[]
+    //                   | undefined;
+    //               verification?:
+    //                   | {
+    //                         verified?: boolean | undefined;
+    //                         reason?: string | undefined;
+    //                         signature?: string | null | undefined;
+    //                         payload?: string | null | undefined;
+    //                     }
+    //                   | undefined;
+    //           }
+    //         | undefined;
+    //     content: {
+    //         name?: string | undefined;
+    //         path?: string | undefined;
+    //         sha?: string | undefined;
+    //         size?: number | undefined;
+    //         url?: string | undefined;
+    //         html_url?: string | undefined;
+    //         git_url?: string | undefined;
+    //         download_url?: string | undefined;
+    //         type?: string | undefined;
+    //         _links?:
+    //             | {
+    //                   self?: string | undefined;
+    //                   git?: string | undefined;
+    //                   html?: string | undefined;
+    //               }
+    //             | undefined;
+    //     } | null;
 };
 
 export type TRepo = {
@@ -247,6 +247,16 @@ export type TGistFile = {
         truncated?: boolean | undefined;
         content?: string | undefined;
     } | null;
+};
+
+export type TGistFileNoKey = {
+    filename?: string | undefined;
+    type?: string | undefined;
+    language?: string | undefined;
+    raw_url?: string | undefined;
+    size?: number | undefined;
+    truncated?: boolean | undefined;
+    content?: string | undefined;
 };
 
 export type TGistHistory = {

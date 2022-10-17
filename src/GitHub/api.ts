@@ -2,7 +2,7 @@ import * as rest from "@octokit/rest";
 import { TextDecoder } from "util";
 import { credentials, output } from "../extension";
 import { GistNode } from "../Tree/nodes";
-import { TBranch, TContent, TGist, TGitHubUpdateContent, TGitHubUser, TTree } from "./types";
+import { TBranch, TContent, TGistFileNoKey, TGist, TGitHubUpdateContent, TGitHubUser, TTree } from "./types";
 
 /**
  * Get the authenticated GitHub user
@@ -75,7 +75,7 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
  * @param {Uint8Array} content The content of the file.
  * @returns {Promise<TGitHubUpdateContent>}
  */
-export async function createOrUpdateFile(gist: GistNode, file: TContent, content: Uint8Array): Promise<TGitHubUpdateContent> {
+export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, content: Uint8Array): Promise<TGitHubUpdateContent> {
     const fileContentString = new TextDecoder().decode(content);
     file!.content = fileContentString;
 
