@@ -2,10 +2,10 @@ import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
-import { GistProvider } from "./Tree/nodes";
+import { GistNode, GistProvider } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import { clearGlobalStorage, getFollowedUsersFromGlobalStorage,  removeFromGlobalStorage } from "./FileSystem/storage";
+import { clearGlobalStorage, getFollowedUsersFromGlobalStorage, removeFromGlobalStorage } from "./FileSystem/storage";
 import { GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -15,6 +15,15 @@ export let gitHubAuthenticatedUser: TGitHubUser;
 export let extensionContext: ExtensionContext;
 export const gistProvider = new GistProvider();
 export const gistFileSystemProvider = new GistFileSystemProvider();
+
+// hack: https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
+import { TextEncoder as _TextEncoder } from "node:util";
+import { TextDecoder as _TextDecoder } from "node:util";
+import { createGist, deleteGist } from "./GitHub/commands";
+declare global {
+    var TextEncoder: typeof _TextEncoder;
+    var TextDecoder: typeof _TextDecoder;
+}
 
 export async function activate(context: ExtensionContext) {
     extensionContext = context;
@@ -30,7 +39,7 @@ export async function activate(context: ExtensionContext) {
     if (!credentials.isAuthenticated) {
         credentials.initialize(context);
     }
-    const disposable = commands.registerCommand("extension.getGitHubUser", async () => {
+    const disposable = commands.registerCommand("VirtualGists.getGitHubUser", async () => {
         const octokit = await credentials.getOctokit();
         const userInfo = await octokit.users.getAuthenticated();
 
@@ -87,17 +96,17 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
-    // context.subscriptions.push(
-    //     commands.registerCommand("VirtualRepos.openRepository", async () => {
-    //         const pick = (await pickRepository()) as string;
-    //         if (pick) {
-    //             output?.appendLine(`Picked repository: ${pick}`, output.messageType.info);
-    //             await addToGlobalStorage(context, pick);
-    //         } else {
-    //             output?.appendLine("Open repository cancelled by uer", output.messageType.info);
-    //         }
-    //     })
-    // );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.deleteNode", async (node: GistNode) => {
+            deleteGist(node.gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.newPrivateGist", async (node) => {
+            createGist(false);
+        })
+    );
 
     // register global storage
     const keysForSync = [GLOBAL_STORAGE_KEY];
@@ -120,9 +129,6 @@ export async function activate(context: ExtensionContext) {
         showCollapseAll: true,
         canSelectMany: true,
     });
-    // tv.reveal(store.repos);
-
-    // window.registerTreeDataProvider("Repositories", repoProvider);
 
     context.subscriptions.push(disposable);
 }

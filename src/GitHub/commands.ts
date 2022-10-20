@@ -1,4 +1,5 @@
-import { Uri } from "vscode";
+import { Uri, window } from "vscode";
+import { gistFileSystemProvider, gistProvider } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
 import { TContent, TGist } from "./types";
@@ -43,4 +44,45 @@ export async function getStarredGists(): Promise<TGist[] | undefined> {
  */
 function charCodeAt(c: string) {
     return c.charCodeAt(0);
+}
+
+export async function deleteGist(gist: TGist) {
+    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, "Yes", "No", "Cancel");
+    if (confirm !== "Yes") {
+        return;
+    }
+
+    const gistUri = fileNameToUri(gist.id!);
+    await gistFileSystemProvider.delete(gistUri);
+    gistProvider.refresh();
+}
+
+export async function createGist(publicGist: boolean) {
+    const gistName = await window.showInputBox({
+        prompt: "Enter the name of the gist",
+        placeHolder: "Gist name",
+    });
+    let fileName: string | undefined;
+    if (gistName) {
+        fileName = await window.showInputBox({
+            prompt: "Enter the name of the file",
+            placeHolder: "File name",
+        });
+    }
+
+    if (fileName) {
+        let gist: TGist = {
+            description: gistName,
+            public: publicGist,
+            files: {
+                [fileName!]: {
+                    content: "",
+                },
+            },
+        };
+
+        gistFileSystemProvider.createGist(gist).then(() => {
+            gistProvider.refresh();
+        });
+    }
 }

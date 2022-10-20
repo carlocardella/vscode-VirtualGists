@@ -1,7 +1,7 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { store, updateStoredGist } from "../FileSystem/storage";
-import { getGist, getOwnedGists, getStarredGists } from "../GitHub/commands";
+import { getGist, getOwnedGists, getStarredGists, fileNameToUri } from '../GitHub/commands';
 import { TContent, TGist, TGistFile } from "../GitHub/types";
 
 enum GistsGroupType {
@@ -44,6 +44,7 @@ export class GistNode extends TreeItem {
     gist: TGist;
     groupType: GistsGroupType;
     readOnly: boolean;
+    uri: Uri;
 
     constructor(gist: TGist, groupType: GistsGroupType, readOnly?: boolean) {
         super(gist.description!, TreeItemCollapsibleState.Collapsed);
@@ -55,6 +56,8 @@ export class GistNode extends TreeItem {
         this.gist = gist;
         this.description = Object.values(gist.files!).length.toString();
         this.readOnly = readOnly ?? false;
+        this.contextValue = "gist";
+        this.uri = fileNameToUri(this.id!);
     }
 }
 

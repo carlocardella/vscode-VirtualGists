@@ -12,9 +12,9 @@ import {
     Uri,
 } from "vscode";
 import { gistProvider } from "../extension";
-import { createOrUpdateFile, refreshGitHubTree } from "../GitHub/api";
+import { createGitHubGist, createOrUpdateFile, deleteGitHubGist, refreshGitHubTree } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
-import { TContent, TGistFileNoKey, TGistFile } from "../GitHub/types";
+import { TContent, TGistFileNoKey, TGistFile, TGist } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";
 
@@ -108,7 +108,8 @@ export class GistFileSystemProvider implements FileSystemProvider {
     }
 
     async delete(uri: Uri): Promise<void> {
-        throw new Error("Method not implemented.");
+        const gist = GistFileSystemProvider.findGist(uri)![0].gist;
+        return await deleteGitHubGist(gist);
     }
 
     async rename(uri: Uri): Promise<void> {
@@ -145,5 +146,15 @@ export class GistFileSystemProvider implements FileSystemProvider {
         this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
 
         return Promise.resolve();
+    }
+
+    createGist(gist: TGist): Promise<boolean> {
+        createGitHubGist(gist).then((response) => {
+            if (response) {
+                return Promise.resolve(true);
+            }
+        });
+
+        return Promise.reject(false);
     }
 }
