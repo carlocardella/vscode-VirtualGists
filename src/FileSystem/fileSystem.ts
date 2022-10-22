@@ -12,9 +12,9 @@ import {
     Uri,
 } from "vscode";
 import { gistProvider } from "../extension";
-import { createGitHubGist, createOrUpdateFile, deleteGitHubGist, refreshGitHubTree } from "../GitHub/api";
+import { createGitHubGist, createOrUpdateFile, deleteGistFile, deleteGitHubGist } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
-import { TContent, TGistFileNoKey, TGistFile, TGist } from "../GitHub/types";
+import { TGistFileNoKey, TGist } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";
 
@@ -109,7 +109,14 @@ export class GistFileSystemProvider implements FileSystemProvider {
 
     async delete(uri: Uri): Promise<void> {
         const gist = GistFileSystemProvider.findGist(uri)![0].gist;
-        return await deleteGitHubGist(gist);
+
+        if (uri.path === "/") {
+            // delete the gist
+            return await deleteGitHubGist(gist);
+        } else {
+            // delete a file
+            deleteGistFile(gist, uri.path);
+        }
     }
 
     async rename(uri: Uri): Promise<void> {
@@ -141,20 +148,14 @@ export class GistFileSystemProvider implements FileSystemProvider {
             });
         }
 
-        gistProvider.refresh();
+        // gistProvider.refresh();
 
         this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
 
         return Promise.resolve();
     }
 
-    createGist(gist: TGist): Promise<boolean> {
-        createGitHubGist(gist).then((response) => {
-            if (response) {
-                return Promise.resolve(true);
-            }
-        });
-
-        return Promise.reject(false);
+    createGist(gist: TGist, publicGist: boolean): Promise<TGist | undefined> {
+        return Promise.resolve(createGitHubGist(gist, publicGist));
     }
 }

@@ -1,5 +1,6 @@
 import * as rest from "@octokit/rest";
-import { credentials, output } from "../extension";
+import { credentials, output, gistFileSystemProvider } from "../extension";
+import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { GistNode } from "../Tree/nodes";
 import { TGistFileNoKey, TGist, TGitHubUser, TTree } from "./types";
 
@@ -99,23 +100,46 @@ export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, c
     return Promise.reject();
 }
 
-export async function createGitHubGist(gist: TGist): Promise<TGist | undefined> {
+export async function deleteGistFile(gist: TGist, filePath: string): Promise<TGist> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    filePath = filePath.split("/").slice(1).join("/");
+
+    try {
+        let { data } = await octokit.gists.update({
+            gist_id: gist.id!,
+            files: {
+                [filePath]: null as any,
+            },
+        });
+
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Could not delete file "${filePath}" from gist "${gist.description}". ${e.message}`, output.messageType.error);
+    }
+
+    return Promise.reject();
+}
+
+export async function createGitHubGist(gist: TGist, publicGist: boolean): Promise<TGist | undefined> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
 
     const fileName = Object.keys(gist.files!)[0];
     const fileContent = `# ${fileName}`;
-    // const fileContent = Object.values(gist.files!)[0]!.content ?? `# ${fileName}`;
     try {
         const { data } = await octokit.gists.create({
             description: gist.description!,
             files: {
-                filename: { content: fileContent },
+                [fileName]: { content: fileContent },
             },
-            public: false,
+            public: publicGist,
             headers: { Accept: "application/vnd.github+json" },
         });
+
         return Promise.resolve(data);
     } catch (e: any) {
         output?.logError(gist, e);
