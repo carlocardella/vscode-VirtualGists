@@ -2,6 +2,7 @@ import * as rest from "@octokit/rest";
 import { credentials, output, gistFileSystemProvider } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { GistNode } from "../Tree/nodes";
+import { ZERO_WIDTH_SPACE } from "./constants";
 import { TGistFileNoKey, TGist, TGitHubUser, TTree } from "./types";
 
 /**
@@ -76,7 +77,7 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
  * @returns {Promise<TGitHubUpdateContent>}
  */
 export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, content: Uint8Array): Promise<TGist> {
-    const fileContentString = new TextDecoder().decode(content);
+    const fileContentString = content.length > 0 ? new TextDecoder().decode(content) : ZERO_WIDTH_SPACE;
     file!.content = fileContentString;
 
     const octokit = new rest.Octokit({
@@ -134,7 +135,7 @@ export async function createGitHubGist(gist: TGist, publicGist: boolean): Promis
         const { data } = await octokit.gists.create({
             description: gist.description!,
             files: {
-                [fileName]: { content: fileContent },
+                [fileName]: { content: ZERO_WIDTH_SPACE },
             },
             public: publicGist,
             headers: { Accept: "application/vnd.github+json" },

@@ -14,6 +14,7 @@ import {
 import { gistProvider } from "../extension";
 import { createGitHubGist, createOrUpdateFile, deleteGistFile, deleteGitHubGist } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
+import { ZERO_WIDTH_SPACE } from "../GitHub/constants";
 import { TGistFileNoKey, TGist } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";
@@ -138,17 +139,20 @@ export class GistFileSystemProvider implements FileSystemProvider {
     writeFile(uri: Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
         let [gist, file] = GistFileSystemProvider.findGist(uri)!;
 
-        if (!gist || !file) {
+        if (!file) {
             // create a new file
-            throw FileSystemError.FileNotFound(uri);
+            file = {
+                filename: uri.path.split("/").slice(1).join("/"),
+            } as TGistFileNoKey;
+            content = new TextEncoder().encode("");
+
+            createOrUpdateFile(gist, file, content);
         } else {
             // update an existing file
             createOrUpdateFile(gist, file, content).then((response) => {
                 gist.gist = response;
             });
         }
-
-        // gistProvider.refresh();
 
         this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
 

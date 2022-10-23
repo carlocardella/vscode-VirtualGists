@@ -3,7 +3,7 @@ import { gistFileSystemProvider, gistProvider, output } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import { deleteGistFile, getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
 import { TContent, TGist } from "./types";
-import { ContentNode } from "../Tree/nodes";
+import { ContentNode, GistNode } from '../Tree/nodes';
 
 /**
  * Get the content of a gist file.
@@ -176,7 +176,7 @@ export async function createGist(publicGist: boolean) {
  * @param {TGist} gist The gist to add the file to
  * @returns {Promise<void>}
  */
-export async function addFile(gist: TGist): Promise<void> {
+export async function addFile(gist: GistNode): Promise<void> {
     const fileName = await window.showInputBox({
         prompt: "Enter the name of the file",
         placeHolder: "File name",
@@ -195,7 +195,7 @@ export async function addFile(gist: TGist): Promise<void> {
         return Promise.reject();
     }
 
-    let fileUri = fileNameToUri(gist.id!, fileName);
+    let fileUri = fileNameToUri(gist.gist.id!, fileName);
     await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(0), { create: true, overwrite: false });
     gistProvider.refresh();
 

@@ -19,7 +19,7 @@ export const gistFileSystemProvider = new GistFileSystemProvider();
 // hack: https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
-import { createGist, deleteFile, deleteGist } from "./GitHub/commands";
+import { addFile, createGist, deleteFile, deleteGist } from "./GitHub/commands";
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -122,8 +122,8 @@ export async function activate(context: ExtensionContext) {
     );
 
     context.subscriptions.push(
-        commands.registerCommand("VirtualGists.addFile", async (gist: TGist) => {
-            // todo: 
+        commands.registerCommand("VirtualGists.addFile", async (gist: GistNode) => {
+            addFile(gist);
         })
     );
 
