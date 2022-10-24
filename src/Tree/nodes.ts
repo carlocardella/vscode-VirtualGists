@@ -1,15 +1,29 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { store, updateStoredGist } from "../FileSystem/storage";
-import { getGist, getOwnedGists, getStarredGists, fileNameToUri } from '../GitHub/commands';
+import { getGist, getOwnedGists, getStarredGists, fileNameToUri } from "../GitHub/commands";
 import { TContent, TGist, TGistFile } from "../GitHub/types";
 
+/**
+ * Type of gists to show in the TreeView
+ *
+ * @enum {number}
+ */
 enum GistsGroupType {
     myGists = "My Gists",
     starredGists = "Starred Gists",
     notepad = "Notepad",
+    followedUsers = "Followed Users",
 }
 
+/**
+ * Class representing a Gist group type
+ *
+ * @export
+ * @class GistsGroupNode
+ * @typedef {GistsGroupNode}
+ * @extends {TreeItem}
+ */
 export class GistsGroupNode extends TreeItem {
     gists: GistNode[] | undefined;
     groupType: GistsGroupType;
@@ -32,13 +46,20 @@ export class GistsGroupNode extends TreeItem {
                 break;
             default:
                 this.iconPath = new ThemeIcon("gist");
-                // todo: get user avatar
+                // @todo get user avatar
                 break;
         }
-        // this.gists = gists;
     }
 }
 
+/**
+ * Class representing a Gist node in the TreeView
+ *
+ * @export
+ * @class GistNode
+ * @typedef {GistNode}
+ * @extends {TreeItem}
+ */
 export class GistNode extends TreeItem {
     name: string | null | undefined;
     gist: TGist;
@@ -61,12 +82,19 @@ export class GistNode extends TreeItem {
     }
 }
 
+/**
+ * Class representing a Gist file node in the TreeView
+ *
+ * @export
+ * @class ContentNode
+ * @typedef {ContentNode}
+ * @extends {TreeItem}
+ */
 export class ContentNode extends TreeItem {
     owner: string;
     gist: TGist;
     path: string;
     uri: Uri;
-    // sha: string;
     name: string;
     nodeContent: TContent;
 
@@ -91,13 +119,46 @@ export class ContentNode extends TreeItem {
             arguments: [this.uri, { preview: true }],
         };
     }
+
+    get parent(): GistNode {
+        return store.gists.find((gist) => gist?.id === this.gist.id)!;
+    }
 }
 
+/**
+ * Gist provider for the TreeView
+ *
+ * @export
+ * @class GistProvider
+ * @typedef {GistProvider}
+ * @implements {TreeDataProvider<ContentNode>}
+ */
 export class GistProvider implements TreeDataProvider<ContentNode> {
+    /**
+     * Returns the TreeItem for the element selected in the TreeView
+     *
+     * @param {ContentNode} node The node to get the TreeItem for
+     * @returns {ContentNode}
+     */
     getTreeItem = (node: ContentNode) => node;
 
+    /**
+     * Get the parent of the selected node
+     *
+     * @param {*} node The node to get the parent of
+     * @returns {*}
+     */
+    getParent = (node: any) => node.parent;
+
+    /**
+     * Returns the children of the selected node
+     *
+     * @async
+     * @param {?ContentNode} [element] The node to get the children of
+     * @returns {Promise<any[]>}
+     */
     async getChildren(element?: ContentNode): Promise<any[]> {
-        // @update: any
+        // @update any
         if (element) {
             let childNodes: any[] = [];
             if (element instanceof GistNode) {
@@ -126,6 +187,8 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         break;
                     case GistsGroupType.notepad:
                         throw new Error("Notepad is not implemented yet");
+                    case GistsGroupType.followedUsers:
+                        throw new Error("Followed users is not implemented yet");
                     default:
                         break;
                 }
@@ -134,16 +197,8 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
         } else {
             let gists: any[] = [];
 
-            let myGistsNode = new GistsGroupNode(
-                GistsGroupType.myGists
-                // ownedGists?.map((gist) => new GistNode(gist))
-            );
-            let starredGistsNode = new GistsGroupNode(
-                GistsGroupType.starredGists
-                // starredGists?.map((gist) => new GistNode(gist))
-            );
-            // let notepadNode = new GistsGroupNode(GistsGroupType.notepad);
-            // gists.push(notepadNode);
+            let myGistsNode = new GistsGroupNode(GistsGroupType.myGists);
+            let starredGistsNode = new GistsGroupNode(GistsGroupType.starredGists);
             gists.push(myGistsNode);
             gists.push(starredGistsNode);
 
@@ -154,7 +209,12 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
     private _onDidChangeTreeData: EventEmitter<ContentNode | undefined | null | void> = new EventEmitter<ContentNode | undefined | null | void>();
     readonly onDidChangeTreeData: Event<ContentNode | undefined | null | void> = this._onDidChangeTreeData.event;
 
-    refresh(): void {
-        this._onDidChangeTreeData.fire();
+    /**
+     * Refresh the TreeView and its data
+     *
+     * @param {?ContentNode} [data] The node to refresh
+     */
+    refresh(data?: ContentNode): void {
+        this._onDidChangeTreeData.fire(data);
     }
 }

@@ -1,7 +1,7 @@
 import { Uri, window } from "vscode";
 import { gistFileSystemProvider, gistProvider, output } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
-import { deleteGistFile, getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
+import { getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
 import { TContent, TGist } from "./types";
 import { ContentNode, GistNode } from '../Tree/nodes';
 

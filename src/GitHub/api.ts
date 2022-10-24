@@ -1,9 +1,9 @@
 import * as rest from "@octokit/rest";
-import { credentials, output, gistFileSystemProvider } from "../extension";
-import { GistFileSystemProvider } from "../FileSystem/fileSystem";
+import { credentials, output } from "../extension";
+import { MessageType } from "../tracing";
 import { GistNode } from "../Tree/nodes";
 import { ZERO_WIDTH_SPACE } from "./constants";
-import { TGistFileNoKey, TGist, TGitHubUser, TTree } from "./types";
+import { TGistFileNoKey, TGist, TGitHubUser } from "./types";
 
 /**
  * Get the authenticated GitHub user
@@ -50,6 +50,14 @@ export async function getGitHubGistsForAuthenticatedUser(starred: boolean): Prom
     return Promise.reject(undefined);
 }
 
+/**
+ * Return gist details from GitHub
+ *
+ * @export
+ * @async
+ * @param {string} gistId The id of the gist to get
+ * @returns {(Promise<TGist | undefined>)}
+ */
 export async function getGitHubGist(gistId: string): Promise<TGist | undefined> {
     // @update: any
     const octokit = new rest.Octokit({
@@ -60,7 +68,7 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
         const { data } = await octokit.gists.get({ gist_id: gistId, headers: { Accept: "application/vnd.github.base64" } });
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Could not get gist ${gistId}. ${e.message}`, output.messageType.error);
+        output?.appendLine(`Could not get gist "${gistId}". ${e.message}`, output.messageType.error);
     }
 
     return Promise.reject();
@@ -85,7 +93,7 @@ export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, c
     });
 
     try {
-        // todo: update gist description
+        // @todo update gist description
         let { data } = await octokit.gists.update({
             gist_id: gist.gist.id!,
             files: {
@@ -93,6 +101,7 @@ export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, c
             },
         });
 
+        output?.appendLine(`Updated "${file!.filename!}" in gist "${gist.description}"`, output.messageType.info);
         return Promise.resolve(data);
     } catch (e: any) {
         output?.logError(gist.gist, e);
@@ -101,6 +110,15 @@ export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, c
     return Promise.reject();
 }
 
+/**
+ * Delete the file from the gist.
+ *
+ * @export
+ * @async
+ * @param {TGist} gist The gist to delete the file from
+ * @param {string} filePath The path of the file to delete
+ * @returns {Promise<TGist>}
+ */
 export async function deleteGistFile(gist: TGist, filePath: string): Promise<TGist> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
@@ -116,6 +134,7 @@ export async function deleteGistFile(gist: TGist, filePath: string): Promise<TGi
             },
         });
 
+        output?.appendLine(`Deleted "${filePath}" from gist "${gist.description}"`, output.messageType.info);
         return Promise.resolve(data);
     } catch (e: any) {
         output?.appendLine(`Could not delete file "${filePath}" from gist "${gist.description}". ${e.message}`, output.messageType.error);
@@ -124,13 +143,21 @@ export async function deleteGistFile(gist: TGist, filePath: string): Promise<TGi
     return Promise.reject();
 }
 
+/**
+ * Create a new gist on GitHub
+ *
+ * @export
+ * @async
+ * @param {TGist} gist The gist to create
+ * @param {boolean} publicGist Whether the gist should be public or not
+ * @returns {(Promise<TGist | undefined>)}
+ */
 export async function createGitHubGist(gist: TGist, publicGist: boolean): Promise<TGist | undefined> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
 
     const fileName = Object.keys(gist.files!)[0];
-    const fileContent = `# ${fileName}`;
     try {
         const { data } = await octokit.gists.create({
             description: gist.description!,
@@ -141,6 +168,7 @@ export async function createGitHubGist(gist: TGist, publicGist: boolean): Promis
             headers: { Accept: "application/vnd.github+json" },
         });
 
+        output?.appendLine(`Created gist "${data.description}"`, output.messageType.info);
         return Promise.resolve(data);
     } catch (e: any) {
         output?.logError(gist, e);
@@ -149,6 +177,14 @@ export async function createGitHubGist(gist: TGist, publicGist: boolean): Promis
     return Promise.reject();
 }
 
+/**
+ * Delete a gist from GitHub
+ *
+ * @export
+ * @async
+ * @param {TGist} gist The gist to delete
+ * @returns {Promise<void>}
+ */
 export async function deleteGitHubGist(gist: TGist): Promise<void> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
@@ -159,6 +195,7 @@ export async function deleteGitHubGist(gist: TGist): Promise<void> {
             gist_id: gist.id!,
             headers: { Accept: "application/vnd.github+json" },
         });
+        output?.appendLine(`Gist "${gist.description}" deleted successfully`, MessageType.info);
         return Promise.resolve();
     } catch (e: any) {
         output?.logError(gist, e);

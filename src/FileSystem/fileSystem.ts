@@ -11,10 +11,8 @@ import {
     TextDocument,
     Uri,
 } from "vscode";
-import { gistProvider } from "../extension";
 import { createGitHubGist, createOrUpdateFile, deleteGistFile, deleteGitHubGist } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
-import { ZERO_WIDTH_SPACE } from "../GitHub/constants";
 import { TGistFileNoKey, TGist } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { store } from "./storage";

@@ -79,6 +79,14 @@ export function clearGlobalStorage(context: ExtensionContext) {
     gistProvider.refresh();
 }
 
+/**
+ * Update the gist object in our in memory store
+ *
+ * @export
+ * @async
+ * @param {TGist} updatedGist The updated gist object to store
+ * @returns {Promise<void>}
+ */
 export async function updateStoredGist(updatedGist: TGist): Promise<void> {
     let currentGist = store.gists.find((storedGist) => storedGist?.gist.id === updatedGist?.id);
 
