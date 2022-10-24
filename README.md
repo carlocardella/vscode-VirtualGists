@@ -26,7 +26,7 @@ Install the extension from the VSCode Marketplace.
 
 ## Gist management
 
-### Open a repo
+### Open a gist
 
 Use the `Open gist` command to open an existing repo from GitHub, you can choose from three options:
 
