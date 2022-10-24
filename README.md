@@ -26,13 +26,19 @@ Install the extension from the VSCode Marketplace.
 
 ## Gist management
 
+Read, create and delete GitHub Gists from the familiar VSCode environment. You can also follow users, star gists, and use a "Notepad" (a special, private gist) to job down ideas and ephemeral notes that do not fit into their own gist.
+
+<!-- ![image](https://user-images.githubusercontent.com/5784415/197618303-98f29f54-6e8f-46bb-9f18-fe9989df4f97.png) -->
+
+![show starred gists](https://user-images.githubusercontent.com/5784415/197624729-0c20ce8b-9cd9-4f53-97dd-69cb61a42fdf.gif)
+
 ### Notepad
 
 This is a special, private gist you can use as a temporary notepad, a place to store ephemeral notes you can quickly jot down and easily access from all your devices even if they do not quite fit into a regular gist.
 
 ### My Gists
 
-All your private and public gists, except `Notepad`, which has its own category. You can create, update, delete gists and files from the convenience of your familiar VSCode environment. Changes are automatically committed and sync'ed with GitHub
+All your private and public gists, except `Notepad`, which has its own category. You can create, update, delete gists and files from the convenience of your familiar VSCode environment. Changes are automatically committed and sync'ed with GitHub.
 
 ### Starred Gists
 
@@ -46,13 +52,13 @@ Gists from the user you want to explicitly follow, to stay up to date with their
 
 Interesting gists you have opened but not starred yet.
 
+## Create a new gist
+
 ## Sync across devices
 
 You can sync your open gists across multiple devices by enabling [Settings Sync](https://code.visualstudio.com/docs/editor/settings-sync) in Visual Studio Code.
 
 *Node: you may need to Refresh the Virtual Gists view to see the latest repos added or removed from another machine.*
-
-## Automatic commits
 
 Changes are committed automatically after the file is saved. The commit message is `VirtualGists: update file <filePath>`.
 
