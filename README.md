@@ -26,40 +26,43 @@ Install the extension from the VSCode Marketplace.
 
 ## Gist management
 
-### Open a gist
+Read, create and delete GitHub Gists from the familiar VSCode environment. You can also follow users, star gists, and use a "Notepad" (a special, private gist) to job down ideas and ephemeral notes that do not fit into their own gist.
 
-Use the `Open gist` command to open an existing repo from GitHub, you can choose from three options:
+<!-- ![image](https://user-images.githubusercontent.com/5784415/197618303-98f29f54-6e8f-46bb-9f18-fe9989df4f97.png) -->
 
-1. `Open gist`: open any gist you have access to, enter the name as `owner/repoName`
+![show starred gists](https://user-images.githubusercontent.com/5784415/197624729-0c20ce8b-9cd9-4f53-97dd-69cb61a42fdf.gif)
 
-   *Note: If you just enter the repo name, the extension assumes you own it, this is the same as using `Open my gist`*
+### Notepad
 
-2. `Open my gist`: open a gist from a list of repos you own
-3. `Open starred gist`: open one of your Starred repos
+This is a special, private gist you can use as a temporary notepad, a place to store ephemeral notes you can quickly jot down and easily access from all your devices even if they do not quite fit into a regular gist.
 
-The gist will load automatically (of course, make sure you are connected to the Internet), you can then browse it, open, edit, add, delete files as if they where on your local file system even without cloning the repo.
+### My Gists
 
-_open gist_
+All your private and public gists, except `Notepad`, which has its own category. You can create, update, delete gists and files from the convenience of your familiar VSCode environment. Changes are automatically committed and sync'ed with GitHub.
 
-![open gist](https://user-images.githubusercontent.com/5784415/192892207-46f5418e-5696-4373-ae80-71cb160e8e25.gif)
+### Starred Gists
 
-_open my gist_
+Your starred gists, grouped in one convenient TreeView node
 
-![open my gist](https://user-images.githubusercontent.com/5784415/192892464-bee3d23f-5688-4dfd-a343-c844ae39e135.gif)
+### Followed Users
 
-#### Sync repositories across devices
+Gists from the user you want to explicitly follow, to stay up to date with their latest work
 
-You can sync your open repositories across multiple devices by enabling [Settings Sync](https://code.visualstudio.com/docs/editor/settings-sync) in Visual Studio Code.
+### Opened Gists
+
+Interesting gists you have opened but not starred yet.
+
+## Create a new gist
+
+You can create a private or public gist, just enter the gist name and the file name you want to use:
+
+![new private gist](https://user-images.githubusercontent.com/5784415/197658237-f2d56e7a-2cbd-4d3a-9b9b-78a963a7336c.gif)
+
+## Sync across devices
+
+You can sync your open gists across multiple devices by enabling [Settings Sync](https://code.visualstudio.com/docs/editor/settings-sync) in Visual Studio Code.
 
 *Node: you may need to Refresh the Virtual Gists view to see the latest repos added or removed from another machine.*
-
-### Create new repo
-
-You can create a new gist (public or private), other repo operations (delete, star, fork, clone, download) will come in future releases.
-
-![create private repo](https://user-images.githubusercontent.com/5784415/192894098-2cb95397-6696-467a-ab9c-6ca272f460b0.gif)
-
-## Automatic commits
 
 Changes are committed automatically after the file is saved. The commit message is `VirtualGists: update file <filePath>`.
 
@@ -67,7 +70,8 @@ Changes are committed automatically after the file is saved. The commit message 
 
 You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Gists` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
 
-![image](https://user-images.githubusercontent.com/5784415/192893074-ffeb0ec1-1932-45ed-a961-1c15492c1a9e.png)
+![image](https://user-images.githubusercontent.com/5784415/197569014-153f751e-6f37-4dd8-a5e6-3d50dc67b3de.png)
+
 
 ## Acknowledgements
 
