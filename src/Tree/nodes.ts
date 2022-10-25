@@ -198,10 +198,11 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         store.gists.push(...childNodes);
                         break;
                     case GistsGroupType.notepad:
-                        let notepadGists = await getNotepadGist();
-                        childNodes = notepadGists?.map((gist) => new GistNode(gist, element.groupType)) ?? [];
-                        store.gists.push(...childNodes);
-                        break;
+                        throw new Error("Notepad is not implemented yet");
+                        // let notepadGists = await getNotepadGist();
+                        // childNodes = notepadGists?.map((gist) => new GistNode(gist, element?.groupType)) ?? [];
+                        // store.gists.push(...childNodes);
+                        // break;
                     case GistsGroupType.followedUsers:
                         throw new Error("Followed users is not implemented yet");
                     case GistsGroupType.openedGists:
