@@ -256,12 +256,12 @@
                 },
                 {
                     "command": "VirtualGists.addFile",
-                    "when": "viewItem == gist",
+                    "when": "viewItem == gist.readwrite",
                     "group": "inline"
                 },
                 {
                     "command": "VirtualGists.deleteNode",
-                    "when": "viewItem == gist || viewItem == file",
+                    "when": "viewItem == gist.readwrite || viewItem == file.readwrite",
                     "group": "inline"
                 },
                 {
@@ -276,12 +276,12 @@
                 },
                 {
                     "command": "VirtualGists.addFile",
-                    "when": "viewItem == gist",
+                    "when": "viewItem == gist.readwrite",
                     "group": "1_add@1"
                 },
                 {
                     "command": "VirtualGists.uploadFile",
-                    "when": "viewItem == gist",
+                    "when": "viewItem == gist.readwrite",
                     "group": "1_add@2"
                 },
                 {
@@ -291,7 +291,7 @@
                 },
                 {
                     "command": "VirtualGists.deleteNode",
-                    "when": "viewItem == gist || viewItem == file",
+                    "when": "viewItem == gist.readwrite || viewItem == file.readwrite",
                     "group": "3_delete@1"
                 },
                 {
