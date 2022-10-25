@@ -54,6 +54,10 @@ Interesting gists you have opened but not starred yet.
 
 ## Create a new gist
 
+You can create a private or public gist, just enter the gist name and the file name you want to use:
+
+![new private gist](https://user-images.githubusercontent.com/5784415/197658237-f2d56e7a-2cbd-4d3a-9b9b-78a963a7336c.gif)
+
 ## Sync across devices
 
 You can sync your open gists across multiple devices by enabling [Settings Sync](https://code.visualstudio.com/docs/editor/settings-sync) in Visual Studio Code.
