@@ -246,42 +246,42 @@
             "view/item/context": [
                 {
                     "command": "VirtualGists.newPrivateGist",
-                    "when": "viewItem == myGistsGroupNode || viewItem == notepadGroupNode",
+                    "when": "viewItem == myGistsGroupNode",
                     "group": "inline"
                 },
                 {
                     "command": "VirtualGists.newPublicGist",
-                    "when": "viewItem == myGistsGroupNode || viewItem == notepadGroupNode",
+                    "when": "viewItem == myGistsGroupNode",
                     "group": "inline"
                 },
                 {
                     "command": "VirtualGists.addFile",
-                    "when": "viewItem == gist.readwrite",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode",
                     "group": "inline"
                 },
                 {
                     "command": "VirtualGists.deleteNode",
-                    "when": "viewItem == gist.readwrite || viewItem == file.readwrite",
+                    "when": "viewItem == gist.readWrite || viewItem == file.readWrite",
                     "group": "inline"
                 },
                 {
                     "command": "VirtualGists.newPrivateGist",
-                    "when": "viewItem == myGistsGroupNode || viewItem == notepadGroupNode",
+                    "when": "viewItem == myGistsGroupNode1`",
                     "group": "1_add@1"
                 },
                 {
                     "command": "VirtualGists.newPublicGist",
-                    "when": "viewItem == myGistsGroupNode || viewItem == notepadGroupNode",
+                    "when": "viewItem == myGistsGroupNode",
                     "group": "1_add@1"
                 },
                 {
                     "command": "VirtualGists.addFile",
-                    "when": "viewItem == gist.readwrite",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode",
                     "group": "1_add@1"
                 },
                 {
                     "command": "VirtualGists.uploadFile",
-                    "when": "viewItem == gist.readwrite",
+                    "when": "viewItem == gist.readWrite",
                     "group": "1_add@2"
                 },
                 {
@@ -291,7 +291,7 @@
                 },
                 {
                     "command": "VirtualGists.deleteNode",
-                    "when": "viewItem == gist.readwrite || viewItem == file.readwrite",
+                    "when": "viewItem == gist.readWrite || viewItem == file.readWrite",
                     "group": "3_delete@1"
                 },
                 {

@@ -1,7 +1,7 @@
 import { Uri, window } from "vscode";
 import { gistFileSystemProvider, gistProvider, output } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
-import { getGitHubGist, getGitHubGistsForAuthenticatedUser } from "./api";
+import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist } from "./api";
 import { TContent, TGist } from "./types";
 import { ContentNode, GistNode } from '../Tree/nodes';
 import { NOTEPAD_GIST_NAME } from "./constants";
@@ -87,6 +87,13 @@ export async function getStarredGists(): Promise<TGist[] | undefined> {
 export async function getNotepadGist(): Promise<TGist[] | undefined> { 
     const gists = await getOwnedGists();
     const notepadGist = gists?.filter((gist: TGist) => gist.description === NOTEPAD_GIST_NAME);
+
+    // if (notepadGist?.length === 0) {
+    //     // NOTEPAD_GIST_NAME does not exist, let's create it
+    //     let gist: TGist = {description: NOTEPAD_GIST_NAME, files: {}, public: false};
+    //     let notepadGist = await createGitHubGist(gist, false);
+    //     return Promise.resolve(getNotepadGist());
+    // }
 
     return Promise.resolve(notepadGist);
 }

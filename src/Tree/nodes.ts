@@ -89,7 +89,7 @@ export class GistNode extends TreeItem {
         this.gist = gist;
         this.description = Object.values(gist.files!).length.toString();
         this.readOnly = readOnly ?? false;
-        this.contextValue = readOnly ? "gist.readonly" : "gist.readwrite";
+        this.contextValue = readOnly ? "gist.readOny" : "gist.readWrite";
         this.uri = fileNameToUri(this.id!);
     }
 }
@@ -110,11 +110,11 @@ export class ContentNode extends TreeItem {
     name: string;
     nodeContent: TContent;
 
-    constructor(nodeContent: TGistFile, gist: TGist, readonly: boolean) {
+    constructor(nodeContent: TGistFile, gist: TGist, readOny: boolean) {
         super(nodeContent.filename as string, TreeItemCollapsibleState.None);
 
         this.iconPath = new ThemeIcon("file");
-        this.contextValue = readonly ? "file.readonly" : "file.readwrite";
+        this.contextValue = readOny ? "file.readOny" : "file.readWrite";
         this.owner = gist.owner?.login ?? "";
         this.nodeContent = nodeContent;
         this.gist = gist;
@@ -189,9 +189,9 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 switch (element.label) {
                     case GistsGroupType.notepad:
                         // throw new Error("Notepad is not implemented yet");
-                        let notepadGists = await getNotepadGist();
-                        childNodes = notepadGists?.map((gist) => new GistNode(gist, element?.groupType, false)) ?? [];
-                        store.gists.push(...childNodes);
+                        // let notepadGists = await getNotepadGist();
+                        // childNodes = notepadGists?.map((gist) => new GistNode(gist, element?.groupType, false)) ?? [];
+                        // store.gists.push(...childNodes);
                         break;
                     case GistsGroupType.myGists:
                         let ownedGists = await getOwnedGists();
@@ -215,6 +215,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
         } else {
             let gists: any[] = [];
 
+            // let notepadGistsNode = new ContentNode({}, {}, false);
             let notepadGistsNode = new GistsGroupNode(GistsGroupType.notepad);
             let myGistsNode = new GistsGroupNode(GistsGroupType.myGists);
             let starredGistsNode = new GistsGroupNode(GistsGroupType.starredGists);
