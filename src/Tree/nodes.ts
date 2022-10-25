@@ -89,7 +89,7 @@ export class GistNode extends TreeItem {
         this.gist = gist;
         this.description = Object.values(gist.files!).length.toString();
         this.readOnly = readOnly ?? false;
-        this.contextValue = "gist";
+        this.contextValue = readOnly ? "gist.readonly" : "gist.readwrite";
         this.uri = fileNameToUri(this.id!);
     }
 }
@@ -110,11 +110,11 @@ export class ContentNode extends TreeItem {
     name: string;
     nodeContent: TContent;
 
-    constructor(nodeContent: TGistFile, gist: TGist) {
+    constructor(nodeContent: TGistFile, gist: TGist, readonly: boolean) {
         super(nodeContent.filename as string, TreeItemCollapsibleState.None);
 
         this.iconPath = new ThemeIcon("file");
-        this.contextValue = "file";
+        this.contextValue = readonly ? "file.readonly" : "file.readwrite";
         this.owner = gist.owner?.login ?? "";
         this.nodeContent = nodeContent;
         this.gist = gist;
@@ -178,7 +178,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                 if (gist?.files) {
                     childNodes = Object.values(gist.files)
-                        .map((node) => new ContentNode(<TGistFile>node, element.gist))
+                        .map((node) => new ContentNode(<TGistFile>node, element.gist, element.readOnly))
                         .sort((a, b) => a.name.localeCompare(b.name!))
                         .sort((a, b) => a.nodeContent!.type!.localeCompare(b.nodeContent!.type!));
                 }
@@ -187,22 +187,22 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 await updateStoredGist(gist);
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
+                    case GistsGroupType.notepad:
+                        // throw new Error("Notepad is not implemented yet");
+                        let notepadGists = await getNotepadGist();
+                        childNodes = notepadGists?.map((gist) => new GistNode(gist, element?.groupType, false)) ?? [];
+                        store.gists.push(...childNodes);
+                        break;
                     case GistsGroupType.myGists:
                         let ownedGists = await getOwnedGists();
-                        childNodes = ownedGists?.map((gist) => new GistNode(gist, element.groupType)) ?? [];
+                        childNodes = ownedGists?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
                         store.gists.push(...childNodes);
                         break;
                     case GistsGroupType.starredGists:
                         let starredGists = await getStarredGists();
-                        childNodes = starredGists?.map((gist) => new GistNode(gist, element.groupType)) ?? [];
+                        childNodes = starredGists?.map((gist) => new GistNode(gist, element.groupType, true)) ?? [];
                         store.gists.push(...childNodes);
                         break;
-                    case GistsGroupType.notepad:
-                        throw new Error("Notepad is not implemented yet");
-                        // let notepadGists = await getNotepadGist();
-                        // childNodes = notepadGists?.map((gist) => new GistNode(gist, element?.groupType)) ?? [];
-                        // store.gists.push(...childNodes);
-                        // break;
                     case GistsGroupType.followedUsers:
                         throw new Error("Followed users is not implemented yet");
                     case GistsGroupType.openedGists:
