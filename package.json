@@ -145,6 +145,12 @@
                 "command": "VirtualGists.followUser",
                 "category": "Virtual Gists",
                 "icon": "$(person-add)"
+            },
+            {
+                "title": "Unfollow User",
+                "command": "VirtualGists.unfollowUser",
+                "category": "Virtual Gists",
+                "icon": "$(close)"
             }
         ],
         "viewsContainers": {
@@ -214,6 +220,10 @@
                 },
                 {
                     "command": "VirtualGists.followUser"
+                },
+                {
+                    "command": "VirtualGists.unfollowUser",
+                    "when": "false"
                 }
             ],
             "view/title": [
@@ -312,6 +322,16 @@
                 {
                     "command": "VirtualGists.followUser",
                     "when": "viewItem == followedUsersGroupNode",
+                    "group": "1_open@1"
+                },
+                {
+                    "command": "VirtualGists.unfollowUser",
+                    "when": "viewItem == user",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.unfollowUser",
+                    "when": "viewItem == user",
                     "group": "1_open@1"
                 }
             ]

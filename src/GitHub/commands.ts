@@ -1,10 +1,11 @@
 import { Uri, window } from "vscode";
-import { gistFileSystemProvider, gistProvider, output } from "../extension";
+import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
-import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist } from "./api";
-import { TContent, TGist } from "./types";
-import { ContentNode, GistNode } from '../Tree/nodes';
+import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser } from "./api";
+import { TContent, TGist, TGitHubUser, TUser } from "./types";
+import { ContentNode, GistNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
+import { addToGlobalStorage, getFollowedUsersFromGlobalStorage } from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -84,7 +85,7 @@ export async function getStarredGists(): Promise<TGist[] | undefined> {
  * @async
  * @returns {(Promise<TGist[] | undefined>)}
  */
-export async function getNotepadGist(): Promise<TGist[] | undefined> { 
+export async function getNotepadGist(): Promise<TGist[] | undefined> {
     const gists = await getOwnedGists();
     const notepadGist = gists?.filter((gist: TGist) => gist.description === NOTEPAD_GIST_NAME);
 
@@ -223,4 +224,66 @@ export async function addFile(gist: GistNode): Promise<void> {
     gistProvider.refresh();
 
     return Promise.resolve();
+}
+
+/**
+ * Follow a GitHub user
+ *
+ * @export
+ * @async
+ * @returns {Promise<void>}
+ */
+export async function followUser(): Promise<void> {
+    const userToFollow = await window.showInputBox({
+        prompt: "Enter the name of the user to follow",
+        placeHolder: "GitHub username",
+        ignoreFocusOut: true,
+    });
+
+    if (!userToFollow) {
+        return Promise.reject();
+    }
+
+    // add username to storage
+    await addToGlobalStorage(extensionContext, userToFollow);
+
+    // get gists for username
+    let gistsForUser = await getGistsForUser(userToFollow);
+
+    // @todo add username as TreeView node
+
+    return Promise.resolve();
+}
+
+/**
+ * Returns the list of gists for a user
+ *
+ * @export
+ * @async
+ * @param {string} githubUser The user to get the gists for
+ * @returns {(Promise<TGist[] | undefined>)}
+ */
+export async function getGistsForUser(githubUser: string): Promise<TGist[] | undefined> {
+    return Promise.resolve(await getGitHubGistForUser(githubUser));
+}
+
+/**
+ * Returns a list of followed users from Global Storage
+ *
+ * @export
+ * @async
+ * @returns {Promise<string[]>}
+ */
+export async function getFollowedUsers(): Promise<TGitHubUser[]> {
+    const users = await getFollowedUsersFromGlobalStorage(extensionContext);
+
+    // let followedUsers = await users.map(async (user) => {
+    //     return await getGitHubUser(user);
+    // });
+
+    let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
+
+    // followedUsers = followedUsers.filter((user) => user !== undefined);
+
+    return Promise.resolve(followedUsers);
 }
