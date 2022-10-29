@@ -277,13 +277,8 @@ export async function getGistsForUser(githubUser: string): Promise<TGist[] | und
 export async function getFollowedUsers(): Promise<TGitHubUser[]> {
     const users = await getFollowedUsersFromGlobalStorage(extensionContext);
 
-    // let followedUsers = await users.map(async (user) => {
-    //     return await getGitHubUser(user);
-    // });
-
     let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
+    let validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
 
-    // followedUsers = followedUsers.filter((user) => user !== undefined);
-
-    return Promise.resolve(followedUsers);
+    return Promise.resolve(validUsers);
 }
