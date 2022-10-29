@@ -203,3 +203,56 @@ export async function deleteGitHubGist(gist: TGist): Promise<void> {
 
     return Promise.reject();
 }
+
+/**
+ * List public gists for a GitHub user
+ *
+ * @export
+ * @async
+ * @param {string} githubUsername The GitHub username to get the gists for
+ * @returns {(Promise<TGist[] | undefined>)}
+ */
+export async function getGitHubGistForUser(githubUsername: string): Promise<TGist[] | undefined> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        let data = await octokit.paginate(
+            octokit.gists.listForUser,
+            { username: githubUsername, headers: { accept: "application/vnd.github+json" } },
+            (response) => {
+                return response.data;
+            }
+        );
+
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Could not get gists for user "${githubUsername}". ${e.message}`, output.messageType.warning);
+    }
+
+    return Promise.reject();
+}
+
+/**
+ * Returns info about a GitHub user
+ *
+ * @export
+ * @async
+ * @param {string} username The username to get info for
+ * @returns {(Promise<TGitHubUser | undefined>)}
+ */
+export async function getGitHubUser(username: string): Promise<TGitHubUser | undefined> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        const { data } = await octokit.users.getByUsername({ username: username });
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Could not get GitHub user "${username}". ${e.message}`, output.messageType.error);
+    }
+
+    return Promise.reject();
+}

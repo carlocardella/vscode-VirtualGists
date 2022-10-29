@@ -40,20 +40,6 @@ export type TGitHubUser = {
     updated_at: string;
 };
 
-export type TTree = {
-    sha: string;
-    url: string;
-    truncated: boolean;
-    tree: {
-        path?: string | undefined;
-        mode?: string | undefined;
-        type?: string | undefined;
-        sha?: string | undefined;
-        size?: number | undefined;
-        url?: string | undefined;
-    }[];
-};
-
 export type TContent =
     | {
           content?: string | undefined | null;
@@ -101,19 +87,6 @@ export type TBranch = {
           }
         | undefined;
     protection_url?: string | undefined;
-};
-
-export type TRepo = {
-    name: string;
-    owner: TUser;
-    description?: string | null | undefined;
-    url: string;
-    default_branch: string;
-    private: boolean;
-    tree?: TTree;
-    has_wiki: boolean;
-    has_issues: boolean;
-    has_pages: boolean;
 };
 
 export type TUser = {

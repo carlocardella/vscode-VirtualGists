@@ -1,7 +1,7 @@
 import { GistNode } from "../Tree/nodes";
 import { ExtensionContext } from "vscode";
-import { GLOBAL_STORAGE_KEY } from "../GitHub/constants";
-import { credentials, output, gistProvider } from "../extension";
+import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GIST_USER } from "../GitHub/constants";
+import { output, gistProvider } from "../extension";
 import { TGist } from "../GitHub/types";
 
 export const store = {
@@ -9,7 +9,7 @@ export const store = {
 };
 
 /**
- * Add a repository to the list of repositories in Global Storage
+ * Add a followed user or opened gist to Global Storage
  *
  * @export
  * @param {ExtensionContext} context Extension context
@@ -18,21 +18,45 @@ export const store = {
 export async function addToGlobalStorage(context: ExtensionContext, value: string): Promise<void> {
     let globalStorage = await getFollowedUsersFromGlobalStorage(context);
 
-    let [owner, gistName] = ["", ""];
-    if (value.indexOf("/") === -1) {
-        owner = credentials.authenticatedUser.login;
-        gistName = value;
-    } else {
-        [owner, gistName] = value.split("/");
-    }
+    // this is a user, add it with the proper format
+    // if (value.startsWith(GIST_USER)) {
+    globalStorage.push(value);
+    context.globalState.update(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, globalStorage);
+    // }
 
-    globalStorage.push(`${owner}/${gistName}`);
-    context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
+    // let [owner, gistName] = ["", ""];
+    // if (value.indexOf("/") === -1) {
+    //     owner = credentials.authenticatedUser.login;
+    //     gistName = value;
+    // } else {
+    //     [owner, gistName] = value.split("/");
+    // }
+
+    // globalStorage.push(`${owner}/${gistName}`);
+    // context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
 
     gistProvider.refresh();
 
     output?.appendLine(`Added ${value} to global storage`, output.messageType.info);
     output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
+
+    // let globalStorage = await getReposFromGlobalStorage(context);
+
+    // let [owner, repoName] = ["", ""];
+    // if (value.indexOf("/") === -1) {
+    //     owner = credentials.authenticatedUser.login;
+    //     repoName = value;
+    // } else {
+    //     [owner, repoName] = value.split("/");
+    // }
+
+    // globalStorage.push(`${owner}/${repoName}`);
+    // context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
+
+    // repoProvider.refresh();
+
+    // output?.appendLine(`Added ${value} to global storage`, output.messageType.info);
+    // output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
 }
 
 /**
@@ -40,17 +64,17 @@ export async function addToGlobalStorage(context: ExtensionContext, value: strin
  *
  * @export
  * @param {ExtensionContext} context Extension context
- * @param {string} repoFullName Repository to remove
+ * @param {string} userName Repository to remove
  */
-export function removeFromGlobalStorage(context: ExtensionContext, repoFullName: string): void {
-    let globalStorage = context.globalState.get(GLOBAL_STORAGE_KEY) as string[];
+export function removeFromGlobalStorage(context: ExtensionContext, userName: string): void {
+    let globalStorage = context.globalState.get(FOLLOWED_USERS_GLOBAL_STORAGE_KEY) as string[];
     if (globalStorage) {
-        globalStorage = globalStorage.filter((item) => item.toLocaleLowerCase() !== repoFullName.toLocaleLowerCase());
-        context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
+        globalStorage = globalStorage.filter((item) => item.toLocaleLowerCase() !== userName.toLocaleLowerCase());
+        context.globalState.update(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, globalStorage);
 
         gistProvider.refresh();
 
-        output?.appendLine(`Removed ${repoFullName} from global storage`, output.messageType.info);
+        output?.appendLine(`Removed ${userName} from global storage`, output.messageType.info);
         output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
     }
 }
@@ -63,8 +87,9 @@ export function removeFromGlobalStorage(context: ExtensionContext, repoFullName:
  * @returns {string[]}
  */
 export async function getFollowedUsersFromGlobalStorage(context: ExtensionContext): Promise<string[]> {
-    return context.globalState.get(GLOBAL_STORAGE_KEY, []);
-    // return await purgeGlobalStorage(context);
+    const followedUsers = context.globalState.get(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, []) as string[];
+
+    return Promise.resolve(followedUsers);
 }
 
 /**
@@ -74,7 +99,7 @@ export async function getFollowedUsersFromGlobalStorage(context: ExtensionContex
  * @param {ExtensionContext} context
  */
 export function clearGlobalStorage(context: ExtensionContext) {
-    context.globalState.update(GLOBAL_STORAGE_KEY, []);
+    context.globalState.update(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, []);
     output?.appendLine(`Cleared global storage`, output.messageType.info);
     gistProvider.refresh();
 }

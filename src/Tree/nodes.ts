@@ -1,8 +1,9 @@
 import { commands, Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { store, updateStoredGist } from "../FileSystem/storage";
-import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getNotepadGist } from "../GitHub/commands";
-import { TContent, TGist, TGistFile } from "../GitHub/types";
+import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
+import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getNotepadGist, getFollowedUsers } from "../GitHub/commands";
+import { TContent, TGist, TGistFile, TGitHubUser, TUser } from "../GitHub/types";
 
 /**
  * Type of gists to show in the TreeView
@@ -91,6 +92,16 @@ export class GistNode extends TreeItem {
         this.readOnly = readOnly ?? false;
         this.contextValue = readOnly ? "gist.readOny" : "gist.readWrite";
         this.uri = fileNameToUri(this.id!);
+    }
+}
+
+export class UserNode extends TreeItem {
+    constructor(user: TGitHubUser) {
+        super(user.login, TreeItemCollapsibleState.Collapsed);
+
+        this.tooltip = user.login;
+        this.iconPath = Uri.parse(user.avatar_url);
+        this.contextValue = "user";
     }
 }
 
@@ -185,32 +196,45 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                 // update storage, we already have gist files content
                 await updateStoredGist(gist);
+            } else if (element instanceof UserNode) {
+                let userGists = (await getGitHubGistForUser(element.label as string)) as TGist[];
+                childNodes = userGists.map((gist) => new GistNode(gist, GistsGroupType.followedUsers, true));
+                store.gists.push(...childNodes);
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
                     case GistsGroupType.notepad:
-                        // throw new Error("Notepad is not implemented yet");
+                        throw new Error("Notepad is not implemented yet");
                         // let notepadGists = await getNotepadGist();
                         // childNodes = notepadGists?.map((gist) => new GistNode(gist, element?.groupType, false)) ?? [];
                         // store.gists.push(...childNodes);
                         break;
+
                     case GistsGroupType.myGists:
                         let ownedGists = await getOwnedGists();
                         childNodes = ownedGists?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
                         store.gists.push(...childNodes);
                         break;
+
                     case GistsGroupType.starredGists:
                         let starredGists = await getStarredGists();
                         childNodes = starredGists?.map((gist) => new GistNode(gist, element.groupType, true)) ?? [];
                         store.gists.push(...childNodes);
                         break;
+
                     case GistsGroupType.followedUsers:
-                        throw new Error("Followed users is not implemented yet");
+                        const followedUserNames = await getFollowedUsers();
+                        const followedUsers = await Promise.all(followedUserNames.map((user) => getGitHubUser(user.login)));
+                        childNodes = followedUsers.filter((user) => user !== undefined).map((user) => new UserNode(user!));
+                        break;
+
                     case GistsGroupType.openedGists:
                         throw new Error("Opened gists is not implemented yet");
+
                     default:
-                        break;
+                        throw new Error(`Invalid group type: ${element.label}`);
                 }
             }
+
             return Promise.resolve(childNodes);
         } else {
             let gists: any[] = [];

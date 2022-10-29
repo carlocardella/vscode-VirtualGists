@@ -2,11 +2,11 @@ import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
-import { GistNode, GistProvider, ContentNode } from "./Tree/nodes";
+import { GistNode, GistProvider, ContentNode, UserNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
-import { TGitHubUser, TGist } from './GitHub/types';
+import { TGitHubUser } from "./GitHub/types";
 import { clearGlobalStorage, getFollowedUsersFromGlobalStorage, removeFromGlobalStorage } from "./FileSystem/storage";
-import { GLOBAL_STORAGE_KEY } from "./GitHub/constants";
+import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
 export let output: trace.Output;
@@ -19,7 +19,7 @@ export const gistFileSystemProvider = new GistFileSystemProvider();
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
-import { addFile, createGist, deleteFile, deleteGist } from "./GitHub/commands";
+import { addFile, createGist, deleteFile, deleteGist, followUser } from "./GitHub/commands";
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -101,7 +101,7 @@ export async function activate(context: ExtensionContext) {
             if (node instanceof GistNode) {
                 deleteGist(node.gist);
             }
-            
+
             if (node instanceof ContentNode) {
                 // deleteGist(node.gist);
                 deleteFile(node);
@@ -127,8 +127,20 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.followUser", async () => {
+            followUser();
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.unfollowUser", async (user: UserNode) => {
+            removeFromGlobalStorage(extensionContext, user.label as string);
+        })
+    );
+
     // register global storage
-    const keysForSync = [GLOBAL_STORAGE_KEY];
+    const keysForSync = [FOLLOWED_USERS_GLOBAL_STORAGE_KEY];
     context.globalState.setKeysForSync(keysForSync);
 
     context.subscriptions.push(
