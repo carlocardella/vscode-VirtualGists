@@ -18,45 +18,13 @@ export const store = {
 export async function addToGlobalStorage(context: ExtensionContext, value: string): Promise<void> {
     let globalStorage = await getFollowedUsersFromGlobalStorage(context);
 
-    // this is a user, add it with the proper format
-    // if (value.startsWith(GIST_USER)) {
     globalStorage.push(value);
     context.globalState.update(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, globalStorage);
-    // }
-
-    // let [owner, gistName] = ["", ""];
-    // if (value.indexOf("/") === -1) {
-    //     owner = credentials.authenticatedUser.login;
-    //     gistName = value;
-    // } else {
-    //     [owner, gistName] = value.split("/");
-    // }
-
-    // globalStorage.push(`${owner}/${gistName}`);
-    // context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
 
     gistProvider.refresh();
 
     output?.appendLine(`Added ${value} to global storage`, output.messageType.info);
     output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
-
-    // let globalStorage = await getReposFromGlobalStorage(context);
-
-    // let [owner, repoName] = ["", ""];
-    // if (value.indexOf("/") === -1) {
-    //     owner = credentials.authenticatedUser.login;
-    //     repoName = value;
-    // } else {
-    //     [owner, repoName] = value.split("/");
-    // }
-
-    // globalStorage.push(`${owner}/${repoName}`);
-    // context.globalState.update(GLOBAL_STORAGE_KEY, globalStorage);
-
-    // repoProvider.refresh();
-
-    // output?.appendLine(`Added ${value} to global storage`, output.messageType.info);
-    // output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
 }
 
 /**
