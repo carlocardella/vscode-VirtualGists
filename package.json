@@ -266,7 +266,7 @@
                 },
                 {
                     "command": "VirtualGists.addFile",
-                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
                     "group": "inline"
                 },
                 {
@@ -286,7 +286,7 @@
                 },
                 {
                     "command": "VirtualGists.addFile",
-                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
                     "group": "1_add@1"
                 },
                 {
