@@ -1,16 +1,17 @@
-import { commands, Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
+import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
+import { store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import { store, updateStoredGist } from "../FileSystem/storage";
+import { addToLocalStorage, updateStoredGist } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
-import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getNotepadGist, getFollowedUsers } from "../GitHub/commands";
-import { TContent, TGist, TGistFile, TGitHubUser, TUser } from "../GitHub/types";
+import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getOrCreateNotepadGist, getFollowedUsers } from "../GitHub/commands";
+import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
 
 /**
  * Type of gists to show in the TreeView
  *
  * @enum {number}
  */
-enum GistsGroupType {
+export enum GistsGroupType {
     myGists = "My Gists",
     starredGists = "Starred Gists",
     notepad = "Notepad",
@@ -95,6 +96,14 @@ export class GistNode extends TreeItem {
     }
 }
 
+/**
+ * Represents a followed user's node in the TreeView
+ *
+ * @export
+ * @class UserNode
+ * @typedef {UserNode}
+ * @extends {TreeItem}
+ */
 export class UserNode extends TreeItem {
     constructor(user: TGitHubUser) {
         super(user.login, TreeItemCollapsibleState.Collapsed);
@@ -102,6 +111,23 @@ export class UserNode extends TreeItem {
         this.tooltip = user.login;
         this.iconPath = Uri.parse(user.avatar_url);
         this.contextValue = "user";
+    }
+}
+
+export class NotepadNode extends TreeItem {
+    // files: TGistFile[] | undefined;
+    gist: GistNode | undefined;
+
+    constructor() {
+        super("Notepad", TreeItemCollapsibleState.Collapsed);
+
+        this.tooltip = "Notepad";
+        this.iconPath = new ThemeIcon("pencil");
+        this.contextValue = "notepad";
+        // this.id = gist.id;
+        // this.description = "Notepad";
+        // this.gist = new GistNode(gist, GistsGroupType.notepad, true);
+        // this.gist.id = gistId;
     }
 }
 
@@ -199,26 +225,25 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
             } else if (element instanceof UserNode) {
                 let userGists = (await getGitHubGistForUser(element.label as string)) as TGist[];
                 childNodes = userGists.map((gist) => new GistNode(gist, GistsGroupType.followedUsers, true));
-                store.gists.push(...childNodes);
+                addToLocalStorage(...childNodes);
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
                     case GistsGroupType.notepad:
-                        throw new Error("Notepad is not implemented yet");
-                        // let notepadGists = await getNotepadGist();
-                        // childNodes = notepadGists?.map((gist) => new GistNode(gist, element?.groupType, false)) ?? [];
-                        // store.gists.push(...childNodes);
+                        // @todo
+                        let notepadGist = await getOrCreateNotepadGist();
+                        childNodes =  [new GistNode(notepadGist, element?.groupType, false)] ?? [];
                         break;
 
                     case GistsGroupType.myGists:
                         let ownedGists = await getOwnedGists();
                         childNodes = ownedGists?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
-                        store.gists.push(...childNodes);
+                        addToLocalStorage(...childNodes);
                         break;
 
                     case GistsGroupType.starredGists:
                         let starredGists = await getStarredGists();
                         childNodes = starredGists?.map((gist) => new GistNode(gist, element.groupType, true)) ?? [];
-                        store.gists.push(...childNodes);
+                        addToLocalStorage(...childNodes);
                         break;
 
                     case GistsGroupType.followedUsers:
@@ -239,12 +264,14 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
         } else {
             let gists: any[] = [];
 
-            // let notepadGistsNode = new ContentNode({}, {}, false);
-            let notepadGistsNode = new GistsGroupNode(GistsGroupType.notepad);
+            // let notepadGist = await getNotepadGist();
+            let notepadGistsNode = new NotepadNode();
+            // let notepadGistsNode = new GistsGroupNode(GistsGroupType.notepad);
             let myGistsNode = new GistsGroupNode(GistsGroupType.myGists);
             let starredGistsNode = new GistsGroupNode(GistsGroupType.starredGists);
             let followedUsersGistsNode = new GistsGroupNode(GistsGroupType.followedUsers);
             let openedGistsNode = new GistsGroupNode(GistsGroupType.openedGists);
+
             gists.push(notepadGistsNode);
             gists.push(myGistsNode);
             gists.push(starredGistsNode);

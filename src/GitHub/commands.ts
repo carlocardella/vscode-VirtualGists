@@ -1,9 +1,9 @@
 import { Uri, window } from "vscode";
-import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
+import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser } from "./api";
 import { TContent, TGist, TGitHubUser, TUser } from "./types";
-import { ContentNode, GistNode } from "../Tree/nodes";
+import { ContentNode, GistNode, GistsGroupNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import { addToGlobalStorage, getFollowedUsersFromGlobalStorage } from "../FileSystem/storage";
 
@@ -85,16 +85,25 @@ export async function getStarredGists(): Promise<TGist[] | undefined> {
  * @async
  * @returns {(Promise<TGist[] | undefined>)}
  */
-export async function getNotepadGist(): Promise<TGist[] | undefined> {
+export async function getOrCreateNotepadGist(fileName?: string): Promise<TGist> {
     const gists = await getOwnedGists();
-    const notepadGist = gists?.filter((gist: TGist) => gist.description === NOTEPAD_GIST_NAME);
+    let notepadGist = gists?.filter((gist: TGist) => gist.description === NOTEPAD_GIST_NAME)[0];
 
-    // if (notepadGist?.length === 0) {
-    //     // NOTEPAD_GIST_NAME does not exist, let's create it
-    //     let gist: TGist = {description: NOTEPAD_GIST_NAME, files: {}, public: false};
-    //     let notepadGist = await createGitHubGist(gist, false);
-    //     return Promise.resolve(getNotepadGist());
-    // }
+    if (!notepadGist) {
+        // NOTEPAD_GIST_NAME does not exist, let's create it
+        let gist: TGist = {
+            description: NOTEPAD_GIST_NAME,
+            files: {
+                [fileName!]: {
+                    filename: fileName,
+                },
+            },
+            public: false,
+        };
+        await createGitHubGist(gist, false);
+
+        return Promise.resolve(getOrCreateNotepadGist());
+    }
 
     return Promise.resolve(notepadGist);
 }
@@ -217,6 +226,13 @@ export async function addFile(gist: GistNode): Promise<void> {
             `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
         );
         return Promise.reject();
+    }
+
+    if (gist instanceof NotepadNode) {
+        // await addNotepadFile(fileName);
+        let notepadGist = await getOrCreateNotepadGist(fileName);
+
+        gist = new GistNode(notepadGist, GistsGroupType.notepad, false);
     }
 
     let fileUri = fileNameToUri(gist.gist.id!, fileName);

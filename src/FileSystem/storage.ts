@@ -1,12 +1,8 @@
 import { GistNode } from "../Tree/nodes";
 import { ExtensionContext } from "vscode";
-import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GIST_USER } from "../GitHub/constants";
-import { output, gistProvider } from "../extension";
+import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "../GitHub/constants";
+import { output, gistProvider, store } from "../extension";
 import { TGist } from "../GitHub/types";
-
-export const store = {
-    gists: [] as (GistNode | undefined)[],
-};
 
 /**
  * Add a followed user or opened gist to Global Storage
@@ -86,4 +82,24 @@ export async function updateStoredGist(updatedGist: TGist): Promise<void> {
     currentGist!.gist = updatedGist;
 
     return Promise.resolve();
+}
+
+/**
+ * Add a gist to our in memory store
+ *
+ * @export
+ * @param {...GistNode[]} gistNode The gist to add to the store
+ */
+export function addToLocalStorage(...gistNode: GistNode[]) {
+    store.gists.push(...gistNode);
+}
+
+/**
+ * Remove a gist from our in memory store
+ *
+ * @export
+ * @param {GistNode} gistNode The gist to remove
+ */
+export function removeFromLocalStorage(gistNode: GistNode) {
+    store.gists = store.gists.filter((gist) => gist?.gist.id !== gistNode.gist.id);
 }
