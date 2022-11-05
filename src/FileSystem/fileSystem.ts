@@ -1,17 +1,5 @@
-import {
-    Disposable,
-    Event,
-    EventEmitter,
-    FileChangeEvent,
-    FileChangeType,
-    FileStat,
-    FileSystemError,
-    FileSystemProvider,
-    FileType,
-    TextDocument,
-    Uri,
-} from "vscode";
-import { store } from "../extension";
+import { Disposable, Event, EventEmitter, FileChangeEvent, FileChangeType, FileStat, FileSystemError, FileSystemProvider, FileType, Uri } from "vscode";
+import { gistProvider, store } from "../extension";
 import { createGitHubGist, createOrUpdateFile, deleteGistFile, deleteGitHubGist } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
 import { TGistFileNoKey, TGist } from "../GitHub/types";
@@ -74,10 +62,6 @@ export class GistFileSystemProvider implements FileSystemProvider {
         const path = uri.path.startsWith("/") ? uri.path.substring(1) : uri.path;
 
         return [gistId, path];
-    }
-
-    static isGistDocument(document: TextDocument, repo?: string) {
-        return document.uri.scheme === GIST_SCHEME && (!repo || document.uri.query === `${GIST_QUERY}${repo}`);
     }
 
     stat(uri: Uri): FileStat {
@@ -143,16 +127,17 @@ export class GistFileSystemProvider implements FileSystemProvider {
                 filename: uri.path.split("/").slice(1).join("/"),
             } as TGistFileNoKey;
             content = new TextEncoder().encode("");
-
-            createOrUpdateFile(gist, file, content);
-        } else {
-            // update an existing file
-            createOrUpdateFile(gist, file, content).then((response) => {
-                gist.gist = response;
-            });
         }
 
-        this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
+        createOrUpdateFile(gist, file, content)
+            .then(() => {
+                // @investigate: refresh the gist or file rather than the whole tree?
+                gistProvider.refresh();
+            })
+            .then(() => {
+                this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
+                gistProvider.refresh();
+            });
 
         return Promise.resolve();
     }
