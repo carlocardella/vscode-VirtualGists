@@ -1,9 +1,9 @@
 import { Uri, window } from "vscode";
-import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
+import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser } from "./api";
-import { TContent, TGist, TGitHubUser, TUser } from "./types";
-import { ContentNode, GistNode, GistsGroupNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
+import { TContent, TGist, TGitHubUser } from "./types";
+import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import { addToGlobalStorage, getFollowedUsersFromGlobalStorage } from "../FileSystem/storage";
 
@@ -17,16 +17,6 @@ import { addToGlobalStorage, getFollowedUsersFromGlobalStorage } from "../FileSy
  */
 export async function getGistFileContent(file: TContent): Promise<Uint8Array> {
     return Promise.resolve(new Uint8Array(Buffer.from(file!.content!, "base64").toString("latin1").split("").map(charCodeAt)));
-
-    // let data: any;
-    // if (!file!.content) {
-    //     data = await getGitHubRepoContent(repo.owner, repo.name, file!.path);
-    //     file!.content = data;
-    // } else {
-    //     data = file!.content;
-    // }
-
-    // return new Uint8Array(Buffer.from(data.content, "base64").toString("latin1").split("").map(charCodeAt));
 }
 
 /**
