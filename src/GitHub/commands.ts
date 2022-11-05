@@ -16,7 +16,17 @@ import { addToGlobalStorage, getFollowedUsersFromGlobalStorage } from "../FileSy
  * @returns {Promise<Uint8Array>}
  */
 export async function getGistFileContent(file: TContent): Promise<Uint8Array> {
-    return Promise.resolve(new Uint8Array(Buffer.from(file?.content!, "base64").toString("latin1").split("").map(charCodeAt)));
+    return Promise.resolve(new Uint8Array(Buffer.from(file!.content!, "base64").toString("latin1").split("").map(charCodeAt)));
+
+    // let data: any;
+    // if (!file!.content) {
+    //     data = await getGitHubRepoContent(repo.owner, repo.name, file!.path);
+    //     file!.content = data;
+    // } else {
+    //     data = file!.content;
+    // }
+
+    // return new Uint8Array(Buffer.from(data.content, "base64").toString("latin1").split("").map(charCodeAt));
 }
 
 /**
