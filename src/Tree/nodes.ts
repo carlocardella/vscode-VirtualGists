@@ -1,5 +1,5 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { store } from "../extension";
+import { extensionContext, store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { addToLocalStorage, updateStoredGist } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
@@ -86,13 +86,17 @@ export class GistNode extends TreeItem {
 
         this.groupType = groupType;
         this.tooltip = gist.description!;
-        this.iconPath = gist.public ? new ThemeIcon("gist") : new ThemeIcon("gist-secret");
         this.name = gist.description;
         this.gist = gist;
         this.description = Object.values(gist.files!).length.toString();
         this.readOnly = readOnly ?? false;
         this.contextValue = readOnly ? "gist.readOny" : "gist.readWrite";
         this.uri = fileNameToUri(this.id!);
+
+        // const privateGistIcon = Uri.file(extensionContext.extensionPath + "/assets/private_gist.svg");
+        // const publicGistIcon = Uri.file(extensionContext.extensionPath + "/assets/public_gist.svg");
+        // this.iconPath = gist.public ? publicGistIcon : privateGistIcon;
+        this.iconPath = gist.public ? new ThemeIcon("gist") : new ThemeIcon("gist-secret");
     }
 }
 
@@ -229,9 +233,10 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
                     case GistsGroupType.notepad:
+                        throw new Error("Notrepad is not implemented yet");
                         // @todo
                         let notepadGist = await getOrCreateNotepadGist();
-                        childNodes =  [new GistNode(notepadGist, element?.groupType, false)] ?? [];
+                        // childNodes = [new GistNode(notepadGist, element?.groupType, false)] ?? [];
                         break;
 
                     case GistsGroupType.myGists:

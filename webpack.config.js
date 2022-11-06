@@ -75,6 +75,7 @@ const webConfig = /** @type WebpackConfig */ {
     },
     devtool: "nosources-source-map", // create a source map that points to the original source file
 };
+
 const nodeConfig = /** @type WebpackConfig */ {
     context: __dirname,
     mode: "none", // this leaves the source code as close as possible to the original (when packaging we set this to 'production')

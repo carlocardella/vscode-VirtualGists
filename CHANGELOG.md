@@ -8,8 +8,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Gists management
 
+* Create gist file under folder
+* Properly render gist files under folders
 * Open owned gists
-* Open starred gists
 * Clone gist
 * Download gists (tar/zip)
 * Fork gist
@@ -18,7 +19,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * Change gist visibility (private/public)
 * Open gist on GitHub
 
-### Repository content
+### Gist content
 
 * Add file
 * Upload File(s)
@@ -37,6 +38,21 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * View gist owner on GitHub
 * Pull at configurable intervals (set a default around 1 minute) to ensure the repo view is current
 * Push changes at configurable intervals (only if there are changes to push) rather than other on save; users may have auto-save enabled, that would generate lots of small push changes and potentially exceed the GitHub [API rate limit](https://docs.github.com/en/rest/rate-limit#about-the-rate-limit-api)
+
+## [0.0.2] - 2022-11-06
+
+### Added
+
+* Enabled `Follow user` command
+
+### Fixed
+
+* Fixed [#2](https://github.com/carlocardella/vscode-VirtualGists/issues/2)
+* Other fixes adn improvements
+
+### Changed
+
+* Updated TreeView commands
 
 ## [0.0.1] - 2022-10-24
 
