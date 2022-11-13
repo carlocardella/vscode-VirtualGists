@@ -5,7 +5,7 @@ import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, ge
 import { TContent, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import { addToGlobalStorage, getFollowedUsersFromGlobalStorage } from "../FileSystem/storage";
+import { addToGlobalStorage, readFromGlobalStorage as getGistsFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage } from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -261,7 +261,7 @@ export async function followUser(): Promise<void> {
     }
 
     // add username to storage
-    await addToGlobalStorage(extensionContext, userToFollow);
+    await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, userToFollow);
 
     // get gists for username
     let gistsForUser = await getGistsForUser(userToFollow);
@@ -291,10 +291,51 @@ export async function getGistsForUser(githubUser: string): Promise<TGist[] | und
  * @returns {Promise<string[]>}
  */
 export async function getFollowedUsers(): Promise<TGitHubUser[]> {
-    const users = await getFollowedUsersFromGlobalStorage(extensionContext);
+    const users = await getGistsFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
 
     let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
     let validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
 
     return Promise.resolve(validUsers);
+}
+
+/**
+ * Returns the list of opened gists
+ *
+ * @export
+ * @async
+ * @returns {Promise<TGist[]>}
+ */
+export async function getOpenedGists(): Promise<TGist[]> {
+    const openedGists = await getGistsFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists);
+
+    let gists = await Promise.all(openedGists.map(async (gist) => await getGitHubGist(gist)));
+    let validGists = gists.filter((gist) => gist !== undefined) as TGist[];
+
+    return Promise.resolve(validGists);
+}
+
+/**
+ * Ask the user to enter a gistId to open and adds it to global storage
+ *
+ * @export
+ * @async
+ * @returns {unknown}
+ */
+export async function openGist() {
+    const gistId = await window.showInputBox({
+        prompt: "Enter the ID of the gist",
+        placeHolder: "Gist ID",
+    });
+
+    if (!gistId) {
+        return Promise.reject();
+    }
+
+    addToGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gistId);
+}
+
+export async function closeGist(gist: GistNode) {
+    removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
+    gistProvider.refresh();
 }

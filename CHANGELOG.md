@@ -10,7 +10,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 * Create gist file under folder
 * Properly render gist files under folders
-* Open owned gists
 * Clone gist
 * Download gists (tar/zip)
 * Fork gist
@@ -21,7 +20,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Gist content
 
-* Add file
 * Upload File(s)
 * Rename file
 * Rename folder

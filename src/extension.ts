@@ -2,10 +2,10 @@ import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
-import { GistNode, GistProvider, ContentNode, UserNode } from "./Tree/nodes";
+import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType } from './Tree/nodes';
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import { clearGlobalStorage, getFollowedUsersFromGlobalStorage, removeFromGlobalStorage } from "./FileSystem/storage";
+import { clearGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage } from "./FileSystem/storage";
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -19,10 +19,10 @@ export const gistFileSystemProvider = new GistFileSystemProvider();
 export const store = {
     gists: [] as (GistNode | undefined)[],
 };
-// @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/ 
+// @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
-import { addFile, createGist, deleteFile, deleteGist, followUser } from "./GitHub/commands";
+import { addFile, closeGist, createGist, deleteFile, deleteGist, followUser, openGist } from "./GitHub/commands";
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -57,11 +57,19 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.getGlobalStorage", async () => {
-            const followedUsersFromGlobalStorage = await getFollowedUsersFromGlobalStorage(context);
+            const followedUsersFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
+            const openedGistsFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.openedGists);
+
             if (followedUsersFromGlobalStorage.length > 0) {
-                output?.appendLine(`Global storage: ${followedUsersFromGlobalStorage}`, output.messageType.info);
+                output?.appendLine(`Global storage ${GlobalStorageGroup.followedUsers}: ${followedUsersFromGlobalStorage}`, output.messageType.info);
             } else {
-                output?.appendLine(`Global storage is empty`, output.messageType.info);
+                output?.appendLine(`Global storage ${GlobalStorageGroup.followedUsers} is empty`, output.messageType.info);
+            }
+
+            if (openedGistsFromGlobalStorage.length > 0) {
+                output?.appendLine(`Global storage ${GlobalStorageGroup.openedGists}: ${openedGistsFromGlobalStorage}`, output.messageType.info);
+            } else {
+                output?.appendLine(`Global storage ${GlobalStorageGroup.openedGists} is empty`, output.messageType.info);
             }
         })
     );
@@ -75,14 +83,14 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.removeFromGlobalStorage", async () => {
-            const gistsFromGlobalStorage = await getFollowedUsersFromGlobalStorage(context);
+            const gistsFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
             const gistToRemove = await window.showQuickPick(gistsFromGlobalStorage, {
                 placeHolder: "Select gist to remove from global storage",
                 ignoreFocusOut: true,
                 canPickMany: false,
             });
             if (gistToRemove) {
-                removeFromGlobalStorage(context, gistToRemove);
+                removeFromGlobalStorage(context, GlobalStorageGroup.followedUsers, gistToRemove);
             }
         })
     );
@@ -138,7 +146,19 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.unfollowUser", async (user: UserNode) => {
-            removeFromGlobalStorage(extensionContext, user.label as string);
+            removeFromGlobalStorage(extensionContext, GistsGroupType.followedUsers, user.label as string);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.openGist", async () => {
+            openGist();
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.closeGist", async (gist: GistNode) => {
+            closeGist(gist);
         })
     );
 
