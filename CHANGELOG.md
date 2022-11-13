@@ -17,6 +17,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * Unstar gist
 * Change gist visibility (private/public)
 * Open gist on GitHub
+* Open Gist
+  * Group by user
+    * Show user avatar
 
 ### Gist content
 
@@ -37,13 +40,19 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * Pull at configurable intervals (set a default around 1 minute) to ensure the repo view is current
 * Push changes at configurable intervals (only if there are changes to push) rather than other on save; users may have auto-save enabled, that would generate lots of small push changes and potentially exceed the GitHub [API rate limit](https://docs.github.com/en/rest/rate-limit#about-the-rate-limit-api)
 
+## [0.0.3] - 2022-11-13
+
+### Added
+
+* Enable `Opened Gists` group
+
 ## [0.0.2] - 2022-11-06
 
 ### Added
 
 * Enabled `Follow user` command
 
-### Fixed
+ ### Fixed
 
 * Fixed [#2](https://github.com/carlocardella/vscode-VirtualGists/issues/2)
 * Other fixes adn improvements
