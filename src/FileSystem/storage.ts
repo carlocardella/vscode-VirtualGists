@@ -35,23 +35,16 @@ export async function addToGlobalStorage(context: ExtensionContext, globalStorag
     output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
 }
 
-/**
- * Remove a user from the list of users in Global Storage
- *
- * @export
- * @param {ExtensionContext} context Extension context
- * @param {string} userName User to remove
- */
-export function removeFromGlobalStorage(context: ExtensionContext, userName: string): void {
-    let globalStorage = context.globalState.get(FOLLOWED_USERS_GLOBAL_STORAGE_KEY) as string[];
+export function removeFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string,  item: string): void {
+    let globalStorage = context.globalState.get(globalStorageGroup) as string[];
     if (globalStorage) {
-        globalStorage = globalStorage.filter((item) => item.toLocaleLowerCase() !== userName.toLocaleLowerCase());
-        context.globalState.update(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, globalStorage);
+        globalStorage = globalStorage.filter((item) => item.toLocaleLowerCase() !== item.toLocaleLowerCase());
+        context.globalState.update(globalStorageGroup, globalStorage);
 
         gistProvider.refresh();
 
-        output?.appendLine(`Removed ${userName} from global storage`, output.messageType.info);
-        output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
+        output?.appendLine(`Removed ${item} from ${globalStorageGroup}`, output.messageType.info);
+        output?.appendLine(`Global storage ${globalStorageGroup}: ${globalStorage}`, output.messageType.info);
     }
 }
 
