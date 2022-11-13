@@ -91,6 +91,10 @@ export class GistNode extends TreeItem {
         this.description = Object.values(gist.files!).length.toString();
         this.readOnly = readOnly ?? false;
         this.contextValue = readOnly ? "gist.readOny" : "gist.readWrite";
+        // @investigate: is groupType better than readOnly/readWrite?
+        if (groupType === GistsGroupType.openedGists) {
+            this.contextValue = "gist.opened";
+        }
         this.uri = fileNameToUri(this.id!);
 
         // const privateGistIcon = Uri.file(extensionContext.extensionPath + "/assets/private_gist.svg");

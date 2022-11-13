@@ -5,7 +5,7 @@ import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, ge
 import { TContent, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import { addToGlobalStorage, readFromGlobalStorage as getGistsFromGlobalStorage, GlobalStorageGroup } from "../FileSystem/storage";
+import { addToGlobalStorage, readFromGlobalStorage as getGistsFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage } from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -333,4 +333,9 @@ export async function openGist() {
     }
 
     addToGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gistId);
+}
+
+export async function closeGist(gist: GistNode) {
+    removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
+    gistProvider.refresh();
 }

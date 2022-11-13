@@ -102,6 +102,12 @@
                 "category": "Virtual Gists"
             },
             {
+                "title": "Close Gist",
+                "command": "VirtualGists.closeGist",
+                "icon": "$(close)",
+                "category": "Virtual Gists"
+            },
+            {
                 "title": "New file",
                 "command": "VirtualGists.addFile",
                 "icon": "$(new-file)",
@@ -181,6 +187,10 @@
                 },
                 {
                     "command": "VirtualGists.openGist"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "false"
                 },
                 {
                     "command": "VirtualGists.newPrivateGist"
@@ -333,6 +343,16 @@
                     "command": "VirtualGists.unfollowUser",
                     "when": "viewItem == user",
                     "group": "1_open@1"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "viewItem == gist.opened",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "viewItem == gist.opened",
+                    "group": "1_close@1"
                 }
             ]
         }

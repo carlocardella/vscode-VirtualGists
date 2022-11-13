@@ -22,7 +22,7 @@ export const store = {
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
-import { addFile, createGist, deleteFile, deleteGist, followUser, openGist } from "./GitHub/commands";
+import { addFile, closeGist, createGist, deleteFile, deleteGist, followUser, openGist } from "./GitHub/commands";
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -153,6 +153,12 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.openGist", async () => {
             openGist();
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.closeGist", async (gist: GistNode) => {
+            closeGist(gist);
         })
     );
 
