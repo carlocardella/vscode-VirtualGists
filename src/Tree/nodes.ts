@@ -1,9 +1,9 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { extensionContext, store } from "../extension";
+import { store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { addToLocalStorage, updateStoredGist } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
-import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getOrCreateNotepadGist, getFollowedUsers } from "../GitHub/commands";
+import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getOrCreateNotepadGist, getFollowedUsers, getOpenedGists } from "../GitHub/commands";
 import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
 
 /**
@@ -258,7 +258,10 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         break;
 
                     case GistsGroupType.openedGists:
-                        throw new Error("Opened gists is not implemented yet");
+                        const openedGists = await getOpenedGists();
+                        childNodes = openedGists?.map((gist) => new GistNode(gist, element.groupType, true)) ?? [];
+                        addToLocalStorage(...childNodes);
+                        break;
 
                     default:
                         throw new Error(`Invalid group type: ${element.label}`);

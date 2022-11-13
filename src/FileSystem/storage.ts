@@ -1,8 +1,20 @@
 import { GistNode } from "../Tree/nodes";
 import { ExtensionContext } from "vscode";
-import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "../GitHub/constants";
+import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, OPENED_GISTS_GLOBAL_STORAGE_KEY } from "../GitHub/constants";
 import { output, gistProvider, store } from "../extension";
 import { TGist } from "../GitHub/types";
+
+/**
+ * Global Storage groups
+ *
+ * @export
+ * @class GlobalStorageGroup
+ * @typedef {GlobalStorageGroup}
+ */
+export class GlobalStorageGroup {
+    static followedUsers: string = FOLLOWED_USERS_GLOBAL_STORAGE_KEY;
+    static openedGists: string = OPENED_GISTS_GLOBAL_STORAGE_KEY;
+}
 
 /**
  * Add a followed user or opened gist to Global Storage
@@ -11,11 +23,11 @@ import { TGist } from "../GitHub/types";
  * @param {ExtensionContext} context Extension context
  * @param {string} value Repository to add
  */
-export async function addToGlobalStorage(context: ExtensionContext, value: string): Promise<void> {
-    let globalStorage = await getFollowedUsersFromGlobalStorage(context);
+export async function addToGlobalStorage(context: ExtensionContext, globalStorageGroup: string, value: string): Promise<void> {
+    let globalStorage = await readFromGlobalStorage(context, globalStorageGroup);
 
     globalStorage.push(value);
-    context.globalState.update(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, globalStorage);
+    context.globalState.update(globalStorageGroup, globalStorage);
 
     gistProvider.refresh();
 
@@ -24,11 +36,11 @@ export async function addToGlobalStorage(context: ExtensionContext, value: strin
 }
 
 /**
- * Remove a repository from the list of repositories in Global Storage
+ * Remove a user from the list of users in Global Storage
  *
  * @export
  * @param {ExtensionContext} context Extension context
- * @param {string} userName Repository to remove
+ * @param {string} userName User to remove
  */
 export function removeFromGlobalStorage(context: ExtensionContext, userName: string): void {
     let globalStorage = context.globalState.get(FOLLOWED_USERS_GLOBAL_STORAGE_KEY) as string[];
@@ -50,8 +62,8 @@ export function removeFromGlobalStorage(context: ExtensionContext, userName: str
  * @param {ExtensionContext} context Extension context
  * @returns {string[]}
  */
-export async function getFollowedUsersFromGlobalStorage(context: ExtensionContext): Promise<string[]> {
-    const followedUsers = context.globalState.get(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, []) as string[];
+export async function readFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string): Promise<string[]> {
+    const followedUsers = context.globalState.get(globalStorageGroup, []) as string[];
 
     return Promise.resolve(followedUsers);
 }
@@ -62,9 +74,16 @@ export async function getFollowedUsersFromGlobalStorage(context: ExtensionContex
  * @export
  * @param {ExtensionContext} context
  */
-export function clearGlobalStorage(context: ExtensionContext) {
-    context.globalState.update(FOLLOWED_USERS_GLOBAL_STORAGE_KEY, []);
-    output?.appendLine(`Cleared global storage`, output.messageType.info);
+export function clearGlobalStorage(context: ExtensionContext, globalStorageGroup?: string) {
+    if (globalStorageGroup) {
+        context.globalState.update(globalStorageGroup, []);
+        output?.appendLine(`Cleared global storage ${globalStorageGroup}`, output.messageType.info);
+    } else {
+        context.globalState.update(GlobalStorageGroup.followedUsers, []);
+        context.globalState.update(GlobalStorageGroup.openedGists, []);
+        output?.appendLine(`Cleared global storage`, output.messageType.info);
+    }
+
     gistProvider.refresh();
 }
 

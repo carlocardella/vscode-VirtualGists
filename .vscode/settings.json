@@ -24,11 +24,11 @@
         "statusBarItem.hoverBackground": "#ff8c00",
         "statusBarItem.remoteBackground": "#cc7000",
         "statusBarItem.remoteForeground": "#e7e7e7",
-        "tab.activeBorder": "#ff8c00",
         "titleBar.activeBackground": "#cc7000",
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#cc700099",
-        "titleBar.inactiveForeground": "#e7e7e799"
+        "titleBar.inactiveForeground": "#e7e7e799",
+        "tab.activeBorder": "#ff8c00"
     },
     "peacock.color": "#cc7000",
     "task.allowAutomaticTasks": "on"
