@@ -114,7 +114,6 @@ export async function activate(context: ExtensionContext) {
             }
 
             if (node instanceof ContentNode) {
-                // deleteGist(node.gist);
                 deleteFile(node);
             }
         })

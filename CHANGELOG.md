@@ -37,6 +37,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Other
 
 * View gist owner on GitHub
+* Show gist count under each group
 * Pull at configurable intervals (set a default around 1 minute) to ensure the repo view is current
 * Push changes at configurable intervals (only if there are changes to push) rather than other on save; users may have auto-save enabled, that would generate lots of small push changes and potentially exceed the GitHub [API rate limit](https://docs.github.com/en/rest/rate-limit#about-the-rate-limit-api)
 

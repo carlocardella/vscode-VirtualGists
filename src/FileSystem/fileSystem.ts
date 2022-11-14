@@ -42,7 +42,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
     static findGist(uri: Uri): [GistNode, TGistFileNoKey] {
         const [gistId, path] = GistFileSystemProvider.getFileInfo(uri);
 
-        const gistNode = store.gists.find((gist) => gist!.gist.id === gistId); // @bug gistid is wrong for notepadGist
+        const gistNode = store.gists.find((gist) => gist!.gist.id === gistId);
         const file: TGistFileNoKey = Object.values(gistNode!.gist.files!).find((gistFile) => gistFile!.filename === path)!;
 
         return [gistNode!, file];

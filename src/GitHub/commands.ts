@@ -100,11 +100,15 @@ export async function getOrCreateNotepadGist(fileName?: string): Promise<TGist> 
             },
             public: false,
         };
-        await createGitHubGist(gist, false);
-
-        return Promise.resolve(getOrCreateNotepadGist());
+        notepadGist = await createGitHubGist(gist, false);
     }
 
+    return Promise.resolve(notepadGist!);
+}
+
+export async function getNotepadGist(): Promise<TGist | undefined> {
+    const gists = await getOwnedGists();
+    let notepadGist = gists?.filter((gist: TGist) => gist.description === NOTEPAD_GIST_NAME)[0];
     return Promise.resolve(notepadGist);
 }
 
