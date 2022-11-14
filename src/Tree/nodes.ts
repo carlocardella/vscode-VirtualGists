@@ -5,6 +5,7 @@ import { addToLocalStorage, updateStoredGist } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
 import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getFollowedUsers, getOpenedGists, getNotepadGist } from "../GitHub/commands";
 import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
+import { NOTEPAD_GIST_NAME } from "../GitHub/constants";
 
 /**
  * Type of gists to show in the TreeView
@@ -243,7 +244,11 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                     case GistsGroupType.myGists:
                         let ownedGists = await getOwnedGists();
-                        childNodes = ownedGists?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
+                        // prettier-ignore
+                        childNodes =
+                            ownedGists
+                            ?.filter((gist) => gist.description !== NOTEPAD_GIST_NAME)
+                            ?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
                         addToLocalStorage(...childNodes);
                         break;
 

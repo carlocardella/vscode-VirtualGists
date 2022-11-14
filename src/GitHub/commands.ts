@@ -108,8 +108,13 @@ export async function getOrCreateNotepadGist(fileName?: string): Promise<TGist> 
 
 export async function getNotepadGist(): Promise<TGist | undefined> {
     const gists = await getOwnedGists();
-    let notepadGist = gists?.filter((gist: TGist) => gist.description === NOTEPAD_GIST_NAME)[0];
-    return Promise.resolve(notepadGist);
+    const notepadGistId = gists?.find((gist) => gist.description === NOTEPAD_GIST_NAME)?.id;
+    if (notepadGistId) {
+        let notepadGist = await getGist(notepadGistId);
+        return Promise.resolve(notepadGist);
+    }
+
+    return Promise.reject();
 }
 
 /**
