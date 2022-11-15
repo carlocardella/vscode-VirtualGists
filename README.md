@@ -54,6 +54,8 @@ Gists from the user you want to explicitly follow, to stay up to date with their
 
 Interesting gists you have opened but not starred yet.
 
+![openedgists](https://user-images.githubusercontent.com/5784415/201803325-acd4a167-cbd3-4d92-b0d4-dc2c5ef28ff9.gif)
+
 ## Create a new gist
 
 You can create a private or public gist, just enter the gist name and the file name you want to use:
