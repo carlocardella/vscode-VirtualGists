@@ -5,7 +5,13 @@ import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, ge
 import { TContent, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import { addToGlobalStorage, readFromGlobalStorage as getGistsFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage } from "../FileSystem/storage";
+import {
+    addToGlobalStorage,
+    readFromGlobalStorage,
+    GlobalStorageGroup,
+    removeFromGlobalStorage,
+    addToOrUpdateLocalStorage,
+} from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -242,6 +248,7 @@ export async function addFile(gist: GistNode): Promise<void> {
         let notepadGist = await getOrCreateNotepadGist(fileName);
 
         gist = new GistNode(notepadGist, GistsGroupType.notepad, false);
+        addToOrUpdateLocalStorage(gist);
     }
 
     let fileUri = fileNameToUri(gist.gist.id!, fileName);
@@ -300,7 +307,7 @@ export async function getGistsForUser(githubUser: string): Promise<TGist[] | und
  * @returns {Promise<string[]>}
  */
 export async function getFollowedUsers(): Promise<TGitHubUser[]> {
-    const users = await getGistsFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
+    const users = await readFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
 
     let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
     let validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
@@ -316,7 +323,7 @@ export async function getFollowedUsers(): Promise<TGitHubUser[]> {
  * @returns {Promise<TGist[]>}
  */
 export async function getOpenedGists(): Promise<TGist[]> {
-    const openedGists = await getGistsFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists);
+    const openedGists = await readFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists);
 
     let gists = await Promise.all(openedGists.map(async (gist) => await getGitHubGist(gist)));
     let validGists = gists.filter((gist) => gist !== undefined) as TGist[];

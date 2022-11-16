@@ -36,14 +36,17 @@ export class GistFileSystemProvider implements FileSystemProvider {
 
     async readFile(uri: Uri): Promise<Uint8Array> {
         const [gist, file] = GistFileSystemProvider.findGist(uri)!;
-        return await getGistFileContent(file);
+        return await getGistFileContent(file!);
     }
 
-    static findGist(uri: Uri): [GistNode, TGistFileNoKey] {
+    static findGist(uri: Uri): [GistNode, TGistFileNoKey | undefined | null] {
         const [gistId, path] = GistFileSystemProvider.getFileInfo(uri);
 
         const gistNode = store.gists.find((gist) => gist!.gist.id === gistId);
-        const file: TGistFileNoKey = Object.values(gistNode!.gist.files!).find((gistFile) => gistFile!.filename === path)!;
+        let file: TGistFileNoKey | undefined | null;
+        if (gistNode?.gist.files) {
+            file = Object.values(gistNode?.gist.files).find((gistFile) => gistFile!.filename === path);
+        }
 
         return [gistNode!, file];
     }

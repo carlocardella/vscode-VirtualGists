@@ -101,7 +101,7 @@ export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, c
             },
         });
 
-        output?.appendLine(`Updated "${file!.filename!}" in gist "${gist.name}"`, output.messageType.info);
+        output?.appendLine(`Updated "${file!.filename!}" in gist "${gist.gist.description}"`, output.messageType.info);
         return Promise.resolve(data);
     } catch (e: any) {
         output?.logError(gist.gist, e);

@@ -35,7 +35,7 @@ export async function addToGlobalStorage(context: ExtensionContext, globalStorag
     output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
 }
 
-export function removeFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string,  item: string): void {
+export function removeFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string, item: string): void {
     let globalStorage = context.globalState.get(globalStorageGroup) as string[];
     if (globalStorage) {
         globalStorage = globalStorage.filter((item) => item.toLocaleLowerCase() !== item.toLocaleLowerCase());
@@ -89,6 +89,7 @@ export function clearGlobalStorage(context: ExtensionContext, globalStorageGroup
  * @returns {Promise<void>}
  */
 export async function updateStoredGist(updatedGist: TGist): Promise<void> {
+    // @investigate: can this be replaced with addToOrUpdateLocalStorage?
     let currentGist = store.gists.find((storedGist) => storedGist?.gist.id === updatedGist?.id);
 
     currentGist!.gist = updatedGist;
@@ -102,8 +103,15 @@ export async function updateStoredGist(updatedGist: TGist): Promise<void> {
  * @export
  * @param {...GistNode[]} gistNode The gist to add to the store
  */
-export function addToLocalStorage(...gistNode: GistNode[]) {
-    store.gists.push(...gistNode);
+export function addToOrUpdateLocalStorage(...gistNode: GistNode[]) {
+    gistNode.forEach((gist) => {
+        let gistIndex = store.gists.findIndex((storedGist) => storedGist?.gist.id === gist.gist.id);
+        if (gistIndex > -1) {
+            store.gists[gistIndex] = gist;
+        } else {
+            store.gists.push(gist);
+        }
+    });
 }
 
 /**
