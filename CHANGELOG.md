@@ -41,6 +41,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * Pull at configurable intervals (set a default around 1 minute) to ensure the repo view is current
 * Push changes at configurable intervals (only if there are changes to push) rather than other on save; users may have auto-save enabled, that would generate lots of small push changes and potentially exceed the GitHub [API rate limit](https://docs.github.com/en/rest/rate-limit#about-the-rate-limit-api)
 
+## [0.0.6] - 2022-11-15
+
+### Fixed
+
+* [#4 Files with a space in the name cannot be opened](https://github.com/carlocardella/vscode-VirtualGists/issues/4)
+* Fixed a but creating a new file under Notepad.
+
 ## [0.0.5] - 2022-11-14
 
 ### Changed
