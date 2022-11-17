@@ -6,40 +6,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
-### Gists management
-
-* Create gist file under folder
-* Properly render gist files under folders
-* Clone gist
-* Download gists (tar/zip)
-* Fork gist
-* Star gist
-* Unstar gist
-* Change gist visibility (private/public)
-* Open gist on GitHub
-* Open Gist
-  * Group by user
-    * Show user avatar
-
-### Gist content
-
-* Upload File(s)
-* Rename file
-* Rename folder
-* Delete file
-* Delete multiple files
-  * Delete folder (delete all files in folder)
-* Move file
-  * Move multiple files
-* Move folder
-* File comments
-
-### Other
-
-* View gist owner on GitHub
-* Show gist count under each group
-* Pull at configurable intervals (set a default around 1 minute) to ensure the repo view is current
-* Push changes at configurable intervals (only if there are changes to push) rather than other on save; users may have auto-save enabled, that would generate lots of small push changes and potentially exceed the GitHub [API rate limit](https://docs.github.com/en/rest/rate-limit#about-the-rate-limit-api)
+See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
 ## [0.0.6] - 2022-11-15
 
