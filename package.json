@@ -157,6 +157,11 @@
                 "command": "VirtualGists.unfollowUser",
                 "category": "Virtual Gists",
                 "icon": "$(close)"
+            },
+            {
+                "title": "Rename...",
+                "command": "VirtualGists.renameFile",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -197,6 +202,10 @@
                 },
                 {
                     "command": "VirtualGists.addFile",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.renameFile",
                     "when": "false"
                 },
                 {
@@ -310,9 +319,14 @@
                     "group": "2_close@1"
                 },
                 {
+                    "command": "VirtualGists.renameFile",
+                    "when": "viewItem == file.readWrite",
+                    "group": "3_delete@1"
+                },
+                {
                     "command": "VirtualGists.deleteNode",
                     "when": "viewItem == gist.readWrite || viewItem == file.readWrite",
-                    "group": "3_delete@1"
+                    "group": "3_delete@2"
                 },
                 {
                     "command": "VirtualGists.openGist",

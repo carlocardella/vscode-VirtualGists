@@ -5,13 +5,7 @@ import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, ge
 import { TContent, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import {
-    addToGlobalStorage,
-    readFromGlobalStorage,
-    GlobalStorageGroup,
-    removeFromGlobalStorage,
-    addToOrUpdateLocalStorage,
-} from "../FileSystem/storage";
+import { addToGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, addToOrUpdateLocalStorage } from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -35,6 +29,10 @@ export async function getGistFileContent(file: TContent): Promise<Uint8Array> {
  */
 export function fileNameToUri(gistId: string, filePath: string = ""): Uri {
     return Uri.parse(`${GIST_SCHEME}://${gistId}/${filePath}`);
+}
+
+export function getFileNameFromUri(uri: Uri): string {
+    return uri.path.split("/").pop()!;
 }
 
 /**
@@ -353,5 +351,39 @@ export async function openGist() {
 
 export async function closeGist(gist: GistNode) {
     removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
+    gistProvider.refresh();
+}
+
+/**
+ * Rename a gist file
+ *
+ * @export
+ * @async
+ * @param {ContentNode} gistFile The gist file to rename
+ * @returns {unknown}
+ */
+export async function renameFile(gistFile: ContentNode) {
+    const fileName = await window.showInputBox({
+        prompt: "Enter the new name of the file",
+        placeHolder: "File name",
+    });
+
+    if (!fileName) {
+        return Promise.reject();
+    }
+
+    // Validate file name
+    if (fileName.match(/gistfile(\d+)/gi)) {
+        output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        window.showErrorMessage(
+            `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
+        );
+        return Promise.reject();
+    }
+
+    let oldUri = fileNameToUri(gistFile.gist.id!, gistFile.name);
+    let newUri = fileNameToUri(gistFile.gist.id!, fileName);
+
+    await gistFileSystemProvider.rename(oldUri, newUri);
     gistProvider.refresh();
 }

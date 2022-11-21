@@ -2,8 +2,8 @@ import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
-import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType } from './Tree/nodes';
-import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
+import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType } from "./Tree/nodes";
+import { GistFileSystemProvider, GIST_SCHEME, GistFile } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
 import { clearGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage } from "./FileSystem/storage";
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "./GitHub/constants";
@@ -22,7 +22,7 @@ export const store = {
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
-import { addFile, closeGist, createGist, deleteFile, deleteGist, followUser, openGist } from "./GitHub/commands";
+import { addFile, closeGist, createGist, deleteFile, deleteGist, followUser, openGist, renameFile } from "./GitHub/commands";
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -158,6 +158,12 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.closeGist", async (gist: GistNode) => {
             closeGist(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.renameFile", async (gistFile: ContentNode) => {
+            renameFile(gistFile);
         })
     );
 
