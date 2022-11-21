@@ -1,7 +1,7 @@
 import { Disposable, Event, EventEmitter, FileChangeEvent, FileChangeType, FileStat, FileSystemError, FileSystemProvider, FileType, Uri } from "vscode";
 import { gistProvider, store } from "../extension";
 import { createGitHubGist, createOrUpdateFile, deleteGistFile, deleteGitHubGist } from "../GitHub/api";
-import { getGistFileContent } from "../GitHub/commands";
+import { getFileNameFromUri, getGistFileContent } from "../GitHub/commands";
 import { TGistFileNoKey, TGist } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 
@@ -105,8 +105,15 @@ export class GistFileSystemProvider implements FileSystemProvider {
         }
     }
 
-    async rename(uri: Uri): Promise<void> {
-        throw new Error("Method not implemented.");
+    async rename(oldUri: Uri, newUri: Uri): Promise<void> {
+        let [gist, oldFile] = GistFileSystemProvider.findGist(oldUri)!;
+        let newFileName = getFileNameFromUri(newUri);
+
+        if (oldFile && newFileName) {
+            await createOrUpdateFile(gist, oldFile, undefined, newFileName);
+        }
+
+        return Promise.resolve();
     }
 
     async deleteDirectory(uri: Uri): Promise<void> {

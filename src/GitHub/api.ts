@@ -84,22 +84,36 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
  * @param {Uint8Array} content The content of the file.
  * @returns {Promise<TGitHubUpdateContent>}
  */
-export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, content: Uint8Array): Promise<TGist> {
-    const fileContentString = content.length > 0 ? new TextDecoder().decode(content) : ZERO_WIDTH_SPACE;
-    file!.content = fileContentString;
-
+export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, content?: Uint8Array, newFileName?: string): Promise<TGist> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
 
     try {
+        let data: any;
         // @todo update gist description
-        let { data } = await octokit.gists.update({
-            gist_id: gist.gist.id!,
-            files: {
-                [file!.filename!]: { content: fileContentString },
-            },
-        });
+
+        // write file content
+        if (content) {
+            const fileContentString = content.length > 0 ? new TextDecoder().decode(content) : ZERO_WIDTH_SPACE;
+            file!.content = fileContentString;
+
+            ({ data } = await octokit.gists.update({
+                gist_id: gist.gist.id!,
+                files: {
+                    [file!.filename!]: { content: fileContentString },
+                },
+            }));
+        }
+
+        if (newFileName) {
+            ({ data } = await octokit.gists.update({
+                gist_id: gist.gist.id!,
+                files: {
+                    [file!.filename!]: { filename: newFileName },
+                },
+            }));
+        }
 
         output?.appendLine(`Updated "${file!.filename!}" in gist "${gist.gist.description}"`, output.messageType.info);
         return Promise.resolve(data);
