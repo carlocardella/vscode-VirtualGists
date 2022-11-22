@@ -99,6 +99,9 @@ export class GistNode extends TreeItem {
         if (groupType === GistsGroupType.starredGists) {
             this.contextValue = "gist.starred";
         }
+        if (groupType === GistsGroupType.followedUsers) {
+            this.contextValue = "gist.followedUsers";
+        }
         this.uri = fileNameToUri(this.id!);
 
         // const privateGistIcon = Uri.file(extensionContext.extensionPath + "/assets/private_gist.svg");

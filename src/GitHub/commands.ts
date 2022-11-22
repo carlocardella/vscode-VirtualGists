@@ -1,4 +1,4 @@
-import { Uri, window } from "vscode";
+import { Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
@@ -507,7 +507,10 @@ export async function starGist(gist?: GistNode) {
         await starredGist(new GistNode(gistToStar, GistsGroupType.starredGists, true), GistStarOperation.star);
     } else {
         await starredGist(gist, GistStarOperation.star);
-        // The gist is listed under "Opened Gists", remove it
-        await closeGist(gist);
+
+        if (gist.contextValue === GistsGroupType.openedGists) {
+            // The gist is listed under "Opened Gists", remove it
+            await closeGist(gist);
+        }
     }
 }

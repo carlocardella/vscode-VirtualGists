@@ -166,12 +166,14 @@
             {
                 "title": "Unstar gist",
                 "command": "VirtualGists.unstarGist",
-                "category": "Virtual Gists"
+                "category": "Virtual Gists",
+                "icon": "$(close)"
             },
             {
                 "title": "Star gist",
                 "command": "VirtualGists.starGist",
-                "category": "Virtual Gists"
+                "category": "Virtual Gists",
+                "icon": "$(star-empty)"
             }
         ],
         "viewsContainers": {
@@ -383,12 +385,22 @@
                 {
                     "command": "VirtualGists.closeGist",
                     "when": "viewItem == gist.opened",
-                    "group": "1_close@1"
+                    "group": "2_close@1"
                 },
                 {
                     "command": "VirtualGists.starGist",
-                    "when": "viewItem == gist.opened",
+                    "when": "viewItem == gist.opened || viewItem == gist.followedUsers",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.starGist",
+                    "when": "viewItem == gist.opened || viewItem == gist.followedUsers",
                     "group": "1_star@1"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "viewItem == gist.starred",
+                    "group": "inline"
                 },
                 {
                     "command": "VirtualGists.unstarGist",
