@@ -397,7 +397,7 @@ export async function renameFile(gistFile: ContentNode) {
  * @returns {Promise<void>}
  */
 export async function uploadFiles(destination: ContentNode | GistNode): Promise<void> {
-    const files = await window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: true, title: "Select the files to upload" });
+    const files = await window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: false, title: "Select the files to upload" });
     if (!files) {
         return Promise.reject();
     }
