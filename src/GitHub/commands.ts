@@ -441,3 +441,20 @@ async function starredGist(gist: GistNode, operation: GistStarOperation) {
     await starGitHubGist(gist, operation);
     gistProvider.refresh();
 }
+
+export async function starGist(gist?: GistNode) {
+    const gistId = await window.showInputBox({ ignoreFocusOut: true, prompt: "Enter the gistId you want to star", placeHolder: "gistId" });
+    if (!gistId) {
+        return;
+    }
+
+    const gistToStar = await getGitHubGist(gistId);
+    if (!gistToStar) {
+        window.showErrorMessage(
+            `Could not open gist ${gistId}, check the [output trace](https://github.com/carlocardella/vscode-VirtualGists/blob/main/README.md#tracing) for details`
+        );
+        return;
+    }
+
+    await starredGist(new GistNode(gistToStar, GistsGroupType.starredGists, true), GistStarOperation.star);
+}
