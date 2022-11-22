@@ -1,4 +1,4 @@
-import { Uri, window } from "vscode";
+import { Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser } from "./api";
@@ -386,4 +386,39 @@ export async function renameFile(gistFile: ContentNode) {
 
     await gistFileSystemProvider.rename(oldUri, newUri);
     gistProvider.refresh();
+}
+
+/**
+ * Upload existing file(s) to a gist
+ *
+ * @export
+ * @async
+ * @param {(ContentNode | GistNode)} destination The gist to upload the file(s) to
+ * @returns {Promise<void>}
+ */
+export async function uploadFiles(destination: ContentNode | GistNode): Promise<void> {
+    const files = await window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: true, title: "Select the files to upload" });
+    if (!files) {
+        return Promise.reject();
+    }
+
+    await Promise.all(
+        files.map(async (file) => {
+            const content = await workspace.fs.readFile(file);
+            let uriPath = "path" in destination ? destination.path : "";
+            let uriFile = file.path.split("/").pop();
+            let uri = Uri.from({
+                scheme: GIST_SCHEME,
+                authority: destination.gist.id!,
+                path: `${uriPath}/${uriFile}`,
+            });
+
+            await gistFileSystemProvider.writeFile(uri, content, {
+                create: true,
+                overwrite: false,
+            });
+        })
+    );
+
+    return Promise.resolve();
 }

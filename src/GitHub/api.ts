@@ -59,7 +59,6 @@ export async function getGitHubGistsForAuthenticatedUser(starred: boolean): Prom
  * @returns {(Promise<TGist | undefined>)}
  */
 export async function getGitHubGist(gistId: string): Promise<TGist | undefined> {
-    // @update: any
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
@@ -85,6 +84,7 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
  * @returns {Promise<TGitHubUpdateContent>}
  */
 export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, content?: Uint8Array, newFileName?: string): Promise<TGist> {
+    // prettier-ignore
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
