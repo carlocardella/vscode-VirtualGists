@@ -1,11 +1,18 @@
-import { Uri, window, workspace } from "vscode";
-import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
-import { GIST_SCHEME } from "../FileSystem/fileSystem";
+import { Uri, window } from "vscode";
+import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
+import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
 import { TContent, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import { addToGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, addToOrUpdateLocalStorage } from "../FileSystem/storage";
+import {
+    addToGlobalStorage,
+    readFromGlobalStorage,
+    GlobalStorageGroup,
+    removeFromGlobalStorage,
+    addToOrUpdateLocalStorage,
+    removeFromLocalStorage,
+} from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -349,6 +356,14 @@ export async function openGist() {
     addToGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gistId);
 }
 
+/**
+ * Remove a gist from the list of opened gists
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to remove
+ * @returns {*}
+ */
 export async function closeGist(gist: GistNode) {
     removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
     gistProvider.refresh();
@@ -423,11 +438,25 @@ export async function uploadFiles(destination: ContentNode | GistNode): Promise<
     return Promise.resolve();
 }
 
+/**
+ * Enums star/ubstar operations
+ *
+ * @export
+ * @enum {number}
+ */
 export enum GistStarOperation {
     star = "star",
     unstar = "unstar",
 }
 
+/**
+ * Unstar a gist and remove it from the "Starred gists" group
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to unstar
+ * @returns {*}
+ */
 export async function unstarGist(gist: GistNode) {
     const confirm = await window.showWarningMessage(`Are you sure you want to unstar ${gist.name}?`, { modal: true }, "Yes", "No");
     if (confirm !== "Yes") {
@@ -437,24 +466,48 @@ export async function unstarGist(gist: GistNode) {
     await starredGist(gist, GistStarOperation.unstar);
 }
 
+/**
+ * Star or unstar a gist and add or remove it to/from the "Starred gists" group
+ *
+ * @async
+ * @param {GistNode} gist The gist to star
+ * @param {GistStarOperation} operation The operation to perform (star/unstar)
+ * @returns {*}
+ */
 async function starredGist(gist: GistNode, operation: GistStarOperation) {
     await starGitHubGist(gist, operation);
     gistProvider.refresh();
 }
 
+/**
+ * Star a gist and add it to the "Starred gists" group.
+ * If the gist is already opened (in the "Opened gists" group), it will be removed from there and added to the "Starred gists" group.
+ * If the gist is not already opened, prompts the user and ask for the gistId to open.
+ *
+ * @export
+ * @async
+ * @param {?GistNode} [gist] The gist to star
+ * @returns {*}
+ */
 export async function starGist(gist?: GistNode) {
-    const gistId = await window.showInputBox({ ignoreFocusOut: true, prompt: "Enter the gistId you want to star", placeHolder: "gistId" });
-    if (!gistId) {
-        return;
-    }
+    if (!gist) {
+        const gistId = await window.showInputBox({ ignoreFocusOut: true, prompt: "Enter the gistId you want to star", placeHolder: "gistId" });
+        if (!gistId) {
+            return;
+        }
 
-    const gistToStar = await getGitHubGist(gistId);
-    if (!gistToStar) {
-        window.showErrorMessage(
-            `Could not open gist ${gistId}, check the [output trace](https://github.com/carlocardella/vscode-VirtualGists/blob/main/README.md#tracing) for details`
-        );
-        return;
-    }
+        const gistToStar = await getGitHubGist(gistId!);
+        if (!gistToStar) {
+            window.showErrorMessage(
+                `Could not open gist ${gistId}, check the [output trace](https://github.com/carlocardella/vscode-VirtualGists/blob/main/README.md#tracing) for details`
+            );
+            return;
+        }
 
-    await starredGist(new GistNode(gistToStar, GistsGroupType.starredGists, true), GistStarOperation.star);
+        await starredGist(new GistNode(gistToStar, GistsGroupType.starredGists, true), GistStarOperation.star);
+    } else {
+        await starredGist(gist, GistStarOperation.star);
+        // The gist is listed under "Opened Gists", remove it
+        await closeGist(gist);
+    }
 }

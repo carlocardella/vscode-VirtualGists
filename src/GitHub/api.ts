@@ -272,6 +272,15 @@ export async function getGitHubUser(username: string): Promise<TGitHubUser | und
     return Promise.reject();
 }
 
+/**
+ * Star or unstar a GitHub gist
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to star or unstar
+ * @param {GistStarOperation} operation The operation to perform (star or unstar)
+ * @returns {Promise<void>}
+ */
 export async function starGitHubGist(gist: GistNode, operation: GistStarOperation): Promise<void> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
@@ -279,12 +288,12 @@ export async function starGitHubGist(gist: GistNode, operation: GistStarOperatio
 
     try {
         if (operation === GistStarOperation.star) {
-            octokit.gists.star({ gist_id: gist.gist.id! });
+            await octokit.gists.star({ gist_id: gist.gist.id! });
             output?.appendLine(`Starred gist "${gist.name}"`, output.messageType.info);
         }
 
         if (operation === GistStarOperation.unstar) {
-            octokit.gists.unstar({ gist_id: gist.gist.id! });
+            await octokit.gists.unstar({ gist_id: gist.gist.id! });
             output?.appendLine(`Unstarred gist "${gist.name}"`, output.messageType.info);
         }
 
