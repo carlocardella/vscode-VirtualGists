@@ -35,15 +35,15 @@ export async function addToGlobalStorage(context: ExtensionContext, globalStorag
     output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
 }
 
-export function removeFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string, item: string): void {
+export function removeFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string, gistId: string): void {
     let globalStorage = context.globalState.get(globalStorageGroup) as string[];
     if (globalStorage) {
-        globalStorage = globalStorage.filter((item) => item.toLocaleLowerCase() !== item.toLocaleLowerCase());
+        globalStorage = globalStorage.filter((id) => id.toLowerCase() !== gistId.toLowerCase());
         context.globalState.update(globalStorageGroup, globalStorage);
 
         gistProvider.refresh();
 
-        output?.appendLine(`Removed ${item} from ${globalStorageGroup}`, output.messageType.info);
+        output?.appendLine(`Removed ${gistId} from ${globalStorageGroup}`, output.messageType.info);
         output?.appendLine(`Global storage ${globalStorageGroup}: ${globalStorage}`, output.messageType.info);
     }
 }

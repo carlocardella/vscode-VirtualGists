@@ -162,6 +162,16 @@
                 "title": "Rename...",
                 "command": "VirtualGists.renameFile",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "Unstar gist",
+                "command": "VirtualGists.unstarGist",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Star gist",
+                "command": "VirtualGists.starGist",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -203,6 +213,13 @@
                 {
                     "command": "VirtualGists.addFile",
                     "when": "false"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.starGist"
                 },
                 {
                     "command": "VirtualGists.renameFile",
@@ -367,6 +384,16 @@
                     "command": "VirtualGists.closeGist",
                     "when": "viewItem == gist.opened",
                     "group": "1_close@1"
+                },
+                {
+                    "command": "VirtualGists.starGist",
+                    "when": "viewItem == gist.opened",
+                    "group": "1_star@1"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "viewItem == gist.starred",
+                    "group": "1_star@1"
                 }
             ]
         }
