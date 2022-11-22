@@ -1,4 +1,4 @@
-import { Uri, window, workspace } from "vscode";
+import { env, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
@@ -513,4 +513,34 @@ export async function starGist(gist?: GistNode) {
             await closeGist(gist);
         }
     }
+}
+
+/**
+ * Copy the gistId to the clipboard
+ *
+ * @export
+ * @param {GistNode} gist The gist to copy the gistId
+ */
+export function copyGistId(gist: GistNode) {
+    env.clipboard.writeText(gist.gist.id!);
+}
+
+/**
+ * Copy the gist URL to the clipboard
+ *
+ * @export
+ * @param {GistNode} gist The gist to copy the URL
+ */
+export function copyGistUrl(gist: GistNode) {
+    env.clipboard.writeText(gist.gist.html_url!);
+}
+
+/**
+ * Open the gist in the browser
+ *
+ * @export
+ * @param {GistNode} gist The gist to open in the browser
+ */
+export function openGistOnGitHub(gist: GistNode) {
+    env.openExternal(Uri.parse(gist.gist.html_url!));
 }
