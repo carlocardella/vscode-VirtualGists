@@ -60,7 +60,6 @@ export async function getGitHubGistsForAuthenticatedUser(starred: boolean): Prom
  * @returns {(Promise<TGist | undefined>)}
  */
 export async function getGitHubGist(gistId: string): Promise<TGist | undefined> {
-    // @update: any
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
@@ -69,10 +68,10 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
         const { data } = await octokit.gists.get({ gist_id: gistId, headers: { Accept: "application/vnd.github.base64" } });
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Could not get gist "${gistId}". ${e.message}`, output.messageType.error);
+        output?.appendLine(`Could not read gist "${gistId}". ${e.message}`, output.messageType.error);
     }
 
-    return Promise.reject();
+    // return Promise.reject(undefined);
 }
 
 /**
