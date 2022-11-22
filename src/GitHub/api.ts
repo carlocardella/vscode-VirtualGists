@@ -2,6 +2,7 @@ import * as rest from "@octokit/rest";
 import { credentials, output } from "../extension";
 import { MessageType } from "../tracing";
 import { GistNode } from "../Tree/nodes";
+import { GistStarOperation } from "./commands";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { TGistFileNoKey, TGist, TGitHubUser } from "./types";
 
@@ -266,6 +267,30 @@ export async function getGitHubUser(username: string): Promise<TGitHubUser | und
         return Promise.resolve(data);
     } catch (e: any) {
         output?.appendLine(`Could not get GitHub user "${username}". ${e.message}`, output.messageType.error);
+    }
+
+    return Promise.reject();
+}
+
+export async function starGitHubGist(gist: GistNode, operation: GistStarOperation): Promise<void> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        if (operation === GistStarOperation.star) {
+            octokit.gists.star({ gist_id: gist.gist.id! });
+            output?.appendLine(`Starred gist "${gist.name}"`, output.messageType.info);
+        }
+
+        if (operation === GistStarOperation.unstar) {
+            octokit.gists.unstar({ gist_id: gist.gist.id! });
+            output?.appendLine(`Unstarred gist "${gist.name}"`, output.messageType.info);
+        }
+
+        return Promise.resolve();
+    } catch (e: any) {
+        output?.appendLine(`Cannot unstar gist "${gist.name}". ${e.message}`, output.messageType.error);
     }
 
     return Promise.reject();

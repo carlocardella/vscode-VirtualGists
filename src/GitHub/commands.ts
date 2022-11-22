@@ -1,7 +1,7 @@
 import { Uri, window } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
-import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser } from "./api";
+import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
 import { TContent, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
@@ -140,7 +140,7 @@ function charCodeAt(c: string) {
  * @returns {*}
  */
 export async function deleteGist(gist: TGist) {
-    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, "Yes", "No", "Cancel");
+    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, { modal: true }, "Yes", "No", "Cancel");
     if (confirm !== "Yes") {
         return;
     }
@@ -159,7 +159,7 @@ export async function deleteGist(gist: TGist) {
  * @returns {*}
  */
 export async function deleteFile(file: ContentNode) {
-    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${file.path}'?`, "Yes", "No", "Cancel");
+    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${file.path}'?`, { modal: true }, "Yes", "No", "Cancel");
     if (confirm !== "Yes") {
         return;
     }
@@ -385,5 +385,24 @@ export async function renameFile(gistFile: ContentNode) {
     let newUri = fileNameToUri(gistFile.gist.id!, fileName);
 
     await gistFileSystemProvider.rename(oldUri, newUri);
+    gistProvider.refresh();
+}
+
+export enum GistStarOperation {
+    star = "star",
+    unstar = "unstar",
+}
+
+export async function unstarGist(gist: GistNode) {
+    const confirm = await window.showWarningMessage(`Are you sure you want to unstar ${gist.name}?`, { modal: true }, "Yes", "No");
+    if (confirm !== "Yes") {
+        return;
+    }
+
+    await starredGist(gist, GistStarOperation.unstar);
+}
+
+async function starredGist(gist: GistNode, operation: GistStarOperation) {
+    await starGitHubGist(gist, operation);
     gistProvider.refresh();
 }
