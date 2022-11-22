@@ -101,7 +101,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
             return await deleteGitHubGist(gist);
         } else {
             // delete a file
-            deleteGistFile(gist, uri.path);
+            await deleteGistFile(gist, uri.path);
         }
     }
 
