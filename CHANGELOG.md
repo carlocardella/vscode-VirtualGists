@@ -1,109 +1,91 @@
-# Virtual Gists
+# Change Log
 
-![preview](https://img.shields.io/badge/-preview-orange)
+All notable changes to the "vscode-VirtualGists" extension will be documented in this file.
 
-<!--[![Publish Extension](https://github.com/carlocardella/vscode-VirtualGists/actions/workflows/PublishExtension.yml/badge.svg)](https://github.com/carlocardella/vscode-VirtualGists/actions/workflows/PublishExtension.yml)-->
-![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/carlocardella.vscode-virtualGists)
-![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/carlocardella.vscode-virtualGists)
-![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/carlocardella.vscode-virtualGists)
-![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/r/carlocardella.vscode-virtualGists)
-[![GitHub issues](https://img.shields.io/github/issues/carlocardella/vscode-VirtualGists.svg)](https://github.com/carlocardella/vscode-VirtualGists/issues)
-[![GitHub license](https://img.shields.io/github/license/carlocardella/vscode-VirtualGists.svg)](https://github.com/carlocardella/vscode-VirtualGists/blob/master/LICENSE.md)
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/carlocardella/vscode-VirtualGists.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Fcarlocardella%2Fvscode-VirtualGists)
-<!-- [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/carlocardella/vscode-texttoolbox) -->
+Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-[Download for VS Code](https://marketplace.visualstudio.com/items?itemName=CarloCardella.vscode-virtualgists)
+## [Unreleased]
 
-<!-- [Download for VS Codium](https://open-vsx.org/extension/carlocardella/vscode-texttoolbox) -->
+See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
-Virtual Gists is a Visual Studio Code extension that allows to open and edit a remote gist (e.g. on GitHub) without cloning, committing or pushing your changes. It all happens automatically.
+## [0.0.8] - 2022-11-22
 
-The extension is still missing lots of features I want to add (as time permits) and you can expect bugs (but hopefully nothing destructive), anyway this is a `preview` extension and you can expect bugs here and there. Please report bugs or issues and ask for features you would like to see. Check [Changelog](CHANGELOG.md) for the latest status, what's planned and what has already been released.
+### Added
 
-## Getting started
+* Star a gist
+  * You can start a gist in two ways:
+    1. Use the `Star gist` command and enter the `gistId`
+    2. If the gist to star is already listed under `Opened Gists` or it belongs to a followed user, you can use the `Star gist` command from the context menu
+* Upload a local file to an existing gist
+* `Copy gist id`
+* `Copy gist URL`
+* `Open gist in browser`
+* `Copy file URL`
+* `Open file in browser`
 
-Install the extension from the VSCode Marketplace.
+### Fixed
 
-## Gist management
+* Fixed issue [#15 Deleting a file sometimes does not update the file counter](https://github.com/carlocardella/vscode-VirtualGists/issues/15)
 
-Read, create and delete GitHub Gists from the familiar VSCode environment. You can also follow users, star gists, and use a "Notepad" (a special, private gist) to job down ideas and ephemeral notes that do not fit into their own gist.
+## [0.0.7] - 2022-11-20
 
-<!-- ![image](https://user-images.githubusercontent.com/5784415/197618303-98f29f54-6e8f-46bb-9f18-fe9989df4f97.png) -->
+### Added
 
-![show starred gists](https://user-images.githubusercontent.com/5784415/197624729-0c20ce8b-9cd9-4f53-97dd-69cb61a42fdf.gif)
+* Rename file
 
-### Notepad
+## [0.0.6] - 2022-11-15
 
-This is a special, private gist you can use as a temporary notepad, a place to store ephemeral notes you can quickly jot down and easily access from all your devices even if they do not quite fit into a regular gist.
+### Fixed
 
-### My Gists
+* [#4 Files with a space in the name cannot be opened](https://github.com/carlocardella/vscode-VirtualGists/issues/4)
+* Fixed a but creating a new file under Notepad.
 
-All your private and public gists, except `Notepad`, which has its own category. You can create, update, delete gists and files from the convenience of your familiar VSCode environment. Changes are automatically committed and sync'ed with GitHub.
+## [0.0.5] - 2022-11-14
 
-### Starred Gists
+### Changed
 
-Your starred gists, grouped in one convenient TreeView node
+* ❗Make the repo public, first Marketplace release (in preview)
 
-### Followed Users
+### Fixed
 
-Gists from the user you want to explicitly follow, to stay up to date with their latest work
+* Fixes around `Notepad`
 
-![follow user](https://user-images.githubusercontent.com/5784415/200188563-725d6a20-71af-4cb1-8424-2ce6aa25fdd9.gif)
+## [0.0.4] - 2022-11-13
 
-### Opened Gists
+### Added
 
-Interesting gists you have opened but not starred yet.
+* Enalbed `Notepad` gist
 
-![opened gists](https://user-images.githubusercontent.com/5784415/201803325-acd4a167-cbd3-4d92-b0d4-dc2c5ef28ff9.gif)
+## [0.0.3] - 2022-11-13
 
-## Create a new gist
+### Added
 
-You can create a private or public gist, just enter the gist name and the file name you want to use:
+* Enable `Opened Gists` group
 
-![new private gist](https://user-images.githubusercontent.com/5784415/197658237-f2d56e7a-2cbd-4d3a-9b9b-78a963a7336c.gif)
+## [0.0.2] - 2022-11-06
 
-## Sync across devices
+### Added
 
-You can sync your open gists across multiple devices by enabling [Settings Sync](https://code.visualstudio.com/docs/editor/settings-sync) in Visual Studio Code.
+* Enabled `Follow user` command
 
-*Node: you may need to Refresh the Virtual Gists view to see the latest repos added or removed from another machine.*
+ ### Fixed
 
-Changes are committed automatically after the file is saved. The commit message is `VirtualGists: update file <filePath>`.
+* Fixed [#2](https://github.com/carlocardella/vscode-VirtualGists/issues/2)
+* Other fixes adn improvements
 
-## Star/Unstar gists
+### Changed
 
-There are lots of useful gists on GitHub and an easy way to keep track is to star them. With Virtual Gists you can add a gist under the `Opened gists` group, or you can star a gist directly using its gistId:
+* Updated TreeView commands
 
-![star gist from gistid](https://user-images.githubusercontent.com/5784415/203449831-687a6f2c-a1a9-4464-9d21-fa264c5b1409.gif)
+## [0.0.1] - 2022-10-24
 
-If the gist you want to star is already listed anywhere else in Virtual Gists (under `Opened gists`, or it belongs to one of your followed users) you can use the `Star gist` command from the context menu:
+### Added
 
-![star gist from followed users](https://user-images.githubusercontent.com/5784415/203450921-605aff3a-5be4-4d4f-9645-89860a50a9d8.gif)
-
-### Copy Url/Open in browser
-
-You may want to share a gist with someone or view the gist in GitHub; easy enough, just use the appropriate command from the context menu.
-
-For a gist:
-
-![gist context menu](https://user-images.githubusercontent.com/5784415/203451530-22ab5558-21a3-4f27-931f-a45c55462576.png)
-
-For a file:
-
-![file context menu](https://user-images.githubusercontent.com/5784415/203451593-461c6da1-4773-4fd4-a4ba-a93ac0383c32.png)
-
-## Tracing
-
-You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Gists` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
-
-![image](https://user-images.githubusercontent.com/5784415/197569014-153f751e-6f37-4dd8-a5e6-3d50dc67b3de.png)
-
-## Acknowledgements
-
-Virtual Gists is freely inspired by these fine extensions:
-
-* [GistPad](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.gistfs)
-* [WikiLens](https://marketplace.visualstudio.com/items?itemName=lostintangent.wikilens)
-* [GitDoc](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.gitdoc)
-* [Dendron](https://marketplace.visualstudio.com/items?itemName=dendron.dendron)
-* [Foam](https://marketplace.visualstudio.com/items?itemName=foam.foam-vscode)
+* `My Gists` TreeView
+* `Starred Gists` TreeView
+* `New Public Gist`
+* `New Private Gist`
+* Delete a gist
+* Delete a file from a Gist
+* Add a new file to an existing Gist
+* Update a gist file, commit automatically on file save
