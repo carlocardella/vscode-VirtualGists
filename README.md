@@ -70,6 +70,28 @@ You can sync your open gists across multiple devices by enabling [Settings Sync]
 
 Changes are committed automatically after the file is saved. The commit message is `VirtualGists: update file <filePath>`.
 
+## Star/Unstar gists
+
+There are lots of useful gists on GitHub and an easy way to keep track is to star them. With Virtual Gists you can add a gist under the `Opened gists` group, or you can star a gist directly using its gistId:
+
+![star gist from gistid](https://user-images.githubusercontent.com/5784415/203449831-687a6f2c-a1a9-4464-9d21-fa264c5b1409.gif)
+
+If the gist you want to star is already listed anywhere else in Virtual Gists (under `Opened gists`, or it belongs to one of your followed users) you can use the `Star gist` command from the context menu:
+
+![star gist from followed users](https://user-images.githubusercontent.com/5784415/203450921-605aff3a-5be4-4d4f-9645-89860a50a9d8.gif)
+
+### Copy Url/Open in browser
+
+You may want to share a gist with someone or view the gist in GitHub; easy enough, just use the appropriate command from the context menu.
+
+For a gist:
+
+![gist context menu](https://user-images.githubusercontent.com/5784415/203451530-22ab5558-21a3-4f27-931f-a45c55462576.png)
+
+For a file:
+
+![file context menu](https://user-images.githubusercontent.com/5784415/203451593-461c6da1-4773-4fd4-a4ba-a93ac0383c32.png)
+
 ## Tracing
 
 You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Gists` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
