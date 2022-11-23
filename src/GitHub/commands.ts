@@ -1,11 +1,18 @@
-import { Uri, window } from "vscode";
-import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
-import { GIST_SCHEME } from "../FileSystem/fileSystem";
-import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser } from "./api";
+import { env, Uri, window, workspace } from "vscode";
+import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
+import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
+import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
 import { TContent, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import { addToGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, addToOrUpdateLocalStorage } from "../FileSystem/storage";
+import {
+    addToGlobalStorage,
+    readFromGlobalStorage,
+    GlobalStorageGroup,
+    removeFromGlobalStorage,
+    addToOrUpdateLocalStorage,
+    removeFromLocalStorage,
+} from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -140,7 +147,7 @@ function charCodeAt(c: string) {
  * @returns {*}
  */
 export async function deleteGist(gist: TGist) {
-    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, "Yes", "No", "Cancel");
+    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, { modal: true }, "Yes", "No", "Cancel");
     if (confirm !== "Yes") {
         return;
     }
@@ -159,7 +166,7 @@ export async function deleteGist(gist: TGist) {
  * @returns {*}
  */
 export async function deleteFile(file: ContentNode) {
-    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${file.path}'?`, "Yes", "No", "Cancel");
+    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${file.path}'?`, { modal: true }, "Yes", "No", "Cancel");
     if (confirm !== "Yes") {
         return;
     }
@@ -349,6 +356,14 @@ export async function openGist() {
     addToGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gistId);
 }
 
+/**
+ * Remove a gist from the list of opened gists
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to remove
+ * @returns {*}
+ */
 export async function closeGist(gist: GistNode) {
     removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
     gistProvider.refresh();
@@ -386,4 +401,179 @@ export async function renameFile(gistFile: ContentNode) {
 
     await gistFileSystemProvider.rename(oldUri, newUri);
     gistProvider.refresh();
+}
+
+/**
+ * Upload existing file(s) to a gist
+ *
+ * @export
+ * @async
+ * @param {(ContentNode | GistNode)} destination The gist to upload the file(s) to
+ * @returns {Promise<void>}
+ */
+export async function uploadFiles(destination: ContentNode | GistNode): Promise<void> {
+    const files = await window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: false, title: "Select the files to upload" });
+    if (!files) {
+        return Promise.reject();
+    }
+
+    await Promise.all(
+        files.map(async (file) => {
+            const content = await workspace.fs.readFile(file);
+            let uriPath = "path" in destination ? destination.path : "";
+            let uriFile = file.path.split("/").pop();
+            let uri = Uri.from({
+                scheme: GIST_SCHEME,
+                authority: destination.gist.id!,
+                path: `${uriPath}/${uriFile}`,
+            });
+
+            await gistFileSystemProvider.writeFile(uri, content, {
+                create: true,
+                overwrite: false,
+            });
+        })
+    );
+
+    return Promise.resolve();
+}
+
+/**
+ * Enums star/ubstar operations
+ *
+ * @export
+ * @enum {number}
+ */
+export enum GistStarOperation {
+    star = "star",
+    unstar = "unstar",
+}
+
+/**
+ * Unstar a gist and remove it from the "Starred gists" group
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to unstar
+ * @returns {*}
+ */
+export async function unstarGist(gist: GistNode) {
+    const confirm = await window.showWarningMessage(`Are you sure you want to unstar ${gist.name}?`, { modal: true }, "Yes", "No");
+    if (confirm !== "Yes") {
+        return;
+    }
+
+    await starredGist(gist, GistStarOperation.unstar);
+}
+
+/**
+ * Star or unstar a gist and add or remove it to/from the "Starred gists" group
+ *
+ * @async
+ * @param {GistNode} gist The gist to star
+ * @param {GistStarOperation} operation The operation to perform (star/unstar)
+ * @returns {*}
+ */
+async function starredGist(gist: GistNode, operation: GistStarOperation) {
+    await starGitHubGist(gist, operation);
+    gistProvider.refresh();
+}
+
+/**
+ * Star a gist and add it to the "Starred gists" group.
+ * If the gist is already opened (in the "Opened gists" group), it will be removed from there and added to the "Starred gists" group.
+ * If the gist is not already opened, prompts the user and ask for the gistId to open.
+ *
+ * @export
+ * @async
+ * @param {?GistNode} [gist] The gist to star
+ * @returns {*}
+ */
+export async function starGist(gist?: GistNode) {
+    if (!gist) {
+        const gistId = await window.showInputBox({ ignoreFocusOut: true, prompt: "Enter the gistId you want to star", placeHolder: "gistId" });
+        if (!gistId) {
+            return;
+        }
+
+        const gistToStar = await getGitHubGist(gistId!);
+        if (!gistToStar) {
+            window.showErrorMessage(
+                `Could not open gist ${gistId}, check the [output trace](https://github.com/carlocardella/vscode-VirtualGists/blob/main/README.md#tracing) for details`
+            );
+            return;
+        }
+
+        await starredGist(new GistNode(gistToStar, GistsGroupType.starredGists, true), GistStarOperation.star);
+    } else {
+        await starredGist(gist, GistStarOperation.star);
+
+        if (gist.contextValue === GistsGroupType.openedGists) {
+            // The gist is listed under "Opened Gists", remove it
+            await closeGist(gist);
+        }
+    }
+}
+
+/**
+ * Copy the gistId to the clipboard
+ *
+ * @export
+ * @param {GistNode} gist The gist to copy the gistId
+ */
+export function copyGistId(gist: GistNode) {
+    env.clipboard.writeText(gist.gist.id!);
+}
+
+/**
+ * Copy the gist URL to the clipboard
+ *
+ * @export
+ * @param {GistNode} gist The gist to copy the URL
+ */
+export function copyGistUrl(gist: GistNode) {
+    env.clipboard.writeText(gist.gist.html_url!);
+}
+
+/**
+ * Open the gist in the browser
+ *
+ * @export
+ * @param {GistNode} gist The gist to open in the browser
+ */
+export function openGistOnGitHub(gist: GistNode) {
+    env.openExternal(Uri.parse(gist.gist.html_url!));
+}
+
+
+/**
+ * Copy the gist file Url to the clipboard
+ *
+ * @export
+ * @param {ContentNode} gistFile The gist file to copy the URL
+ */
+export function copyFileUrl(gistFile: ContentNode) {
+    let fileUrl = getFileUriForCopy(gistFile);
+    env.clipboard.writeText(fileUrl);
+}
+
+/**
+ * Open the gist file in the browser
+ *
+ * @export
+ * @param {ContentNode} gistFile The gist file to open in the browser
+ */
+export function openFileOnGitHub(gistFile: ContentNode) {
+    let fileUrl = getFileUriForCopy(gistFile);
+    env.openExternal(Uri.parse(fileUrl));
+}
+
+/**
+ * Builds the gist file URL to be copied or opened in the browser
+ *
+ * @param {ContentNode} gistFile The gist file to copy the URL
+ * @returns {string}
+ */
+function getFileUriForCopy(gistFile: ContentNode): string {
+    return "https://gist.github.com/" + gistFile.gist.owner!.login + "/" + gistFile.gist.id + "#file-" + gistFile.name.replace(".", "-");
 }

@@ -101,7 +101,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
             return await deleteGitHubGist(gist);
         } else {
             // delete a file
-            deleteGistFile(gist, uri.path);
+            await deleteGistFile(gist, uri.path);
         }
     }
 
@@ -136,18 +136,15 @@ export class GistFileSystemProvider implements FileSystemProvider {
             file = {
                 filename: uri.path.split("/").slice(1).join("/"),
             } as TGistFileNoKey;
-            content = new TextEncoder().encode("");
+            if (!content) {
+                content = new TextEncoder().encode("");
+            }
         }
 
-        createOrUpdateFile(gist, file, content)
-            .then(() => {
-                // @investigate: refresh the gist or file rather than the whole tree?
-                gistProvider.refresh();
-            })
-            .then(() => {
-                this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
-                gistProvider.refresh();
-            });
+        createOrUpdateFile(gist, file, content).then(() => {
+            this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
+            gistProvider.refresh();
+        });
 
         return Promise.resolve();
     }

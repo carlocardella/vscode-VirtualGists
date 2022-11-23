@@ -162,6 +162,43 @@
                 "title": "Rename...",
                 "command": "VirtualGists.renameFile",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "Unstar gist",
+                "command": "VirtualGists.unstarGist",
+                "category": "Virtual Gists",
+                "icon": "$(close)"
+            },
+            {
+                "title": "Star gist",
+                "command": "VirtualGists.starGist",
+                "category": "Virtual Gists",
+                "icon": "$(star-empty)"
+            },
+            {
+                "title": "Copy gist id",
+                "command": "VirtualGists.copyGistId",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Copy gist URL",
+                "command": "VirtualGists.copyGistUrl",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Open gist in browser",
+                "command": "VirtualGists.openGistOnGitHub",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Copy file URL",
+                "command": "VirtualGists.copyFileUrl",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Open file in browser",
+                "command": "VirtualGists.openFileOnGitHub",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -187,6 +224,18 @@
         "menus": {
             "commandPalette": [
                 {
+                    "command": "VirtualGists.copyGistId",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.copyGistUrl",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.openGistOnGitHub",
+                    "when": "false"
+                },
+                {
                     "command": "VirtualGists.closeGist",
                     "when": "false"
                 },
@@ -203,6 +252,13 @@
                 {
                     "command": "VirtualGists.addFile",
                     "when": "false"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.starGist"
                 },
                 {
                     "command": "VirtualGists.renameFile",
@@ -242,6 +298,14 @@
                 },
                 {
                     "command": "VirtualGists.unfollowUser",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.copyFileUrl",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.openFileOnGitHub",
                     "when": "false"
                 }
             ],
@@ -319,6 +383,16 @@
                     "group": "2_close@1"
                 },
                 {
+                    "command": "VirtualGists.copyFileUrl",
+                    "when": "viewItem =~ /file./",
+                    "group": "1_copy@1"
+                },
+                {
+                    "command": "VirtualGists.openFileOnGitHub",
+                    "when": "viewItem =~ /file./",
+                    "group": "1_copy@2"
+                },
+                {
                     "command": "VirtualGists.renameFile",
                     "when": "viewItem == file.readWrite",
                     "group": "3_delete@1"
@@ -366,7 +440,42 @@
                 {
                     "command": "VirtualGists.closeGist",
                     "when": "viewItem == gist.opened",
-                    "group": "1_close@1"
+                    "group": "2_close@1"
+                },
+                {
+                    "command": "VirtualGists.starGist",
+                    "when": "viewItem == gist.opened || viewItem == gist.followedUsers",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.starGist",
+                    "when": "viewItem == gist.opened || viewItem == gist.followedUsers",
+                    "group": "1_star@1"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "viewItem == gist.starred",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "viewItem == gist.starred",
+                    "group": "1_star@1"
+                },
+                {
+                    "command": "VirtualGists.copyGistId",
+                    "when": "viewItem =~ /gist./",
+                    "group": "3_copy@1"
+                },
+                {
+                    "command": "VirtualGists.copyGistUrl",
+                    "when": "viewItem =~ /gist./",
+                    "group": "3_copy@2"
+                },
+                {
+                    "command": "VirtualGists.openGistOnGitHub",
+                    "when": "viewItem =~ /gist./",
+                    "group": "3_copy@3"
                 }
             ]
         }

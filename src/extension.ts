@@ -22,7 +22,24 @@ export const store = {
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
-import { addFile, closeGist, createGist, deleteFile, deleteGist, followUser, openGist, renameFile } from "./GitHub/commands";
+import {
+    addFile,
+    closeGist,
+    createGist,
+    deleteFile,
+    deleteGist,
+    followUser,
+    openGist,
+    renameFile,
+    starGist,
+    unstarGist,
+    uploadFiles,
+    copyGistId,
+    copyGistUrl,
+    openGistOnGitHub,
+    copyFileUrl,
+    openFileOnGitHub,
+} from "./GitHub/commands";
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -164,6 +181,54 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.renameFile", async (gistFile: ContentNode) => {
             renameFile(gistFile);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.uploadFile", async (gist: ContentNode) => {
+            uploadFiles(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.unstarGist", async (gist: GistNode) => {
+            await unstarGist(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.starGist", async (gist: GistNode) => {
+            starGist(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.copyGistId", async (gist: GistNode) => {
+            copyGistId(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.copyGistUrl", async (gist: GistNode) => {
+            copyGistUrl(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.openGistOnGitHub", async (gist: GistNode) => {
+            openGistOnGitHub(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.copyFileUrl", async (gistFile: ContentNode) => {
+            copyFileUrl(gistFile);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.openFileOnGitHub", async (gistFile: ContentNode) => {
+            openFileOnGitHub(gistFile);
         })
     );
 
