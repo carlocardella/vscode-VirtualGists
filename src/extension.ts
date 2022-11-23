@@ -22,7 +22,24 @@ export const store = {
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
-import { addFile, closeGist, createGist, deleteFile, deleteGist, followUser, openGist, renameFile, starGist, unstarGist, uploadFiles, copyGistId, copyGistUrl, openGistOnGitHub } from './GitHub/commands';
+import {
+    addFile,
+    closeGist,
+    createGist,
+    deleteFile,
+    deleteGist,
+    followUser,
+    openGist,
+    renameFile,
+    starGist,
+    unstarGist,
+    uploadFiles,
+    copyGistId,
+    copyGistUrl,
+    openGistOnGitHub,
+    copyFileUrl,
+    openFileOnGitHub,
+} from "./GitHub/commands";
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -200,6 +217,18 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.openGistOnGitHub", async (gist: GistNode) => {
             openGistOnGitHub(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.copyFileUrl", async (gistFile: ContentNode) => {
+            copyFileUrl(gistFile);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.openFileOnGitHub", async (gistFile: ContentNode) => {
+            openFileOnGitHub(gistFile);
         })
     );
 

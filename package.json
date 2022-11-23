@@ -189,6 +189,16 @@
                 "title": "Open gist in browser",
                 "command": "VirtualGists.openGistOnGitHub",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "Copy file URL",
+                "command": "VirtualGists.copyFileUrl",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Open file in browser",
+                "command": "VirtualGists.openFileOnGitHub",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -289,6 +299,14 @@
                 {
                     "command": "VirtualGists.unfollowUser",
                     "when": "false"
+                },
+                {
+                    "command": "VirtualGists.copyFileUrl",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.openFileOnGitHub",
+                    "when": "false"
                 }
             ],
             "view/title": [
@@ -363,6 +381,16 @@
                     "command": "VirtualGists.closeGist",
                     "when": "viewItem == gist",
                     "group": "2_close@1"
+                },
+                {
+                    "command": "VirtualGists.copyFileUrl",
+                    "when": "viewItem =~ /file./",
+                    "group": "1_copy@1"
+                },
+                {
+                    "command": "VirtualGists.openFileOnGitHub",
+                    "when": "viewItem =~ /file./",
+                    "group": "1_copy@2"
                 },
                 {
                     "command": "VirtualGists.renameFile",

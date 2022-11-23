@@ -76,7 +76,6 @@ You can enable `VirtualGists.EnableTracing` in your User or Workspace settings t
 
 ![image](https://user-images.githubusercontent.com/5784415/197569014-153f751e-6f37-4dd8-a5e6-3d50dc67b3de.png)
 
-
 ## Acknowledgements
 
 Virtual Gists is freely inspired by these fine extensions:

@@ -544,3 +544,36 @@ export function copyGistUrl(gist: GistNode) {
 export function openGistOnGitHub(gist: GistNode) {
     env.openExternal(Uri.parse(gist.gist.html_url!));
 }
+
+
+/**
+ * Copy the gist file Url to the clipboard
+ *
+ * @export
+ * @param {ContentNode} gistFile The gist file to copy the URL
+ */
+export function copyFileUrl(gistFile: ContentNode) {
+    let fileUrl = getFileUriForCopy(gistFile);
+    env.clipboard.writeText(fileUrl);
+}
+
+/**
+ * Open the gist file in the browser
+ *
+ * @export
+ * @param {ContentNode} gistFile The gist file to open in the browser
+ */
+export function openFileOnGitHub(gistFile: ContentNode) {
+    let fileUrl = getFileUriForCopy(gistFile);
+    env.openExternal(Uri.parse(fileUrl));
+}
+
+/**
+ * Builds the gist file URL to be copied or opened in the browser
+ *
+ * @param {ContentNode} gistFile The gist file to copy the URL
+ * @returns {string}
+ */
+function getFileUriForCopy(gistFile: ContentNode): string {
+    return "https://gist.github.com/" + gistFile.gist.owner!.login + "/" + gistFile.gist.id + "#file-" + gistFile.name.replace(".", "-");
+}

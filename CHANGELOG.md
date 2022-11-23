@@ -8,6 +8,25 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [0.0.8] - 2022-11-22
+
+### Added
+
+* Star a gist
+  * You can start a gist in two ways:
+    1. Use the `Star gist` command and enter the `gistId`
+    2. If the gist to star is already listed under `Opened Gists` or it belongs to a followed user, you can use the `Star gist` command from the context menu
+* Upload a local file to an existing gist
+* `Copy gist id`
+* `Copy gist URL`
+* `Open gist in browser`
+* `Copy file URL`
+* `Open file in browser`
+
+### Fixed
+
+* Fixed issue [#15 Deleting a file sometimes does not update the file counter](https://github.com/carlocardella/vscode-VirtualGists/issues/15)
+
 ## [0.0.7] - 2022-11-20
 
 ### Added
