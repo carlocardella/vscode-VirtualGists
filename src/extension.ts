@@ -39,6 +39,7 @@ import {
     openGistOnGitHub,
     copyFileUrl,
     openFileOnGitHub,
+    viewGistOwnerProfileOnGitHub,
 } from "./GitHub/commands";
 declare global {
     var TextEncoder: typeof _TextEncoder;
@@ -223,6 +224,13 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.copyFileUrl", async (gistFile: ContentNode) => {
             copyFileUrl(gistFile);
+        })
+    );
+
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.viewGistOwnerProfileOnGitHub", async (gist: GistNode) => {
+            await viewGistOwnerProfileOnGitHub(gist.gist.owner!.login);
         })
     );
 

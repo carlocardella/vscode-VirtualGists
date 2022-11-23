@@ -199,6 +199,11 @@
                 "title": "Open file in browser",
                 "command": "VirtualGists.openFileOnGitHub",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "View user profile on GitHub",
+                "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -233,6 +238,10 @@
                 },
                 {
                     "command": "VirtualGists.openGistOnGitHub",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
                     "when": "false"
                 },
                 {
@@ -476,6 +485,11 @@
                     "command": "VirtualGists.openGistOnGitHub",
                     "when": "viewItem =~ /gist./",
                     "group": "3_copy@3"
+                },
+                {
+                    "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
+                    "when": "viewItem =~ /gist./",
+                    "group": "4_browser@1"
                 }
             ]
         }

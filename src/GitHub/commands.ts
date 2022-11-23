@@ -577,3 +577,18 @@ export function openFileOnGitHub(gistFile: ContentNode) {
 function getFileUriForCopy(gistFile: ContentNode): string {
     return "https://gist.github.com/" + gistFile.gist.owner!.login + "/" + gistFile.gist.id + "#file-" + gistFile.name.replace(".", "-");
 }
+
+/**
+ * View the gist owner's profile on GitHub
+ *
+ * @export
+ * @async
+ * @param {string} username The username of the owner
+ * @returns {*}
+ */
+export async function viewGistOwnerProfileOnGitHub(username: string) {
+    const user = await getGitHubUser(username);
+    if (user) {
+        env.openExternal(Uri.parse(user.html_url));
+    }
+}
