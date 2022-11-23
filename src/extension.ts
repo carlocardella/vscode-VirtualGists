@@ -19,7 +19,6 @@ export const gistFileSystemProvider = new GistFileSystemProvider();
 export const store = {
     gists: [] as (GistNode | undefined)[],
 };
-// @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
 import {
@@ -41,6 +40,9 @@ import {
     openFileOnGitHub,
     viewGistOwnerProfileOnGitHub,
 } from "./GitHub/commands";
+
+// @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
+
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -226,7 +228,6 @@ export async function activate(context: ExtensionContext) {
             copyFileUrl(gistFile);
         })
     );
-
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.viewGistOwnerProfileOnGitHub", async (gist: GistNode) => {
