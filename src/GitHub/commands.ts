@@ -1,4 +1,4 @@
-import { env, Uri, window, workspace } from "vscode";
+import { env, ProgressLocation, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
@@ -13,6 +13,8 @@ import {
     addToOrUpdateLocalStorage,
     removeFromLocalStorage,
 } from "../FileSystem/storage";
+import { confirmOverwrite, confirmOverwriteOptions } from "../utils";
+import { MessageType } from "../tracing";
 
 /**
  * Get the content of a gist file.
@@ -545,7 +547,6 @@ export function openGistOnGitHub(gist: GistNode) {
     env.openExternal(Uri.parse(gist.gist.html_url!));
 }
 
-
 /**
  * Copy the gist file Url to the clipboard
  *
@@ -591,4 +592,71 @@ export async function viewGistOwnerProfileOnGitHub(username: string) {
     if (user) {
         env.openExternal(Uri.parse(user.html_url));
     }
+}
+
+export async function downloadFiles(targetNode: GistFileNode, targetNodes?: GistFileNode[]) => {
+    const nodes = targetNodes || [targetNode];
+    let folder = await window.showOpenDialog({
+        canSelectFiles: false,
+        canSelectFolders: true,
+        canSelectMany: false,
+    });
+
+    let overwrite = new confirmOverwrite();
+    
+    window.withProgress(
+        {
+            location: ProgressLocation.Notification,
+            title: "Downloading gists...",
+            cancellable: true,
+        },
+        async (progress, token) => {
+            token.onCancellationRequested(() => {
+                console.log("Gist download cancelled by user.");
+                overwrite.cancel();
+                return;
+            });
+
+            if (folder && nodes) {
+                for (let node of nodes) {
+                    let fileName = ensureIsValidFileSystemName(node.file.filename!);
+                    let newFileUri = Uri.joinPath(folder![0], fileName);
+
+                    // check if the user wants to overwrite the file
+                    let canOverwrite = await overwrite.confirm(newFileUri);
+
+                    if (overwrite.userChoice === confirmOverwriteOptions.Cancel) {
+                        // the user cancelled the download
+                        output?.appendLine("File download cancelled by user.", messageType.Info);
+                        return;
+                    }
+
+                    if (!canOverwrite) {
+                        continue;
+                    }
+
+                    // workspace.fs.readFile should return a Uint8Array but in testing I found that fileContent is of type string if I do not explicitly mark it as Uint8Array
+                    const fileContent: Uint8Array = await workspace.fs.readFile(fileNameToUri(node.gistId, fileName));
+
+                    downloadFile(newFileUri, fileContent);
+                }
+            }
+        }
+    );
+}
+
+
+/**
+ * Download a Gist file to a local file.
+ *
+ * @export
+ * @param {Uri} newFileUri Uri of the new file; this is where the file will be downloaded to
+ * @param {Uint8Array} fileContent Content of the file to be downloaded
+ */
+export function downloadFile(newFileUri: Uri, fileContent: Uint8Array) {
+  try {
+    workspace.fs.writeFile(newFileUri, fileContent);
+  } catch (e) {
+    output?.appendLine(`Error writing file: ${e}`, MessageType.error);
+  }
 }
