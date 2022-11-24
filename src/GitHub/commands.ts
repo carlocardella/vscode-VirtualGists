@@ -2,7 +2,7 @@ import { env, ProgressLocation, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
-import { TContent, TGist, TGitHubUser, TGistFile } from './types';
+import { TContent, TGist, TGitHubUser, TGistFile } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import {
@@ -13,7 +13,7 @@ import {
     addToOrUpdateLocalStorage,
     removeFromLocalStorage,
 } from "../FileSystem/storage";
-import { confirmOverwrite, confirmOverwriteOptions } from "../utils";
+import { confirmOverwrite, confirmOverwriteOptions, ensureIsValidFileSystemName } from "../utils";
 import { MessageType } from "../tracing";
 
 /**
@@ -603,7 +603,7 @@ export async function downloadFiles(targetNode: TGistFile, targetNodes?: TGistFi
     });
 
     let overwrite = new confirmOverwrite();
-    
+
     window.withProgress(
         {
             location: ProgressLocation.Notification,
@@ -627,7 +627,7 @@ export async function downloadFiles(targetNode: TGistFile, targetNodes?: TGistFi
 
                     if (overwrite.userChoice === confirmOverwriteOptions.Cancel) {
                         // the user cancelled the download
-                        output?.appendLine("File download cancelled by user.", messageType.Info);
+                        output?.appendLine("File download cancelled by user.", MessageType.info);
                         return;
                     }
 
@@ -645,7 +645,6 @@ export async function downloadFiles(targetNode: TGistFile, targetNodes?: TGistFi
     );
 }
 
-
 /**
  * Download a Gist file to a local file.
  *
@@ -654,9 +653,204 @@ export async function downloadFiles(targetNode: TGistFile, targetNodes?: TGistFi
  * @param {Uint8Array} fileContent Content of the file to be downloaded
  */
 export function downloadFile(newFileUri: Uri, fileContent: Uint8Array) {
-  try {
-    workspace.fs.writeFile(newFileUri, fileContent);
-  } catch (e) {
-    output?.appendLine(`Error writing file: ${e}`, MessageType.error);
-  }
+    try {
+        workspace.fs.writeFile(newFileUri, fileContent);
+    } catch (e) {
+        output?.appendLine(`Error writing file: ${e}`, MessageType.error);
+    }
+}
+
+export async function downloadGist(targetNode?: GistNode, multiSelectNodes?: GistNode[]) {
+    let folder = await window.showOpenDialog({
+        canSelectFiles: false,
+        canSelectFolders: true,
+        canSelectMany: false,
+    });
+
+    let overwrite = new confirmOverwrite();
+    window.withProgress(
+        {
+            location: ProgressLocation.Notification,
+            title: "Downloading gists...",
+            cancellable: true,
+        },
+        async (progress, token) => {
+            token.onCancellationRequested(() => {
+                output?.appendLine("Gist download cancelled by user.", MessageType.info);
+                overwrite.cancel();
+                return;
+            });
+
+            if (folder) {
+                for (const node of multiSelectNodes || [targetNode]) {
+                    try {
+                        // create the folder for the Gist, use the Gist label as name
+                        let folderName = ensureIsValidFileSystemName(node!.label!.toString());
+
+                        // @investigate: can treeNode.label be undefined?
+                        let newFolder = Uri.joinPath(folder[0], folderName);
+                        // check if the user wants to overwrite the folder
+                        let canOverwrite = await overwrite.confirm(newFolder);
+
+                        if ((overwrite.userChoice as confirmOverwriteOptions) === confirmOverwriteOptions.Cancel) {
+                            // the user cancelled the operation, so we can just return
+                            return;
+                        }
+
+                        if (!canOverwrite) {
+                            continue;
+                        }
+
+                        // create the folder for the Gist
+                        workspace.fs.createDirectory(newFolder);
+
+                        // download the files
+                        for (const gistFile of Object.values<any>(node!.gist.files)) {
+                            const validFsName = ensureIsValidFileSystemName(gistFile.filename);
+                            let newFileUri = Uri.joinPath(newFolder, validFsName);
+
+                            // check if the user wants to overwrite the folder
+                            canOverwrite = await overwrite.confirm(newFileUri);
+
+                            if ((overwrite.userChoice as confirmOverwriteOptions) === confirmOverwriteOptions.Cancel) {
+                                // the user cancelled the download
+                                output?.appendLine("Gist download cancelled by user.", messageType.Info);
+                                return;
+                            }
+
+                            if (!canOverwrite) {
+                                continue;
+                            }
+
+                            // get the file content; for this we need to use the raw file name and needs to be extracted from raw_url
+                            // note: oddly, node.file.raw_url?.split("/").at(-1) throws compilation error (but it works for a gist)
+                            const rawUrlParts = node.file.raw_url?.split("/");
+                            const rawFileName = rawUrlParts![rawUrlParts!.length - 1];
+
+                            // workspace.fs.readFile should return a Uint8Array but in testing I found that fileContent is of type string if I do not explicitly mark it as Uint8Array
+                            const fileContent: Uint8Array = await workspace.fs.readFile(fileNameToUri(node.gistId, rawFileName));
+
+                            downloadFile(newFileUri, fileContent);
+                        }
+                    } catch (e) {
+                        // @todo: add Output trace to show the error
+                        output?.appendLine(`Error downloading gist: ${e}`, MessageType.error);
+                    }
+                }
+            }
+        }
+    );
+}
+
+export async function downloadAddGists(targetNode?: any, multiSelectNodes?: any[]) {
+    let folder = await window.showOpenDialog({
+        canSelectFiles: false,
+        canSelectFolders: true,
+        canSelectMany: false,
+    });
+
+    let overwrite = new confirmOverwrite();
+    window.withProgress(
+        {
+            location: ProgressLocation.Notification,
+            title: "Downloading gists...",
+            cancellable: true,
+        },
+        async (progress, token) => {
+            token.onCancellationRequested(() => {
+                output?.appendLine("Gist download cancelled by user.", messageType.Info);
+                overwrite.cancel();
+                return;
+            });
+
+            if (folder) {
+                for (const node of multiSelectNodes || [targetNode]) {
+                    try {
+                        // create a folder for the user
+                        // gitGroupFolderName is the folder that will contain all gists downloaded for Gist group, e.g. followedUsers
+                        let gistGroupFolderName = "";
+                        let gists: any;
+
+                        [gistGroupFolderName, gists] = getGistFolderAndStore(node);
+
+                        let userFolderName = ensureIsValidFileSystemName(gistGroupFolderName);
+                        // create the folder for the Gist, use the Gist label as the name
+                        // @investigate: can treeNode.label be undefined?
+                        let newFolder = Uri.joinPath(folder[0], userFolderName);
+
+                        // check if the user wants to overwrite the folder
+                        let canOverwrite = await overwrite.confirm(newFolder);
+
+                        if ((overwrite.userChoice as confirmOverwriteOptions) === confirmOverwriteOptions.Cancel) {
+                            // the user cancelled the operation, so we can just return
+                            return;
+                        }
+
+                        if (!canOverwrite) {
+                            continue;
+                        }
+
+                        // create the folder for the Gist
+                        workspace.fs.createDirectory(newFolder);
+
+                        // download the files
+                        let gist: any;
+                        for (gist of gists) {
+                            let gistName = gist.description;
+                            if (!gistName) {
+                                gistName = gist.files[Object.keys(gist.files)[0]].filename;
+                            }
+
+                            let gistFolderName = ensureIsValidFileSystemName(gistName);
+                            // create the gist folder (username/gistname)
+                            let newFolder = Uri.joinPath(folder[0], userFolderName, gistFolderName); // prettier-ignore
+
+                            // check if the user wants to overwrite the folder
+                            canOverwrite = await overwrite.confirm(newFolder);
+
+                            if ((overwrite.userChoice as confirmOverwriteOptions) === confirmOverwriteOptions.Cancel) {
+                                // the user cancelled the operation, so we can just return
+                                output?.appendLine("Gist download cancelled by user.", messageType.Info);
+                                return;
+                            }
+
+                            if (!canOverwrite) {
+                                continue;
+                            }
+
+                            // create the folder for the Gist
+                            workspace.fs.createDirectory(newFolder);
+
+                            // download the files
+                            for (const gistFile of Object.values<any>(gist?.files)) {
+                                const validFsName = ensureIsValidFileSystemName(gistFile.filename);
+                                let newFileUri = Uri.joinPath(newFolder, validFsName);
+
+                                // check if the user wants to overwrite the folder
+                                canOverwrite = await overwrite.confirm(newFileUri);
+
+                                if ((overwrite.userChoice as confirmOverwriteOptions) === confirmOverwriteOptions.Cancel) {
+                                    // the user cancelled the download
+                                    output?.appendLine("Gist download cancelled by user.", messageType.Info);
+                                    return;
+                                }
+
+                                if (!canOverwrite) {
+                                    continue;
+                                }
+
+                                // get the file content; for this we need to use the raw file name and needs to be extracted from raw_url
+                                const rawFileName = gistFile.raw_url.split("/").at(-1);
+                                // workspace.fs.readFile should return a Uint8Array but in testing I found that fileContent is of type string if I do not explicitly mark it as Uint8Array
+                                const fileContent: Uint8Array = await workspace.fs.readFile(fileNameToUri(gist.id, rawFileName));
+
+                                downloadFile(newFileUri, fileContent);
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+            return Promise.resolve();
+        }
+    );
 }

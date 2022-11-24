@@ -1,5 +1,7 @@
 import { Uri, window, workspace } from "vscode";
 import * as config from "./config";
+import { output } from "./extension";
+import { MessageType } from './tracing';
 
 /**
  * Possible answers to the question "Do you want to overwrite the file?"
@@ -104,4 +106,82 @@ export class confirmOverwrite {
 
         return Promise.resolve(this._overwrite);
     }
+}
+
+/**
+ * Returns a valid file system name for the file represented by the given URI.
+ *
+ * @export
+ * @param {string} name The file or folder name to validate
+ * @returns {string}
+ */
+export function ensureIsValidFileSystemName(name: string): string {
+    // name cannot begin with a slash (even if it is a valid html character and it would not be removed by Uri.toString())
+    if (name[0] === "/") {
+        name = name.substring(1);
+    }
+
+    // remove invalid file system characters
+    name = name.replace(/[\/|\\:*?#"<>]/g, "_");
+
+    // remove unicode characters (emoji)
+    name = name.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "_");
+
+    // a file system name cannot be longer than 255 characters, but I'm going to truncate it to max 200 characters because during testing,
+    // files and folder with a 255 character name were created correctly but then it was not possible to open or delete them.
+    name = name.substring(0, 200).trim();
+
+    // a folder name cannot end with a dot (.), if it does then the folder cannot be opened once created (at least on Windows)
+    if (name.endsWith(".")) {
+        name = name.slice(0, -1);
+    }
+
+    return name;
+}
+
+function getGistFolderAndStore(node: any): [string, any, boolean] {
+    let gistGroupFolderName = "";
+    let gists: any;
+    let isGistContainer = false;
+
+    switch (node.contextValue) {
+        case "followedUserGists":
+            gistGroupFolderName = node!.user!.username;
+            gists = store.followedUsers.filter((user) => user.username === gistGroupFolderName)[0].gists;
+            isGistContainer = true;
+            break;
+
+        case "starredGists":
+            gistGroupFolderName = "Starred gists";
+            gists = store.starredGists;
+            isGistContainer = true;
+            break;
+
+        case "gists":
+            gistGroupFolderName = "My gists";
+            gists = store.gists;
+            isGistContainer = true;
+            break;
+
+        case "scratchGist":
+            gistGroupFolderName = "Scratch notes";
+            gists = store.scratchNotes.gist;
+            isGistContainer = true;
+            break;
+
+        case "followedUser.gist":
+            break;
+
+        case "gists.gist":
+            break;
+
+        case "gistFile.editable":
+            break;
+
+        default:
+            output?.appendLine(`GistPad; downloadAllGists: unknown context value: ${node.contextValue}`, MessageType.error);
+            break;
+    }
+
+    return [gistGroupFolderName, gists, isGistContainer];
 }
