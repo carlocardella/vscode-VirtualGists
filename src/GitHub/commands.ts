@@ -2,7 +2,7 @@ import { env, ProgressLocation, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
-import { TContent, TGist, TGitHubUser } from "./types";
+import { TContent, TGist, TGitHubUser, TGistFile } from './types';
 import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import {
@@ -594,7 +594,7 @@ export async function viewGistOwnerProfileOnGitHub(username: string) {
     }
 }
 
-export async function downloadFiles(targetNode: GistFileNode, targetNodes?: GistFileNode[]) => {
+export async function downloadFiles(targetNode: TGistFile, targetNodes?: TGistFile[]) {
     const nodes = targetNodes || [targetNode];
     let folder = await window.showOpenDialog({
         canSelectFiles: false,
