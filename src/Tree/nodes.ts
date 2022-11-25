@@ -271,7 +271,11 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                     case GistsGroupType.openedGists:
                         const openedGists = await getOpenedGists();
-                        childNodes = openedGists?.map((gist) => new GistNode(gist, element.groupType, true)) ?? [];
+                        childNodes = openedGists?.map((gist) => {
+                            let openedGist = new GistNode(gist, element.groupType, true);
+                            openedGist.iconPath = Uri.parse(gist.owner!.avatar_url);
+                            return openedGist;
+                        }) ?? [];
                         addToOrUpdateLocalStorage(...childNodes);
                         break;
 
