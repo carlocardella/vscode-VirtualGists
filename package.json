@@ -120,7 +120,7 @@
                 "category": "Virtual Gists"
             },
             {
-                "title": "Delete",
+                "title": "Delete...",
                 "command": "VirtualGists.deleteNode",
                 "icon": "$(trash)",
                 "category": "Virtual Gists"
@@ -368,28 +368,28 @@
                 },
                 {
                     "command": "VirtualGists.newPrivateGist",
-                    "when": "viewItem == myGistsGroupNode1`",
-                    "group": "1_add@1"
+                    "when": "viewItem == myGistsGroupNode",
+                    "group": "1_gist@1"
                 },
                 {
                     "command": "VirtualGists.newPublicGist",
                     "when": "viewItem == myGistsGroupNode",
-                    "group": "1_add@1"
+                    "group": "1_gist@1"
                 },
                 {
                     "command": "VirtualGists.addFile",
                     "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
-                    "group": "1_add@1"
+                    "group": "1_gist@1"
                 },
                 {
                     "command": "VirtualGists.uploadFile",
                     "when": "viewItem == gist.readWrite",
-                    "group": "1_add@2"
+                    "group": "1_gist@2"
                 },
                 {
                     "command": "VirtualGists.closeGist",
                     "when": "viewItem == gist",
-                    "group": "2_close@1"
+                    "group": "1_gist@1"
                 },
                 {
                     "command": "VirtualGists.copyFileUrl",
@@ -414,11 +414,6 @@
                 {
                     "command": "VirtualGists.openGist",
                     "when": "viewItem == openedGistsGroupNode",
-                    "group": "inline"
-                },
-                {
-                    "command": "VirtualGists.openGist",
-                    "when": "viewItem == openedGistsGroupNode",
                     "group": "1_open@1"
                 },
                 {
@@ -443,32 +438,32 @@
                 },
                 {
                     "command": "VirtualGists.closeGist",
-                    "when": "viewItem == gist.opened",
+                    "when": "viewItem == gist.openedGists",
                     "group": "inline"
                 },
                 {
                     "command": "VirtualGists.closeGist",
-                    "when": "viewItem == gist.opened",
-                    "group": "2_close@1"
+                    "when": "viewItem == gist.openedGists",
+                    "group": "1_gist@2"
                 },
                 {
                     "command": "VirtualGists.starGist",
-                    "when": "viewItem == gist.opened || viewItem == gist.followedUsers",
+                    "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers",
                     "group": "inline"
                 },
                 {
                     "command": "VirtualGists.starGist",
-                    "when": "viewItem == gist.opened || viewItem == gist.followedUsers",
-                    "group": "1_star@1"
+                    "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers",
+                    "group": "1_gist@1"
                 },
                 {
                     "command": "VirtualGists.unstarGist",
-                    "when": "viewItem == gist.starred",
+                    "when": "viewItem == gist.starredGists",
                     "group": "inline"
                 },
                 {
                     "command": "VirtualGists.unstarGist",
-                    "when": "viewItem == gist.starred",
+                    "when": "viewItem == gist.starredGists",
                     "group": "1_star@1"
                 },
                 {
@@ -489,7 +484,12 @@
                 {
                     "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
                     "when": "viewItem =~ /gist./",
-                    "group": "4_browser@1"
+                    "group": "9_open@2"
+                },
+                {
+                    "command": "VirtualGists.followUser",
+                    "when": "viewItem == gist.openedGists",
+                    "group": "1_open@3"
                 }
             ]
         }

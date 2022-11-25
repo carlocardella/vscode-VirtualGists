@@ -158,8 +158,8 @@ export async function activate(context: ExtensionContext) {
     );
 
     context.subscriptions.push(
-        commands.registerCommand("VirtualGists.followUser", async () => {
-            followUser();
+        commands.registerCommand("VirtualGists.followUser", async (gist?: GistNode) => {
+            followUser(gist?.gist?.owner?.login);
         })
     );
 
