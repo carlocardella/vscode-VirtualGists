@@ -265,8 +265,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         break;
 
                     case GistsGroupType.followedUsers:
-                        const followedUserNames = await getFollowedUsers();
-                        const followedUsers = await Promise.all(followedUserNames.map((user) => getGitHubUser(user.login)));
+                        const followedUsers = await getFollowedUsers();
                         childNodes = followedUsers.filter((user) => user !== undefined).map((user) => new UserNode(user!));
                         break;
 
