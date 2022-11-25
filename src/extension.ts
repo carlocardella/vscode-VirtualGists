@@ -1,7 +1,7 @@
 import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
-import { commands, ExtensionContext, workspace, window } from "vscode";
+import { commands, ExtensionContext, workspace, window, TreeView } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME, GistFile } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
@@ -257,7 +257,7 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
-    window.createTreeView("virtualGistsView", {
+    treeView = window.createTreeView("virtualGistsView", {
         treeDataProvider: gistProvider,
         showCollapseAll: true,
         canSelectMany: true,
@@ -265,6 +265,8 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(disposable);
 }
+
+export let treeView: TreeView<any>;
 
 // this method is called when your extension is deactivated
 export function deactivate() {}

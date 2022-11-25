@@ -1,5 +1,5 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { store } from "../extension";
+import { store, gistProvider } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { addToOrUpdateLocalStorage, updateStoredGist } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
@@ -31,6 +31,7 @@ export enum GistsGroupType {
 export class GistsGroupNode extends TreeItem {
     gists: GistNode[] | undefined;
     groupType: GistsGroupType;
+    description: string | undefined;
 
     constructor(groupType: GistsGroupType | string, gists?: GistNode[] | undefined) {
         super(groupType, TreeItemCollapsibleState.Collapsed);
@@ -126,6 +127,7 @@ export class UserNode extends TreeItem {
         this.tooltip = user.login;
         this.iconPath = Uri.parse(user.avatar_url);
         this.contextValue = "user";
+        // this.description = user.type;
     }
 }
 
@@ -265,8 +267,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         break;
 
                     case GistsGroupType.followedUsers:
-                        const followedUserNames = await getFollowedUsers();
-                        const followedUsers = await Promise.all(followedUserNames.map((user) => getGitHubUser(user.login)));
+                        const followedUsers = await getFollowedUsers();
                         childNodes = followedUsers.filter((user) => user !== undefined).map((user) => new UserNode(user!));
                         break;
 
