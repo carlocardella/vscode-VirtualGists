@@ -3,7 +3,7 @@ import { extensionContext, gistFileSystemProvider, gistProvider, output, store }
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
 import { TContent, TGist, TGitHubUser } from "./types";
-import { ContentNode, GistNode, GistsGroupType, NotepadNode } from "../Tree/nodes";
+import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import {
     addToGlobalStorage,
@@ -286,9 +286,6 @@ export async function followUser(username?: string): Promise<void> {
     // add username to storage
     await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, username);
 
-    // get gists for username
-    let gistsForUser = await getGistsForUser(username);
-
     return Promise.resolve();
 }
 
@@ -305,7 +302,8 @@ export async function getGistsForUser(githubUser: string): Promise<TGist[] | und
 }
 
 /**
- * Returns a list of followed users from Global Storage
+ * Returns a list of followed, valid users from Global Storage
+ * The username is validated by checking if the user exits on GitHub
  *
  * @export
  * @async
@@ -321,7 +319,8 @@ export async function getFollowedUsers(): Promise<TGitHubUser[]> {
 }
 
 /**
- * Returns the list of opened gists
+ * Returns the list of opened, valid gists
+ * The gist is validated by checking if the gist exits on GitHub
  *
  * @export
  * @async
@@ -589,5 +588,25 @@ export async function viewGistOwnerProfileOnGitHub(username: string) {
     const user = await getGitHubUser(username);
     if (user) {
         env.openExternal(Uri.parse(user.html_url));
+    }
+}
+
+/**
+ * Copy the gist owner's username to the clipboard
+ *
+ * @export
+ * @param {(GistNode | ContentNode | UserNode)} node The node to copy the username
+ */
+export function copyUserName(node: GistNode | ContentNode | UserNode) {
+    if (node instanceof GistNode) {
+        env.clipboard.writeText(node.gist.owner!.login);
+    }
+
+    if (node instanceof ContentNode) {
+        env.clipboard.writeText(node.gist.owner!.login);
+    }
+
+    if (node instanceof UserNode) {
+        env.clipboard.writeText(node.label as string);
     }
 }

@@ -5,7 +5,7 @@ import { commands, ExtensionContext, workspace, window } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME, GistFile } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import { clearGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage } from "./FileSystem/storage";
+import { clearGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, purgeGlobalStorage } from "./FileSystem/storage";
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -39,6 +39,7 @@ import {
     copyFileUrl,
     openFileOnGitHub,
     viewGistOwnerProfileOnGitHub,
+    copyUserName,
 } from "./GitHub/commands";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
@@ -96,8 +97,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.purgeGlobalStorage", async () => {
-            // purgeGlobalStorage(extensionContext);
-            throw new Error("Not implemented");
+            purgeGlobalStorage(extensionContext);
         })
     );
 
@@ -165,7 +165,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.unfollowUser", async (user: UserNode) => {
-            removeFromGlobalStorage(extensionContext, GistsGroupType.followedUsers, user.label as string);
+            removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
         })
     );
 
@@ -214,6 +214,12 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.copyGistUrl", async (gist: GistNode) => {
             copyGistUrl(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.copyUsername", async (node: GistNode | UserNode | ContentNode) => {
+            copyUserName(node);
         })
     );
 

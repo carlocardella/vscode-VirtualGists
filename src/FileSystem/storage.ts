@@ -1,8 +1,9 @@
-import { GistNode } from "../Tree/nodes";
-import { ExtensionContext } from "vscode";
+import { GistNode, GistsGroupNode } from "../Tree/nodes";
+import { Extension, ExtensionContext, window } from "vscode";
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, OPENED_GISTS_GLOBAL_STORAGE_KEY } from "../GitHub/constants";
 import { output, gistProvider, store } from "../extension";
 import { TGist } from "../GitHub/types";
+import { getFollowedUsers, getOpenedGists } from "../GitHub/commands";
 
 /**
  * Global Storage groups
@@ -25,6 +26,11 @@ export class GlobalStorageGroup {
  */
 export async function addToGlobalStorage(context: ExtensionContext, globalStorageGroup: string, value: string): Promise<void> {
     let globalStorage = await readFromGlobalStorage(context, globalStorageGroup);
+
+    if (globalStorage.includes(value)) {
+        window.showInformationMessage(`${value} is already in the list`);
+        return Promise.resolve();
+    }
 
     globalStorage.push(value);
     context.globalState.update(globalStorageGroup, globalStorage);
@@ -78,6 +84,28 @@ export function clearGlobalStorage(context: ExtensionContext, globalStorageGroup
     }
 
     gistProvider.refresh();
+}
+
+export async function purgeGlobalStorage(context: ExtensionContext, storageGroup?: GlobalStorageGroup[]) {
+    let cleanedGlobalStorage: string[] = [];
+    let cleanedFollowedUsers: string[] = [];
+    let cleanedOpenedGists: string[] = [];
+
+    if (!storageGroup) {
+        storageGroup = [GlobalStorageGroup.followedUsers, GlobalStorageGroup.openedGists];
+    }
+
+    for (const group of storageGroup) {
+        if (group === GlobalStorageGroup.followedUsers) {
+            cleanedFollowedUsers = (await getFollowedUsers()).map((user) => user.login);
+            context.globalState.update(GlobalStorageGroup.followedUsers, cleanedFollowedUsers);
+        }
+
+        if (group === GlobalStorageGroup.openedGists) {
+            cleanedOpenedGists = (await getOpenedGists()).map((gist) => gist.id!);
+            context.globalState.update(GlobalStorageGroup.openedGists, cleanedOpenedGists);
+        }
+    }
 }
 
 /**

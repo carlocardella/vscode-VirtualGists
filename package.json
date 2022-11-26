@@ -204,6 +204,11 @@
                 "title": "View user profile on GitHub",
                 "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "Copy owner name",
+                "command": "VirtualGists.copyUsername",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -234,6 +239,10 @@
                 },
                 {
                     "command": "VirtualGists.copyGistUrl",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.copyUsername",
                     "when": "false"
                 },
                 {
@@ -482,14 +491,19 @@
                     "group": "3_copy@3"
                 },
                 {
-                    "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
+                    "command": "VirtualGists.followUser",
+                    "when": "viewItem == gist.openedGists || viewItem == gist.starredGists",
+                    "group": "9_open@1"
+                },
+                {
+                    "command": "VirtualGists.copyUsername",
                     "when": "viewItem =~ /gist./",
                     "group": "9_open@2"
                 },
                 {
-                    "command": "VirtualGists.followUser",
-                    "when": "viewItem == gist.openedGists",
-                    "group": "1_open@3"
+                    "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
+                    "when": "viewItem =~ /gist./",
+                    "group": "9_open@3"
                 }
             ]
         }

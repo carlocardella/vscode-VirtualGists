@@ -251,8 +251,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                     case GistsGroupType.myGists:
                         let ownedGists = await getOwnedGists();
                         // prettier-ignore
-                        childNodes =
-                            ownedGists
+                        childNodes = ownedGists
                             ?.filter((gist) => gist.description !== NOTEPAD_GIST_NAME)
                             ?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
                         addToOrUpdateLocalStorage(...childNodes);
@@ -260,8 +259,8 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                     case GistsGroupType.starredGists:
                         let starredGists = await getStarredGists();
-                        childNodes =
-                            starredGists?.map((gist) => {
+                        // prettier-ignore
+                        childNodes = starredGists?.map((gist) => {
                                 let starredGist = new GistNode(gist, element.groupType, true);
                                 starredGist.iconPath = Uri.parse(gist.owner!.avatar_url);
                                 return starredGist;
@@ -276,12 +275,12 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                     case GistsGroupType.openedGists:
                         const openedGists = await getOpenedGists();
-                        childNodes =
-                            openedGists?.map((gist) => {
-                                let openedGist = new GistNode(gist, element.groupType, true);
-                                openedGist.iconPath = Uri.parse(gist.owner!.avatar_url);
-                                return openedGist;
-                            }) ?? [];
+                        // prettier-ignore
+                        childNodes = openedGists?.map((gist) => {
+                                    let openedGist = new GistNode(gist, element.groupType, true);
+                                    openedGist.iconPath = Uri.parse(gist.owner!.avatar_url);
+                                    return openedGist;
+                                }) ?? [];
                         addToOrUpdateLocalStorage(...childNodes);
                         break;
 
