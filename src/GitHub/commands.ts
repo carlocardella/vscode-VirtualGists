@@ -270,24 +270,24 @@ export async function addFile(gist: GistNode): Promise<void> {
  * @async
  * @returns {Promise<void>}
  */
-export async function followUser(): Promise<void> {
-    const userToFollow = await window.showInputBox({
-        prompt: "Enter the name of the user to follow",
-        placeHolder: "GitHub username",
-        ignoreFocusOut: true,
-    });
+export async function followUser(username?: string): Promise<void> {
+    if (!username) {
+        username = await window.showInputBox({
+            prompt: "Enter the name of the user to follow",
+            placeHolder: "GitHub username",
+            ignoreFocusOut: true,
+        });
 
-    if (!userToFollow) {
-        return Promise.reject();
+        if (!username) {
+            return Promise.reject();
+        }
     }
 
     // add username to storage
-    await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, userToFollow);
+    await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, username);
 
     // get gists for username
-    let gistsForUser = await getGistsForUser(userToFollow);
-
-    // @todo add username as TreeView node
+    let gistsForUser = await getGistsForUser(username);
 
     return Promise.resolve();
 }
@@ -508,7 +508,7 @@ export async function starGist(gist?: GistNode) {
     } else {
         await starredGist(gist, GistStarOperation.star);
 
-        if (gist.contextValue === GistsGroupType.openedGists) {
+        if (gist.contextValue === "gist.openedGists" || gist.contextValue === "gist.openedGists") {
             // The gist is listed under "Opened Gists", remove it
             await closeGist(gist);
         }
@@ -544,7 +544,6 @@ export function copyGistUrl(gist: GistNode) {
 export function openGistOnGitHub(gist: GistNode) {
     env.openExternal(Uri.parse(gist.gist.html_url!));
 }
-
 
 /**
  * Copy the gist file Url to the clipboard

@@ -94,10 +94,10 @@ export class GistNode extends TreeItem {
         this.contextValue = readOnly ? "gist.readOny" : "gist.readWrite";
         // @investigate: is groupType better than readOnly/readWrite?
         if (groupType === GistsGroupType.openedGists) {
-            this.contextValue = "gist.opened";
+            this.contextValue = "gist.openedGists";
         }
         if (groupType === GistsGroupType.starredGists) {
-            this.contextValue = "gist.starred";
+            this.contextValue = "gist.starredGists";
         }
         if (groupType === GistsGroupType.followedUsers) {
             this.contextValue = "gist.followedUsers";
@@ -260,7 +260,12 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                     case GistsGroupType.starredGists:
                         let starredGists = await getStarredGists();
-                        childNodes = starredGists?.map((gist) => new GistNode(gist, element.groupType, true)) ?? [];
+                        childNodes =
+                            starredGists?.map((gist) => {
+                                let starredGist = new GistNode(gist, element.groupType, true);
+                                starredGist.iconPath = Uri.parse(gist.owner!.avatar_url);
+                                return starredGist;
+                            }) ?? [];
                         addToOrUpdateLocalStorage(...childNodes);
                         break;
 
@@ -271,11 +276,12 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                     case GistsGroupType.openedGists:
                         const openedGists = await getOpenedGists();
-                        childNodes = openedGists?.map((gist) => {
-                            let openedGist = new GistNode(gist, element.groupType, true);
-                            openedGist.iconPath = Uri.parse(gist.owner!.avatar_url);
-                            return openedGist;
-                        }) ?? [];
+                        childNodes =
+                            openedGists?.map((gist) => {
+                                let openedGist = new GistNode(gist, element.groupType, true);
+                                openedGist.iconPath = Uri.parse(gist.owner!.avatar_url);
+                                return openedGist;
+                            }) ?? [];
                         addToOrUpdateLocalStorage(...childNodes);
                         break;
 
