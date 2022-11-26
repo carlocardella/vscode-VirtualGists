@@ -6,6 +6,7 @@ import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
 import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getFollowedUsers, getOpenedGists, getNotepadGist } from "../GitHub/commands";
 import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
 import { NOTEPAD_GIST_NAME } from "../GitHub/constants";
+import * as config from "./../config";
 
 /**
  * Type of gists to show in the TreeView
@@ -123,8 +124,9 @@ export class UserNode extends TreeItem {
     constructor(user: TGitHubUser) {
         super(user.login, TreeItemCollapsibleState.Collapsed);
 
+        const icon = config.get("UseGistOwnerAvatar") ? Uri.parse(user.avatar_url) : new ThemeIcon("person-follow");
+        this.iconPath = icon;
         this.tooltip = user.login;
-        this.iconPath = Uri.parse(user.avatar_url);
         this.contextValue = "user";
     }
 }
@@ -261,8 +263,10 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         let starredGists = await getStarredGists();
                         // prettier-ignore
                         childNodes = starredGists?.map((gist) => {
-                                let starredGist = new GistNode(gist, element.groupType, true);
-                                starredGist.iconPath = Uri.parse(gist.owner!.avatar_url);
+                            let starredGist = new GistNode(gist, element.groupType, true);
+                                if (config.get("UseGistOwnerAvatar")){
+                                    starredGist.iconPath = Uri.parse(gist.owner!.avatar_url);
+                                }
                                 return starredGist;
                             }) ?? [];
                         addToOrUpdateLocalStorage(...childNodes);
@@ -277,10 +281,12 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         const openedGists = await getOpenedGists();
                         // prettier-ignore
                         childNodes = openedGists?.map((gist) => {
-                                    let openedGist = new GistNode(gist, element.groupType, true);
-                                    openedGist.iconPath = Uri.parse(gist.owner!.avatar_url);
-                                    return openedGist;
-                                }) ?? [];
+                            let openedGist = new GistNode(gist, element.groupType, true);
+                            if (config.get("UseGistOwnerAvatar")) {
+                                openedGist.iconPath = Uri.parse(gist.owner!.avatar_url);
+                            }
+                            return openedGist;
+                        }) ?? [];
                         addToOrUpdateLocalStorage(...childNodes);
                         break;
 

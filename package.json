@@ -50,6 +50,16 @@
                     "type": "boolean",
                     "description": "Enable tracing of the extension",
                     "default": false
+                },
+                "VirtualGists.PullInterval": {
+                    "type": "number",
+                    "description": "Interval in seconds to pull changes from the remote gists, set to 0 (zero) to disable",
+                    "default": 0
+                },
+                "VirtualGists.UseGistOwnerAvatar": {
+                    "type": "boolean",
+                    "description": "Use the owner's avatar for opened and starred gists, and followed users",
+                    "default": false
                 }
             }
         },

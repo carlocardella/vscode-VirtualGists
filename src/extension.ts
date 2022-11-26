@@ -260,6 +260,11 @@ export async function activate(context: ExtensionContext) {
                     output?.dispose();
                 }
             }
+
+            if (e.affectsConfiguration("VirtualGists.UseGistOwnerAvatar")) {
+                gistProvider.refresh();
+                output?.appendLine("UseGistOwnerAvatar changed", output.messageType.info);
+            }
         })
     );
 
