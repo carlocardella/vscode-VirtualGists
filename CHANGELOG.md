@@ -8,6 +8,22 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [0.0.9] - 2022-11-26
+
+### Added
+
+* Setting `VirtualGist.PullInterval`. Default: `0` (zero)
+  * Controls, in seconds, how frequently gists should be refreshed from GitHub. Set to zero to disable
+* Setting `VirtualGists.UseGistOwnerAvatar`: default `false`
+  * Controls if followed users, starred gists and opened gists should use the gist owner's GitHub avatar or a generic icon from the active IconTheme
+* `View user profile on GitHub`
+
+### Changed
+
+* Node module updates
+* Some code refactoring
+* IMproved performance by avoiding duplicate calls in certain scenarios
+
 ## [0.0.8] - 2022-11-22
 
 ### Added

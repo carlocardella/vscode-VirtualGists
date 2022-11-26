@@ -92,11 +92,27 @@ For a file:
 
 ![file context menu](https://user-images.githubusercontent.com/5784415/203451593-461c6da1-4773-4fd4-a4ba-a93ac0383c32.png)
 
+### Optionally use the gist owner's avatar as icon
+
+It can be helpful to identify to which user an opened or starred gist belongs to as a glance. Oh the other hand, you may prefer a cleaner list where icons only show the item type without being too distracting. Use `VirtualGists.UseGistOwnerAvatar` to toggle the behavior to your liking:
+
+![virtualGits_use_owner_avatar](https://user-images.githubusercontent.com/5784415/204113210-2b3c1c64-9205-4ac7-800d-cd449f98df6a.gif)
+
 ## Tracing
 
 You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Gists` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
 
 ![image](https://user-images.githubusercontent.com/5784415/197569014-153f751e-6f37-4dd8-a5e6-3d50dc67b3de.png)
+
+## My other extensions
+
+* [Virtual Repos](https://github.com/carlocardella/vscode-VirtualRepos): Virtual Repos is a Visual Studio Code extension that allows to open and edit a remote repository (e.g. on GitHub) without cloning, committing or pushing your changes. It all happens automatically
+<!-- * [Virtual Gists](https://github.com/carlocardella/vscode-VirtualGists): Virtual Gists is a Visual Studio Code extension that allows to open and edit a remote gist (e.g. on GitHub) without cloning, committing or pushing your changes. It all happens automatically -->
+* [Virtual Git](https://github.com/carlocardella/vscode-VirtualGit): VSCode extension path with my extensions to work with virtual repositories and gists based on a virtual file system
+* [Text Toolbox](https://github.com/carlocardella/vscode-TextToolbox): Collection of tools for text manipulation, filtering, sorting etc...
+* [File System Toolbox](https://github.com/carlocardella/vscode-FileSystemToolbox): VSCode extension to work with the file system, path auto-complete on any file type
+* [Changelog Manager](https://github.com/carlocardella/vscode-ChangelogManager): VSCode extension, helps to build a changelog for your project, either in markdown or plain text files. The changelog format follows Keep a changelog
+* [Hogwarts colors for Visual Studio Code](https://github.com/carlocardella/hogwarts-colors-for-vscode): Visual Studio theme colors inspired by Harry Potter, Hogwarts and Hogwarts Houses colors and banners
 
 ## Acknowledgements
 
