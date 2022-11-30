@@ -124,7 +124,7 @@ export class UserNode extends TreeItem {
     constructor(user: TGitHubUser) {
         super(user.login, TreeItemCollapsibleState.Collapsed);
 
-        const icon = config.get("UseGistOwnerAvatar") ? Uri.parse(user.avatar_url) : new ThemeIcon("person-follow");
+        const icon = config.get("UseGistOwnerAvatar") ? Uri.parse(user.avatar_url) : new ThemeIcon("account");
         this.iconPath = icon;
         this.tooltip = user.login;
         this.contextValue = "user";
