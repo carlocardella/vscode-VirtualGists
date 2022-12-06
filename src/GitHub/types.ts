@@ -190,3 +190,32 @@ export type TForks = {
     created_at: string;
     updated_at: string;
 };
+
+export type TForkedGist = {
+    url: string;
+    forks_url: string;
+    commits_url: string;
+    id: string;
+    node_id: string;
+    git_pull_url: string;
+    git_push_url: string;
+    html_url: string;
+    files: {
+        [key: string]: {
+            filename?: string | undefined;
+            type?: string | undefined;
+            language?: string | undefined;
+            raw_url?: string | undefined;
+            size?: number | undefined;
+        };
+    };
+    public: boolean;
+    created_at: string;
+    updated_at: string;
+    description?: string | null;
+    comments: number;
+    user?: TUser | null | undefined;
+    comments_url: string;
+    owner?: TUser | undefined;
+    truncated?: boolean | undefined;
+};

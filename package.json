@@ -219,6 +219,11 @@
                 "title": "Copy owner name",
                 "command": "VirtualGists.copyUsername",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "Fork gist...",
+                "command": "VirtualGists.forkGist",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -269,6 +274,9 @@
                 },
                 {
                     "command": "VirtualGists.openGist"
+                },
+                {
+                    "command": "VirtualGists.forkGist"
                 },
                 {
                     "command": "VirtualGists.closeGist",
@@ -483,7 +491,12 @@
                 {
                     "command": "VirtualGists.unstarGist",
                     "when": "viewItem == gist.starredGists",
-                    "group": "1_star@1"
+                    "group": "1_gist@1"
+                },
+                {
+                    "command": "VirtualGists.forkGist",
+                    "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers || viewItem == gist.starredGists",
+                    "group": "1_gist@2"
                 },
                 {
                     "command": "VirtualGists.copyGistId",

@@ -4,7 +4,7 @@ import { MessageType } from "../tracing";
 import { GistNode } from "../Tree/nodes";
 import { GistStarOperation } from "./commands";
 import { ZERO_WIDTH_SPACE } from "./constants";
-import { TGistFileNoKey, TGist, TGitHubUser } from "./types";
+import { TGistFileNoKey, TGist, TGitHubUser, TForkedGist } from "./types";
 
 /**
  * Get the authenticated GitHub user
@@ -300,6 +300,30 @@ export async function starGitHubGist(gist: GistNode, operation: GistStarOperatio
         return Promise.resolve();
     } catch (e: any) {
         output?.appendLine(`Cannot unstar gist "${gist.name}". ${e.message}`, output.messageType.error);
+    }
+
+    return Promise.reject();
+}
+
+/**
+ * Fork a GitHub gist
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to fork
+ * @returns {Promise<any>}
+ */
+export async function forkGitHubGist(gist: GistNode): Promise<TForkedGist> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        let { data } = await octokit.gists.fork({ gist_id: gist.gist.id! });
+        output?.appendLine(`Forked gist "${gist.name}"`, output.messageType.info);
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Cannot fork gist "${gist.name}". ${e.message}`, output.messageType.error);
     }
 
     return Promise.reject();

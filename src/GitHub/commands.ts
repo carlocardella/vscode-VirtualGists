@@ -1,8 +1,16 @@
-import { env, Uri, window, workspace } from "vscode";
+import { env, ProgressLocation, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
-import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
-import { TContent, TGist, TGitHubUser } from "./types";
+import {
+    getGitHubGist,
+    getGitHubGistsForAuthenticatedUser,
+    createGitHubGist,
+    getGitHubGistForUser,
+    getGitHubUser,
+    starGitHubGist,
+    forkGitHubGist,
+} from "./api";
+import { TContent, TForkedGist, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import {
@@ -608,5 +616,49 @@ export function copyUserName(node: GistNode | ContentNode | UserNode) {
 
     if (node instanceof UserNode) {
         env.clipboard.writeText(node.label as string);
+    }
+}
+
+/**
+ * Fork a gist and add it to the "My Gist" group.
+ *
+ * @export
+ * @async
+ * @param {?(GistNode | string)} [gist]
+ * @returns {*}
+ */
+export async function forkGist(gist?: GistNode | string) {
+    let newGist: TForkedGist | undefined;
+
+    if (gist instanceof GistNode) {
+        await window
+            .withProgress({ title: "Forking gist...", location: ProgressLocation.Notification }, async () => {
+                newGist = await forkGitHubGist(gist as GistNode);
+            });
+    }
+
+    if (!gist) {
+        const gistId = await window.showInputBox({ ignoreFocusOut: true, prompt: "Enter the gistId you want to fork", placeHolder: "gistId" });
+        if (!gistId) {
+            return;
+        }
+
+        gist = await getGitHubGist(gistId!).then((gist) => {
+            return gist?.id;
+        });
+    }
+
+    if (typeof gist === "string") {
+        await window.withProgress({ title: "Forking gist...", location: ProgressLocation.Notification }, async () => {
+            let sourceGist = await getGitHubGist(gist as string);
+            if (sourceGist) {
+                let gistObject = new GistNode(sourceGist, GistsGroupType.openedGists);
+                newGist = await forkGitHubGist(gistObject);
+            }
+        });
+    }
+
+    if (newGist) {
+        gistProvider.refresh();
     }
 }
