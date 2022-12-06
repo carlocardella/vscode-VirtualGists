@@ -8,6 +8,17 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [0.0.10] - 2022-12-06
+
+### Added
+
+* `Fork gist`
+* `Clone gist`
+
+### Changed
+
+* Updated the generic `followed users` icon
+
 ## [0.0.9] - 2022-11-26
 
 ### Added
