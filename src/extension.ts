@@ -40,6 +40,7 @@ import {
     openFileOnGitHub,
     viewGistOwnerProfileOnGitHub,
     copyUserName,
+    cloneGist,
 } from "./GitHub/commands";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
@@ -244,6 +245,12 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.openFileOnGitHub", async (gistFile: ContentNode) => {
             openFileOnGitHub(gistFile);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.cloneGist", async (gist: GistNode) => {
+            cloneGist(gist);
         })
     );
 

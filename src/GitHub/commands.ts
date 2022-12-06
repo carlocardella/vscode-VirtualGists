@@ -1,4 +1,4 @@
-import { env, Uri, window, workspace } from "vscode";
+import { commands, env, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import { getGitHubGist, getGitHubGistsForAuthenticatedUser, createGitHubGist, getGitHubGistForUser, getGitHubUser, starGitHubGist } from "./api";
@@ -609,4 +609,17 @@ export function copyUserName(node: GistNode | ContentNode | UserNode) {
     if (node instanceof UserNode) {
         env.clipboard.writeText(node.label as string);
     }
+}
+
+/**
+ * Clone the selected gist
+ *
+ * @export
+ * @async
+ * @param {RepoNode} gist The gist to clone
+ * @returns {*}
+ */
+export async function cloneGist(gist: GistNode) {
+    output?.appendLine(`Cloning ${gist.gist.git_pull_url}`, output.messageType.info);
+    commands.executeCommand("git.clone", gist.gist.git_pull_url);
 }
