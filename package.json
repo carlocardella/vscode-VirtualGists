@@ -88,7 +88,7 @@
                 "icon": "$(lock)"
             },
             {
-                "title": "Clone gist",
+                "title": "Clone gist...",
                 "command": "VirtualGists.cloneGist",
                 "category": "Virtual Gists",
                 "icon": "$(repo-clone)"
@@ -512,6 +512,11 @@
                     "command": "VirtualGists.openGistOnGitHub",
                     "when": "viewItem =~ /gist./",
                     "group": "3_copy@3"
+                },
+                {
+                    "command": "VirtualGists.cloneGist",
+                    "when": "viewItem =~ /gist./",
+                    "group": "3_copy@4"
                 },
                 {
                     "command": "VirtualGists.followUser",

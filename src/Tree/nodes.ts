@@ -82,6 +82,7 @@ export class GistNode extends TreeItem {
     groupType: GistsGroupType;
     readOnly: boolean;
     uri: Uri;
+    git_pull_url: string | undefined;
 
     constructor(gist: TGist, groupType: GistsGroupType, readOnly?: boolean) {
         super(gist.description!, TreeItemCollapsibleState.Collapsed);
@@ -104,6 +105,7 @@ export class GistNode extends TreeItem {
             this.contextValue = "gist.followedUsers";
         }
         this.uri = fileNameToUri(this.id!);
+        this.git_pull_url = gist.git_pull_url;
 
         // const privateGistIcon = Uri.file(extensionContext.extensionPath + "/assets/private_gist.svg");
         // const publicGistIcon = Uri.file(extensionContext.extensionPath + "/assets/public_gist.svg");

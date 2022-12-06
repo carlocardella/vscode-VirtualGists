@@ -1,4 +1,4 @@
-import { env, ProgressLocation, Uri, window, workspace } from "vscode";
+import { commands, env, ProgressLocation, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
 import {
@@ -661,4 +661,17 @@ export async function forkGist(gist?: GistNode | string) {
     if (newGist) {
         gistProvider.refresh();
     }
+}
+
+/**
+ * Clone the selected gist
+ *
+ * @export
+ * @async
+ * @param {RepoNode} gist The gist to clone
+ * @returns {*}
+ */
+export async function cloneGist(gist: GistNode) {
+    output?.appendLine(`Cloning ${gist.gist.git_pull_url}`, output.messageType.info);
+    commands.executeCommand("git.clone", gist.gist.git_pull_url);
 }
