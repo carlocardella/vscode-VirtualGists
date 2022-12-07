@@ -353,3 +353,17 @@ export async function getGitHubFollowedUsers(): Promise<TUser[]> {
 
     return Promise.reject();
 }
+
+export async function followGitHubUser(username: string): Promise<void> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        await octokit.users.follow({ username: username });
+        output?.appendLine(`Followed user "${username}"`, output.messageType.info);
+        return Promise.resolve();
+    } catch (e: any) {
+        output?.appendLine(`Cannot follow user "${username} on GitHub". ${e.message}`, output.messageType.error);
+    }
+}

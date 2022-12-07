@@ -10,6 +10,7 @@ import {
     starGitHubGist,
     forkGitHubGist,
     getGitHubFollowedUsers,
+    followGitHubUser,
 } from "./api";
 import { TContent, TForkedGist, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
@@ -727,3 +728,13 @@ export async function pickUserToFollow(): Promise<string | undefined> {
         // @todo: refresh the list of followed users
     });
 }
+
+
+export async function followUserOnGitHub(username: string) {
+    await window.withProgress({ title: "Following user...", location: ProgressLocation.Notification }, async () => {
+        await followGitHubUser(username);
+    });
+}
+
+
+

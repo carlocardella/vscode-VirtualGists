@@ -224,6 +224,11 @@
                 "title": "Fork gist...",
                 "command": "VirtualGists.forkGist",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "Follow user on GitHub...",
+                "command": "VirtualGists.followUserOnGitHub",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -270,6 +275,10 @@
                 },
                 {
                     "command": "VirtualGists.closeGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.followUserOnGitHub",
                     "when": "false"
                 },
                 {
@@ -462,6 +471,11 @@
                     "command": "VirtualGists.unfollowUser",
                     "when": "viewItem == user",
                     "group": "1_open@1"
+                },
+                {
+                    "command": "VirtualGists.followUserOnGitHub",
+                    "when": "viewItem == user",
+                    "group": "1_open@2"
                 },
                 {
                     "command": "VirtualGists.closeGist",

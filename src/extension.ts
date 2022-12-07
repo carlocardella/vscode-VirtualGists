@@ -50,6 +50,7 @@ import {
     forkGist,
     cloneGist,
     pickUserToFollow,
+    followUserOnGitHub,
 } from "./GitHub/commands";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
@@ -187,6 +188,12 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.unfollowUser", async (user: UserNode) => {
             removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.followUserOnGitHub", async (user: UserNode) => {
+            await followUserOnGitHub(user!.label as string);
         })
     );
 
