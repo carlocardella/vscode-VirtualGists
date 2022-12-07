@@ -2,7 +2,7 @@ import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
-import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType } from "./Tree/nodes";
+import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType, GistsGroupNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME, GistFile } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
 import {
@@ -170,7 +170,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.followUser", async (gist?: GistNode) => {
-            const pick = gist ? gist!.gist!.owner!.login : await pickUserToFollow();
+            const pick = gist instanceof GistsGroupNode || !gist ? await pickUserToFollow() : gist!.gist!.owner!.login;
             if (pick) {
                 if (pick === credentials.authenticatedUser.login) {
                     window.showErrorMessage("You cannot follow yourself");
