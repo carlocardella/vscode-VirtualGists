@@ -693,6 +693,8 @@ export async function pickUserToFollow(): Promise<string | undefined> {
         quickPick.show();
 
         quickPick.items = [{ label: QuickPickItems.username }, { label: QuickPickItems.followedGitHubUsers }];
+        quickPick.title = "GitHub user to follow";
+        quickPick.placeholder = "GitHub username";
 
         quickPick.onDidAccept(async () => {
             if (pick === QuickPickItems.username) {
