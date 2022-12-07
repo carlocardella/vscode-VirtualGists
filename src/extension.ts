@@ -5,7 +5,14 @@ import { commands, ExtensionContext, workspace, window } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME, GistFile } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import { clearGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, purgeGlobalStorage } from "./FileSystem/storage";
+import {
+    clearGlobalStorage,
+    readFromGlobalStorage,
+    GlobalStorageGroup,
+    removeFromGlobalStorage,
+    purgeGlobalStorage,
+    addToGlobalStorage,
+} from "./FileSystem/storage";
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -42,6 +49,7 @@ import {
     copyUserName,
     forkGist,
     cloneGist,
+    pickUserToFollow,
 } from "./GitHub/commands";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
@@ -161,7 +169,17 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.followUser", async (gist?: GistNode) => {
-            followUser(gist?.gist?.owner?.login);
+            // followUser(gist?.gist?.owner?.login);
+            // pickUserToFollow(gist?.gist?.owner?.login);
+            // const pick = (await pickUserToFollow()) as string;
+            const pick = gist ? gist!.gist!.owner!.login : await pickUserToFollow();
+            if (pick) {
+                output?.appendLine(`Picked repository: ${pick}`, output.messageType.info);
+                await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
+                gistProvider.refresh();
+            } else {
+                output?.appendLine("'Follow user' cancelled by user", output.messageType.info);
+            }
         })
     );
 

@@ -4,7 +4,7 @@ import { MessageType } from "../tracing";
 import { GistNode } from "../Tree/nodes";
 import { GistStarOperation } from "./commands";
 import { ZERO_WIDTH_SPACE } from "./constants";
-import { TGistFileNoKey, TGist, TGitHubUser, TForkedGist } from "./types";
+import { TGistFileNoKey, TGist, TGitHubUser, TForkedGist, TUser } from "./types";
 
 /**
  * Get the authenticated GitHub user
@@ -324,6 +324,31 @@ export async function forkGitHubGist(gist: GistNode): Promise<TForkedGist> {
         return Promise.resolve(data);
     } catch (e: any) {
         output?.appendLine(`Cannot fork gist "${gist.name}". ${e.message}`, output.messageType.error);
+    }
+
+    return Promise.reject();
+}
+
+/**
+ * Return a list of followed users on GitHub
+ *
+ * @export
+ * @async
+ * @returns {Promise<TUser[]>}
+ */
+export async function getGitHubFollowedUsers(): Promise<TUser[]> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        const data = await octokit.paginate(octokit.users.listFollowedByAuthenticatedUser, (response) => {
+            return response.data;
+        });
+
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Cannot get followed users. ${e.message}`, output.messageType.error);
     }
 
     return Promise.reject();

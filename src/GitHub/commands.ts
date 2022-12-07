@@ -9,6 +9,7 @@ import {
     getGitHubUser,
     starGitHubGist,
     forkGitHubGist,
+    getGitHubFollowedUsers,
 } from "./api";
 import { TContent, TForkedGist, TGist, TGitHubUser } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
@@ -631,10 +632,9 @@ export async function forkGist(gist?: GistNode | string) {
     let newGist: TForkedGist | undefined;
 
     if (gist instanceof GistNode) {
-        await window
-            .withProgress({ title: "Forking gist...", location: ProgressLocation.Notification }, async () => {
-                newGist = await forkGitHubGist(gist as GistNode);
-            });
+        await window.withProgress({ title: "Forking gist...", location: ProgressLocation.Notification }, async () => {
+            newGist = await forkGitHubGist(gist as GistNode);
+        });
     }
 
     if (!gist) {
@@ -674,4 +674,54 @@ export async function forkGist(gist?: GistNode | string) {
 export async function cloneGist(gist: GistNode) {
     output?.appendLine(`Cloning ${gist.gist.git_pull_url}`, output.messageType.info);
     commands.executeCommand("git.clone", gist.gist.git_pull_url);
+}
+
+enum QuickPickItems {
+    username = "$(account) Enter username",
+    followedGitHubUsers = "$(person-follow) Pick followed GitHub user",
+}
+
+export async function pickUserToFollow(): Promise<string | undefined> {
+    return await new Promise((resolve) => {
+        let pick: string | undefined;
+
+        let quickPick = window.createQuickPick();
+        quickPick.onDidHide(() => quickPick.dispose());
+        quickPick.title = "Select or type the repository you would like to open";
+        quickPick.canSelectMany = false;
+
+        quickPick.show();
+
+        quickPick.items = [{ label: QuickPickItems.username }, { label: QuickPickItems.followedGitHubUsers }];
+
+        quickPick.onDidAccept(async () => {
+            if (pick === QuickPickItems.username) {
+                let accepted = await window.showInputBox({
+                    ignoreFocusOut: true,
+                    placeHolder: "username",
+                    title: "Enter the username to follow",
+                });
+                quickPick.hide();
+                resolve(accepted);
+            } else if (pick === QuickPickItems.followedGitHubUsers) {
+                quickPick.busy = true;
+                quickPick.placeholder = "Enter the username to follow";
+                const followedUsers = await getGitHubFollowedUsers();
+                quickPick.busy = false;
+                quickPick.items = followedUsers!.map((followedUser) => ({ label: `${followedUser.login}` }));
+                quickPick.show();
+            } else {
+                output?.appendLine(`onDidAccept: ${pick}`, output.messageType.debug);
+                quickPick.hide();
+                resolve(pick);
+            }
+        });
+
+        quickPick.onDidChangeSelection(async (selection) => {
+            pick = selection[0].label;
+            output?.appendLine(`onDidChangeSelection: ${pick}`, output.messageType.debug);
+        });
+
+        // @todo: refresh the list of followed users
+    });
 }
