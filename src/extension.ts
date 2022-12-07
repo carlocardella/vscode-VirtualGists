@@ -169,11 +169,12 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.followUser", async (gist?: GistNode) => {
-            // followUser(gist?.gist?.owner?.login);
-            // pickUserToFollow(gist?.gist?.owner?.login);
-            // const pick = (await pickUserToFollow()) as string;
             const pick = gist ? gist!.gist!.owner!.login : await pickUserToFollow();
             if (pick) {
+                if (pick === credentials.authenticatedUser.login) {
+                    window.showErrorMessage("You cannot follow yourself");
+                    return;
+                }
                 output?.appendLine(`Picked repository: ${pick}`, output.messageType.info);
                 await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
                 gistProvider.refresh();
