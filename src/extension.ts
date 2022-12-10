@@ -32,7 +32,7 @@ import {
     addFile,
     closeGist,
     createGist,
-    deleteFile,
+    deleteFiles,
     deleteGist,
     followUser,
     openGist,
@@ -139,16 +139,27 @@ export async function activate(context: ExtensionContext) {
     );
 
     context.subscriptions.push(
-        commands.registerCommand("VirtualGists.deleteNode", async (node: GistNode | ContentNode) => {
-            if (node instanceof GistNode) {
-                deleteGist(node.gist);
-            }
+        commands.registerCommand("VirtualGists.deleteNode", async (node: GistNode | ContentNode, nodes?: GistNode[] | ContentNode[]) => {
+            const nodesToDelete = nodes || [node];
+            const isGistNode = isArrayOf(isInstanceOf(GistNode));
 
-            if (node instanceof ContentNode) {
-                deleteFile(node);
+            if (isGistNode(nodesToDelete)) {
+                deleteGist(node.gist);
+            } else {
+                deleteFiles(nodesToDelete as ContentNode[]);
             }
         })
     );
+
+    const isArrayOf =
+        <T>(elemGuard: (x: any) => x is T) =>
+        (arr: any[]): arr is Array<T> =>
+            arr.every(elemGuard);
+
+    const isInstanceOf =
+        <T>(ctor: new (...args: any) => T) =>
+        (x: any): x is T =>
+            x instanceof ctor;
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.newPrivateGist", async () => {

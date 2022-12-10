@@ -61,7 +61,7 @@ export class Output {
 
     private log(gist: TGist, error: any, messageType: MessageType) {
         if (error.name === "HttpError") {
-            this.appendLine(`Error reading repo ${gist.id}: ${error.response.data.message}`, messageType);
+            this.appendLine(`Error reading gist ${gist.id}: ${error.response.data.message}`, messageType);
         } else {
             this.appendLine(`${gist.id}: ${error.response}`, this.messageType.error);
         }

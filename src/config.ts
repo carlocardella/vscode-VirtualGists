@@ -5,6 +5,7 @@ const CONFIG_SECTION = "VirtualGists";
 export function get(key: "EnableTracing"): boolean;
 export function get(key: "PullInterval"): number;
 export function get(key: "UseGistOwnerAvatar"): boolean;
+export function get(key: "downloadOverwrite"): string;
 
 export function get(key: any) {
     const extensionConfig = vscode.workspace.getConfiguration(CONFIG_SECTION);

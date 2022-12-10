@@ -191,6 +191,10 @@ export type TForks = {
     updated_at: string;
 };
 
+export type TFileToDelete = {
+    [key: string]: any;
+};
+
 export type TForkedGist = {
     url: string;
     forks_url: string;

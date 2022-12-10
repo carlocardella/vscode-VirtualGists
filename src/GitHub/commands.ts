@@ -1,6 +1,6 @@
 import { commands, env, ProgressLocation, Uri, window, workspace } from "vscode";
-import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
-import { GistFileSystemProvider, GIST_SCHEME } from "../FileSystem/fileSystem";
+import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
+import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import {
     getGitHubGist,
     getGitHubGistsForAuthenticatedUser,
@@ -11,8 +11,9 @@ import {
     forkGitHubGist,
     getGitHubFollowedUsers,
     followGitHubUser,
+    deleteGistFile,
 } from "./api";
-import { TContent, TForkedGist, TGist, TGitHubUser } from "./types";
+import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import {
@@ -21,8 +22,8 @@ import {
     GlobalStorageGroup,
     removeFromGlobalStorage,
     addToOrUpdateLocalStorage,
-    removeFromLocalStorage,
 } from "../FileSystem/storage";
+import { MessageType } from "../tracing";
 
 /**
  * Get the content of a gist file.
@@ -175,13 +176,27 @@ export async function deleteGist(gist: TGist) {
  * @param {ContentNode} file The file to delete
  * @returns {*}
  */
-export async function deleteFile(file: ContentNode) {
-    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${file.path}'?`, { modal: true }, "Yes", "No", "Cancel");
+export async function deleteFiles(filesToDelete: ContentNode[]) {
+    let confirm: "Yes" | "No" | "Cancel" | undefined = undefined;
+    let message: string;
+    filesToDelete.length === 1
+        ? (message = `Are you sure you want to delete '${filesToDelete[0].path}'?`)
+        : (message = `Are you sure you want to delete ${filesToDelete.length} files?`);
+
+    confirm = await window.showWarningMessage(message, { modal: true }, "Yes", "No", "Cancel");
+
     if (confirm !== "Yes") {
         return;
     }
 
-    await gistFileSystemProvider.delete(file.uri);
+    let files: TFileToDelete = {};
+    // let files: Record<string, any> = {};
+
+    filesToDelete.forEach((file) => {
+        files[file.path] = null;
+    });
+
+    await deleteGistFile(filesToDelete[0].gist, files!);
     gistProvider.refresh();
 }
 
@@ -249,12 +264,17 @@ export async function addFile(gist: GistNode): Promise<void> {
         return Promise.reject();
     }
 
-    // Validate file name
+    // Validate file name // @todo: move to a helper function
     if (fileName.match(/gistfile(\d+)/gi)) {
         output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
         window.showErrorMessage(
             `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
         );
+        return Promise.reject();
+    }
+    if (fileName.indexOf("/") !== -1) {
+        output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        window.showErrorMessage(`"/" is not allowed in a file name.`);
         return Promise.reject();
     }
 
@@ -729,12 +749,23 @@ export async function pickUserToFollow(): Promise<string | undefined> {
     });
 }
 
-
 export async function followUserOnGitHub(username: string) {
     await window.withProgress({ title: "Following user...", location: ProgressLocation.Notification }, async () => {
         await followGitHubUser(username);
     });
 }
 
-
-
+/**
+ * Download a Gist file to a local file.
+ *
+ * @export
+ * @param {Uri} newFileUri Uri of the new file; this is where the file will be downloaded to
+ * @param {Uint8Array} fileContent Content of the file to be downloaded
+ */
+export function downloadFile(newFileUri: Uri, fileContent: Uint8Array) {
+    try {
+        workspace.fs.writeFile(newFileUri, fileContent);
+    } catch (e) {
+        output?.appendLine(`Error writing file: ${e}`, MessageType.error);
+    }
+}

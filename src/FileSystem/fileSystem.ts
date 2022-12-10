@@ -99,10 +99,11 @@ export class GistFileSystemProvider implements FileSystemProvider {
         if (uri.path === "/") {
             // delete the gist
             return await deleteGitHubGist(gist);
-        } else {
-            // delete a file
-            await deleteGistFile(gist, uri.path);
         }
+        // } else {
+        //     // delete a file
+        //     await deleteGistFile(gist, uri.path);
+        // }
     }
 
     async rename(oldUri: Uri, newUri: Uri): Promise<void> {
