@@ -8,6 +8,23 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [0.0.11] - 2022-12-09
+
+### Added
+
+* Follow a user on GitHub: right-click one of the users lister under `Followed User` and select `Follow user on GitHub...`. [#6](https://github.com/carlocardella/vscode-VirtualGists/issues/6)
+* Select multiple files within a gist and delete them all with one click. [#17](https://github.com/carlocardella/vscode-VirtualGists/issues/17)
+
+### Changed
+
+* Improved the `Follow user...` dialog
+  * You can still enter a GitHub username as before, but you can now also select a user from the list of users you already follow on GitHub (https://gist.github.com/username) [#34](https://github.com/carlocardella/vscode-VirtualGists/issues/34), [#28](https://github.com/carlocardella/vscode-VirtualGists/issues/28)
+* You cannot follow yourself 😄 Why would you anyway? Your gists are already all listed under `My Gists`, no need to duplicate them
+
+### Fixed
+
+* bug fixes
+
 ## [0.0.10] - 2022-12-06
 
 ### Added
