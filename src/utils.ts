@@ -1,7 +1,5 @@
 import { Uri, window, workspace } from "vscode";
 import * as config from "./config";
-import { output } from "./extension";
-import { MessageType } from './tracing';
 
 /**
  * Possible answers to the question "Do you want to overwrite the file?"
@@ -137,51 +135,4 @@ export function ensureIsValidFileSystemName(name: string): string {
     }
 
     return name;
-}
-
-function getGistFolderAndStore(node: any): [string, any, boolean] {
-    let gistGroupFolderName = "";
-    let gists: any;
-    let isGistContainer = false;
-
-    switch (node.contextValue) {
-        case "followedUserGists":
-            gistGroupFolderName = node!.user!.username;
-            gists = store.followedUsers.filter((user) => user.username === gistGroupFolderName)[0].gists;
-            isGistContainer = true;
-            break;
-
-        case "starredGists":
-            gistGroupFolderName = "Starred gists";
-            gists = store.starredGists;
-            isGistContainer = true;
-            break;
-
-        case "gists":
-            gistGroupFolderName = "My gists";
-            gists = store.gists;
-            isGistContainer = true;
-            break;
-
-        case "scratchGist":
-            gistGroupFolderName = "Scratch notes";
-            gists = store.scratchNotes.gist;
-            isGistContainer = true;
-            break;
-
-        case "followedUser.gist":
-            break;
-
-        case "gists.gist":
-            break;
-
-        case "gistFile.editable":
-            break;
-
-        default:
-            output?.appendLine(`GistPad; downloadAllGists: unknown context value: ${node.contextValue}`, MessageType.error);
-            break;
-    }
-
-    return [gistGroupFolderName, gists, isGistContainer];
 }

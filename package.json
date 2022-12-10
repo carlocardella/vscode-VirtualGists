@@ -120,7 +120,7 @@
                 "category": "Virtual Gists"
             },
             {
-                "title": "Delete",
+                "title": "Delete...",
                 "command": "VirtualGists.deleteNode",
                 "icon": "$(trash)",
                 "category": "Virtual Gists"

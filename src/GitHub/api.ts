@@ -4,7 +4,7 @@ import { MessageType } from "../tracing";
 import { GistNode } from "../Tree/nodes";
 import { GistStarOperation } from "./commands";
 import { ZERO_WIDTH_SPACE } from "./constants";
-import { TGistFileNoKey, TGist, TGitHubUser } from "./types";
+import { TGistFileNoKey, TGist, TGitHubUser, TFileToDelete } from "./types";
 
 /**
  * Get the authenticated GitHub user
@@ -134,25 +134,22 @@ export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, c
  * @param {string} filePath The path of the file to delete
  * @returns {Promise<TGist>}
  */
-export async function deleteGistFile(gist: TGist, filePath: string): Promise<TGist> {
+export async function deleteGistFile(gist: TGist, files: TFileToDelete): Promise<TGist> {
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
     });
 
-    filePath = filePath.split("/").slice(1).join("/");
-
     try {
         let { data } = await octokit.gists.update({
             gist_id: gist.id!,
-            files: {
-                [filePath]: null as any,
-            },
+            files: files,
         });
 
-        output?.appendLine(`Deleted "${filePath}" from gist "${gist.description}"`, output.messageType.info);
+        output?.appendLine(`Deleted "${Object.keys(files)}" from gist "${gist.description}"`, output.messageType.info);
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Could not delete file "${filePath}" from gist "${gist.description}". ${e.message}`, output.messageType.error);
+        output?.appendLine(`Could not delete "${Object.keys(files)}" from gist "${gist.description}". ${e.message}`, output.messageType.error);
+        output?.logError(gist, e);
     }
 
     return Promise.reject();

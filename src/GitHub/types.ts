@@ -190,3 +190,7 @@ export type TForks = {
     created_at: string;
     updated_at: string;
 };
+
+export type TFileToDelete = {
+    [key: string]: any;
+};
