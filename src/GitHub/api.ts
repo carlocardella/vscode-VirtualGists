@@ -4,7 +4,7 @@ import { MessageType } from "../tracing";
 import { GistNode } from "../Tree/nodes";
 import { GistStarOperation } from "./commands";
 import { ZERO_WIDTH_SPACE } from "./constants";
-import { TGistFileNoKey, TGist, TGitHubUser, TForkedGist, TUser, TFileToDelete } from "./types";
+import { TGistFileNoKey, TGist, TGitHubUser, TForkedGist, TUser, TFileToDelete, TTreeRename, TTree, TCommit, TRef } from "./types";
 
 /**
  * Get the authenticated GitHub user
@@ -363,4 +363,134 @@ export async function followGitHubUser(username: string): Promise<void> {
     } catch (e: any) {
         output?.appendLine(`Cannot follow user "${username} on GitHub". ${e.message}`, output.messageType.error);
     }
+}
+
+
+
+
+
+
+
+
+/**
+ * Create a new Tree on GitHub
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to create the tree in
+ * @param {TTreeRename[]} newTree Contents of the new tree
+ * @returns {(Promise<TTree | undefined>)}
+ */
+export async function createGitHubTree(gist: GistNode, newTree: TTreeRename[], deleteFolder?: boolean): Promise<TTree | TTreeRename | undefined> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        let options: any;
+        if (deleteFolder) {
+            options = { owner: gist.gist.owner, repo: gist.name, tree: newTree };
+        } else {
+            const base_tree = gist!.tree!.sha;
+            options = { owner: gist.gist.owner, repo: gist.name, base_tree, tree: newTree };
+        }
+        const { data } = await octokit.git.createTree(options);
+
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Error creating new Tree: ${e.message.trim()}`, output.messageType.error);
+    }
+
+    return Promise.reject(undefined);
+}
+
+// The file mode; one of 100644 for file (blob), 100755 for executable (blob), 040000 for subdirectory (tree), 160000 for submodule (commit), or 120000 for a blob that specifies the path of a symlink
+/**
+ * File Mode for a GitHub tree
+ *
+ * @export
+ * @enum {number}
+ */
+export enum FileMode {
+    file = "100644",
+    executable = "100755",
+    subdirectory = "040000",
+    submodule = "160000",
+    symlink = "120000",
+}
+
+/**
+ * Type Mode
+ *
+ * @export
+ * @enum {number}
+ */
+export enum TypeMode {
+    blob = "blob",
+    tree = "tree",
+    commit = "commit",
+}
+
+/**
+ * Create a new commit on GitHub
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to create the commit on
+ * @param {string} message The commit message
+ * @param {string} tree The tree SHA
+ * @param {string[]} parents The parent SHAs
+ * @returns {(Promise<TCommit | undefined>)}
+ */
+export async function createGitHubCommit(gist: GistNode, message: string, tree: string, parents: string[]): Promise<TCommit | undefined> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        const { data } = await octokit.git.createCommit({
+            owner: gist.owner,
+            repo: gist.name,
+            message,
+            tree,
+            parents,
+        });
+
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Error creating new commit: ${e.message.trim()}`, output.messageType.error);
+    }
+
+    return Promise.reject(undefined);
+}
+
+/**
+ * Update a reference in the git database on GitHub
+ *
+ * @export
+ * @async
+ * @param {GistNode} gist The gist to update the reference in
+ * @param {string} ref The reference to update
+ * @param {string} sha The SHA to update the reference to
+ * @returns {(Promise<TRef | undefined>)}
+ */
+export async function updateGitHubRef(gist: GistNode, ref: string, sha: string): Promise<TRef | undefined> {
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        const { data } = await octokit.git.updateRef({
+            owner: gist.owner,
+            repo: gist.name,
+            ref,
+            sha,
+        });
+
+        return Promise.resolve(data);
+    } catch (e: any) {
+        output?.appendLine(`Error updating ref: ${e.message.trim()}`, output.messageType.error);
+    }
+
+    return Promise.reject(undefined);
 }

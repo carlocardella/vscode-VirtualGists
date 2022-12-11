@@ -223,3 +223,54 @@ export type TForkedGist = {
     owner?: TUser | undefined;
     truncated?: boolean | undefined;
 };
+
+export type TTree = {
+    sha: string;
+    url: string;
+    truncated: boolean;
+    tree: {
+        path?: string | undefined;
+        mode?: "100644" | "100755" | "040000" | "160000" | "120000" | undefined;
+        type?: "commit" | "tree" | "blob" | undefined;
+        sha?: string | undefined;
+        size?: number | undefined;
+        url?: string | undefined;
+    }[];
+};
+
+export type TTreeRename = {
+    path?: string | undefined;
+    mode?: "100644" | "100755" | "040000" | "160000" | "120000" | undefined;
+    type?: "commit" | "tree" | "blob" | undefined;
+    sha?: string | null | undefined;
+};
+
+
+export type TCommit = {
+    sha: string;
+    node_id: string;
+    url: string;
+    author: {
+        date: string;
+        name: string;
+        email: string;
+    };
+    committer: {
+        date: string;
+        name: string;
+        email: string;
+    };
+    message: string;
+    tree: {
+        url: string;
+        sha: string;
+    };
+    parents: { sha: string; url: string; html_url: string }[];
+    verification: {
+        verified: boolean;
+        reason: string;
+        signature: string | null | undefined;
+        payload: string | null | undefined;
+    };
+    html_url: string;
+};
