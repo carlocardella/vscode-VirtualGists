@@ -223,6 +223,8 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
      */
     async getChildren(element?: ContentNode): Promise<any[]> {
         // @update any
+        this.refreshing = true;
+
         if (element) {
             let childNodes: any[] = [];
 
@@ -297,6 +299,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 }
             }
 
+            this.refreshing = false;
             return Promise.resolve(childNodes);
         } else {
             let gists: any[] = [];
@@ -313,6 +316,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
             gists.push(followedUsersGistsNode);
             gists.push(openedGistsNode);
 
+            this.refreshing = false;
             return Promise.resolve(gists);
         }
     }
@@ -328,4 +332,6 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
     refresh(data?: ContentNode): void {
         this._onDidChangeTreeData.fire(data);
     }
+
+    refreshing = false;
 }

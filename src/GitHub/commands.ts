@@ -16,13 +16,7 @@ import {
 import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import {
-    addToGlobalStorage,
-    readFromGlobalStorage,
-    GlobalStorageGroup,
-    removeFromGlobalStorage,
-    addToOrUpdateLocalStorage,
-} from "../FileSystem/storage";
+import { addToGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, addToOrUpdateLocalStorage } from "../FileSystem/storage";
 import { MessageType } from "../tracing";
 
 /**
@@ -158,7 +152,7 @@ function charCodeAt(c: string) {
  * @returns {*}
  */
 export async function deleteGist(gist: TGist) {
-    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, { modal: true }, "Yes", "No", "Cancel");
+    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, { modal: true }, "Yes", "No");
     if (confirm !== "Yes") {
         return;
     }
@@ -177,13 +171,13 @@ export async function deleteGist(gist: TGist) {
  * @returns {*}
  */
 export async function deleteFiles(filesToDelete: ContentNode[]) {
-    let confirm: "Yes" | "No" | "Cancel" | undefined = undefined;
+    let confirm: "Yes" | "No" | undefined = undefined;
     let message: string;
     filesToDelete.length === 1
         ? (message = `Are you sure you want to delete '${filesToDelete[0].path}'?`)
         : (message = `Are you sure you want to delete ${filesToDelete.length} files?`);
 
-    confirm = await window.showWarningMessage(message, { modal: true }, "Yes", "No", "Cancel");
+    confirm = await window.showWarningMessage(message, { modal: true }, "Yes", "No");
 
     if (confirm !== "Yes") {
         return;
@@ -254,7 +248,7 @@ export async function createGist(publicGist: boolean) {
  * @param {TGist} gist The gist to add the file to
  * @returns {Promise<void>}
  */
-export async function addFile(gist: GistNode): Promise<void> {
+export async function addFile(gist: GistNode): Promise<Uri | undefined> {
     const fileName = await window.showInputBox({
         prompt: "Enter the name of the file",
         placeHolder: "File name",
@@ -288,9 +282,9 @@ export async function addFile(gist: GistNode): Promise<void> {
 
     let fileUri = fileNameToUri(gist.gist.id!, fileName);
     await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(0), { create: true, overwrite: false });
-    gistProvider.refresh();
+    // gistProvider.refresh();
 
-    return Promise.resolve();
+    return Promise.resolve(fileUri);
 }
 
 /**

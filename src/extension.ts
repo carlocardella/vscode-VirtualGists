@@ -54,7 +54,6 @@ import {
 } from "./GitHub/commands";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
-
 declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
@@ -175,7 +174,18 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.addFile", async (gist: GistNode) => {
-            addFile(gist);
+            const newFileUri = await addFile(gist);
+          
+            gistProvider.refreshing = true;
+            gistProvider.refresh();
+          
+            while (gistProvider.refreshing) {
+                output?.appendLine(`waiting`, output.messageType.debug);
+                await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+          
+            output?.appendLine(`open ${newFileUri}`, output.messageType.debug);
+            commands.executeCommand("vscode.open", newFileUri);
         })
     );
 
