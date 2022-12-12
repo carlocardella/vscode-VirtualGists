@@ -148,17 +148,28 @@ function charCodeAt(c: string) {
  *
  * @export
  * @async
- * @param {TGist} gist The gist to delete
+ * @param {TGist} gistsToDelete The gist to delete
  * @returns {*}
  */
-export async function deleteGist(gist: TGist) {
-    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, { modal: true }, "Yes", "No");
+export async function deleteGist(gistsToDelete: GistNode[]) {
+    let confirm: "Yes" | "No" | undefined = undefined;
+    let message: string;
+    gistsToDelete.length === 1
+        ? (message = `Are you sure you want to delete '${gistsToDelete[0].name}'?`)
+        : (message = `Are you sure you want to delete ${gistsToDelete.length} gists?`);
+
+    confirm = await window.showWarningMessage(message, { modal: true }, "Yes", "No");
     if (confirm !== "Yes") {
         return;
     }
 
-    const gistUri = fileNameToUri(gist.id!);
-    await gistFileSystemProvider.delete(gistUri);
+    await Promise.all(
+        gistsToDelete.map(async (gist) => {
+            const gistUri = fileNameToUri(gist.gist.id!);
+            await gistFileSystemProvider.delete(gistUri);
+        })
+    );
+
     gistProvider.refresh();
 }
 

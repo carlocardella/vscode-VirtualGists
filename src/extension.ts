@@ -143,9 +143,9 @@ export async function activate(context: ExtensionContext) {
             const isGistNode = isArrayOf(isInstanceOf(GistNode));
 
             if (isGistNode(nodesToDelete)) {
-                deleteGist(node.gist);
+                deleteGist(nodesToDelete.filter((x) => x instanceof GistNode) as GistNode[]);
             } else {
-                deleteFiles(nodesToDelete as ContentNode[]);
+                deleteFiles(nodesToDelete.filter((x) => x instanceof ContentNode) as ContentNode[]);
             }
         })
     );
@@ -175,15 +175,15 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.addFile", async (gist: GistNode) => {
             const newFileUri = await addFile(gist);
-          
+
             gistProvider.refreshing = true;
             gistProvider.refresh();
-          
+
             while (gistProvider.refreshing) {
                 output?.appendLine(`waiting`, output.messageType.debug);
                 await new Promise((resolve) => setTimeout(resolve, 500));
             }
-          
+
             output?.appendLine(`open ${newFileUri}`, output.messageType.debug);
             commands.executeCommand("vscode.open", newFileUri);
         })
