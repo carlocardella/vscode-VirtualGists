@@ -8,6 +8,16 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [0.0.12] - 2022-12-12
+
+### Changed
+
+* Adding a new gist file now opens the file in the editor: [#37](https://github.com/carlocardella/vscode-VirtualGists/issues/37)
+
+### Added
+
+* You can now select multiple gists in the treeview and delete them all with one click: [#18](https://github.com/carlocardella/vscode-VirtualGists/issues/18)
+
 ## [0.0.11] - 2022-12-09
 
 ### Added
