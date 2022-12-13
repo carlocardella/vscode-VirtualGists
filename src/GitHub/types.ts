@@ -143,6 +143,7 @@ export type TGist = {
     truncated?: boolean | undefined;
     starred?: boolean;
     forks?: TForks[] | unknown | undefined;
+    fork_of?: TForkedGist | null | undefined;
 };
 
 export type TGistFile = {
@@ -222,4 +223,24 @@ export type TForkedGist = {
     comments_url: string;
     owner?: TUser | undefined;
     truncated?: boolean | undefined;
+};
+
+export type TForkOfGist = {
+    url: string;
+    forks_url: string;
+    commits_url: string;
+    id: string;
+    node_id: string;
+    git_pull_url: string;
+    git_push_url: string;
+    html_url: string;
+    files: {};
+    public: boolean;
+    created_at: string;
+    updated_at: string;
+    description: string;
+    comments: number;
+    user: null;
+    comments_url: string;
+    owner: TUser;
 };

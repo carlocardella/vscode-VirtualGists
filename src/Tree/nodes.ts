@@ -110,7 +110,18 @@ export class GistNode extends TreeItem {
         // const privateGistIcon = Uri.file(extensionContext.extensionPath + "/assets/private_gist.svg");
         // const publicGistIcon = Uri.file(extensionContext.extensionPath + "/assets/public_gist.svg");
         // this.iconPath = gist.public ? publicGistIcon : privateGistIcon;
-        this.iconPath = gist.public ? new ThemeIcon("gist") : new ThemeIcon("gist-secret");
+        // this.iconPath = gist.public ? new ThemeIcon("gist") : new ThemeIcon("gist-secret");
+
+        let icon: Uri | ThemeIcon;
+        if (gist.public) {
+            icon = new ThemeIcon("gist");
+        } else if (gist.fork_of) {
+            icon = new ThemeIcon("gist-fork");
+        } else {
+            icon = new ThemeIcon("gist-secret");
+        }
+
+        this.iconPath = icon;
     }
 }
 
@@ -257,9 +268,25 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                     case GistsGroupType.myGists:
                         let ownedGists = await getOwnedGists();
                         // prettier-ignore
-                        childNodes = ownedGists
-                            ?.filter((gist) => gist.description !== NOTEPAD_GIST_NAME)
-                            ?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
+                        childNodes =
+                            ownedGists
+                                // @investigate: is there another way other than checking each gist individually?
+                                // https://docs.github.com/en/rest/gists/gists?apiVersion=2022-11-28#get-a-gist
+                                /**
+                                {
+                                    "title": "Gist Simple",
+                                    "description": "Gist Simple",
+                                    "type": "object",
+                                    "properties": {
+                                        "forks": {
+                                        "deprecated": true, <== this is the property that is being deprecated
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                */
+                                ?.filter((gist) => gist.description !== NOTEPAD_GIST_NAME)
+                                ?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
                         addToOrUpdateLocalStorage(...childNodes);
                         break;
 
