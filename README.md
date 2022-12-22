@@ -104,6 +104,13 @@ You can enable `VirtualGists.EnableTracing` in your User or Workspace settings t
 
 ![image](https://user-images.githubusercontent.com/5784415/197569014-153f751e-6f37-4dd8-a5e6-3d50dc67b3de.png)
 
+## GitHub authentication scopes
+
+The extension uses the following [GitHub authentication scopes](https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps)
+
+- `user`: needed to authenticate to GitHub and to read user's properties
+- `gist`: needed to create and update gists
+
 ## My other extensions
 
 * [Virtual Repos](https://github.com/carlocardella/vscode-VirtualRepos): Virtual Repos is a Visual Studio Code extension that allows to open and edit a remote repository (e.g. on GitHub) without cloning, committing or pushing your changes. It all happens automatically
