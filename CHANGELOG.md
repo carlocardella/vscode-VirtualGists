@@ -8,6 +8,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [version] - 2022-12-27
+
+### Changed
+
+* Updated npm modules
+* Log when gists are being refreshed
+
 ## [0.0.12] - 2022-12-12
 
 ### Changed
