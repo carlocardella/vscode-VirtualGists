@@ -1,5 +1,5 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { store } from "../extension";
+import { output, store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
 import { addToOrUpdateLocalStorage, updateStoredGist } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
@@ -330,6 +330,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
      * @param {?ContentNode} [data] The node to refresh
      */
     refresh(data?: ContentNode): void {
+        output?.appendLine("Refreshing gists", output?.messageType.info);
         this._onDidChangeTreeData.fire(data);
     }
 
