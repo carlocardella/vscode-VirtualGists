@@ -1,7 +1,7 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { output, store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import { addToOrUpdateLocalStorage, updateStoredGist } from "../FileSystem/storage";
+import { updateStoredGist } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
 import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getFollowedUsers, getOpenedGists, getNotepadGist } from "../GitHub/commands";
 import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
@@ -83,6 +83,8 @@ export class GistNode extends TreeItem {
     readOnly: boolean;
     uri: Uri;
     git_pull_url: string | undefined;
+    created_at: string | undefined;
+    updated_at: string | undefined;
 
     constructor(gist: TGist, groupType: GistsGroupType, readOnly?: boolean) {
         super(gist.description!, TreeItemCollapsibleState.Collapsed);
@@ -111,6 +113,8 @@ export class GistNode extends TreeItem {
         // const publicGistIcon = Uri.file(extensionContext.extensionPath + "/assets/public_gist.svg");
         // this.iconPath = gist.public ? publicGistIcon : privateGistIcon;
         this.iconPath = gist.public ? new ThemeIcon("gist") : new ThemeIcon("gist-secret");
+        this.created_at = gist.created_at;
+        this.updated_at = gist.updated_at;
     }
 }
 
@@ -243,12 +247,12 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
             } else if (element instanceof UserNode) {
                 let userGists = (await getGitHubGistForUser(element.label as string)) as TGist[];
                 childNodes = userGists.map((gist) => new GistNode(gist, GistsGroupType.followedUsers, true));
-                addToOrUpdateLocalStorage(...childNodes);
+                store.addToOrUpdateLocalStorage(...childNodes);
             } else if (element instanceof NotepadNode) {
                 let notepadGist = await getNotepadGist();
                 let notepadFiles = Object.values(notepadGist?.files ?? []);
                 childNodes = notepadFiles.map((file) => new ContentNode(file as TGistFile, notepadGist as TGist, false));
-                addToOrUpdateLocalStorage(...childNodes);
+                store.addToOrUpdateLocalStorage(...childNodes);
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
                     case GistsGroupType.notepad:
@@ -260,7 +264,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         childNodes = ownedGists
                             ?.filter((gist) => gist.description !== NOTEPAD_GIST_NAME)
                             ?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
-                        addToOrUpdateLocalStorage(...childNodes);
+                        store.addToOrUpdateLocalStorage(...childNodes);
                         break;
 
                     case GistsGroupType.starredGists:
@@ -273,7 +277,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                                 }
                                 return starredGist;
                             }) ?? [];
-                        addToOrUpdateLocalStorage(...childNodes);
+                        store.addToOrUpdateLocalStorage(...childNodes);
                         break;
 
                     case GistsGroupType.followedUsers:
@@ -291,7 +295,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                             }
                             return openedGist;
                         }) ?? [];
-                        addToOrUpdateLocalStorage(...childNodes);
+                        store.addToOrUpdateLocalStorage(...childNodes);
                         break;
 
                     default:

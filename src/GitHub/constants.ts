@@ -8,3 +8,11 @@ export const ZERO_WIDTH_SPACE = "\u200B";
 export const NOTEPAD_GIST_NAME = "virtualGists-Notepad";
 
 export const GIST_USER = "user:";
+
+export enum GlobalStorageKeys {
+    gistGlobalStorage = "virtualGists",
+    FollowedUsers = "followedUsers",
+    OpenedGists = "openedGists",
+    sortType = "sortType",
+    sortDirection = "sortDirection",
+}

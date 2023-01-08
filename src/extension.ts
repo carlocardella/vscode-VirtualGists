@@ -2,17 +2,10 @@ import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window } from "vscode";
-import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType, GistsGroupNode } from "./Tree/nodes";
-import { GistFileSystemProvider, GIST_SCHEME, GistFile } from "./FileSystem/fileSystem";
+import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from "./Tree/nodes";
+import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import {
-    clearGlobalStorage,
-    readFromGlobalStorage,
-    GlobalStorageGroup,
-    removeFromGlobalStorage,
-    purgeGlobalStorage,
-    addToGlobalStorage,
-} from "./FileSystem/storage";
+import { readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, Store } from "./FileSystem/storage";
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -23,9 +16,6 @@ export let extensionContext: ExtensionContext;
 export const gistProvider = new GistProvider();
 export const gistFileSystemProvider = new GistFileSystemProvider();
 
-export const store = {
-    gists: [] as (GistNode | undefined)[],
-};
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
 import {
@@ -34,7 +24,6 @@ import {
     createGist,
     deleteFiles,
     deleteGist,
-    followUser,
     openGist,
     renameFile,
     starGist,
@@ -58,6 +47,8 @@ declare global {
     var TextEncoder: typeof _TextEncoder;
     var TextDecoder: typeof _TextDecoder;
 }
+
+export let store = new Store();
 
 export async function activate(context: ExtensionContext) {
     extensionContext = context;
@@ -107,7 +98,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.purgeGlobalStorage", async () => {
-            purgeGlobalStorage(extensionContext);
+            store.purgeGlobalStorage(extensionContext);
         })
     );
 
@@ -127,7 +118,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.clearGlobalStorage", async () => {
-            clearGlobalStorage(context);
+            store.clearGlobalStorage(context);
         })
     );
 
@@ -198,7 +189,7 @@ export async function activate(context: ExtensionContext) {
                     return;
                 }
                 output?.appendLine(`Picked repository: ${pick}`, output.messageType.info);
-                await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
+                await store.addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
                 gistProvider.refresh();
             } else {
                 output?.appendLine("'Follow user' cancelled by user", output.messageType.info);
