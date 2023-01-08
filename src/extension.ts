@@ -5,7 +5,7 @@ import { commands, ExtensionContext, workspace, window } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import { readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, Store, SortType, SortDirection } from "./FileSystem/storage";
+import { GlobalStorageGroup, Store, SortType, SortDirection } from "./FileSystem/storage";
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
@@ -53,6 +53,8 @@ export let store = new Store();
 
 export async function activate(context: ExtensionContext) {
     extensionContext = context;
+    await store.init();
+
     if (config.get("EnableTracing")) {
         output = new trace.Output();
     }
@@ -80,8 +82,8 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.getGlobalStorage", async () => {
-            const followedUsersFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
-            const openedGistsFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.openedGists);
+            const followedUsersFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
+            const openedGistsFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.openedGists);
 
             if (followedUsersFromGlobalStorage.length > 0) {
                 output?.appendLine(`Global storage ${GlobalStorageGroup.followedUsers}: ${followedUsersFromGlobalStorage}`, output.messageType.info);
@@ -94,6 +96,9 @@ export async function activate(context: ExtensionContext) {
             } else {
                 output?.appendLine(`Global storage ${GlobalStorageGroup.openedGists} is empty`, output.messageType.info);
             }
+
+            output?.appendLine(`Sort Type: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType)}`, output.messageType.info);
+            output?.appendLine(`Sort Direction: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection)}`, output.messageType.info);
         })
     );
 
@@ -105,14 +110,14 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.removeFromGlobalStorage", async () => {
-            const gistsFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
+            const gistsFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
             const gistToRemove = await window.showQuickPick(gistsFromGlobalStorage, {
                 placeHolder: "Select gist to remove from global storage",
                 ignoreFocusOut: true,
                 canPickMany: false,
             });
             if (gistToRemove) {
-                removeFromGlobalStorage(context, GlobalStorageGroup.followedUsers, gistToRemove);
+                store.removeFromGlobalStorage(context, GlobalStorageGroup.followedUsers, gistToRemove);
             }
         })
     );
@@ -200,7 +205,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.unfollowUser", async (user: UserNode) => {
-            removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
+            store.removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
         })
     );
 

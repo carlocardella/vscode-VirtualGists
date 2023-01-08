@@ -9,12 +9,12 @@ export enum SortType {
     name = "name",
     creationTime = "creationTime",
     updateTime = "updateTime",
-    public = "public"
+    public = "public",
 }
 
 export enum SortDirection {
     ascending = "ascending",
-    descending = "descending"
+    descending = "descending",
 }
 
 /**
@@ -81,6 +81,8 @@ export class Store {
      * @async
      */
     async init() {
+        this.sortType = this.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
+        this.sortDirection = this.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
         // await getOrRefreshStarredRepos();
         // await getOrRefreshFollowedUsers();
         // const reposFromGlobalStorage = this.getGistFromGlobalState(extensionContext);
@@ -127,18 +129,6 @@ export class Store {
         //     this.sortGists(sortType, sortDirection);
         // }
     }
-
-    // /**
-    //  * Add a new value to the global storage
-    //  *
-    //  * @public
-    //  * @param {ExtensionContext} context Extension context
-    //  * @param {GlobalStorageKeys} key Key to store the value under
-    //  * @param {*} value Value to store, must be json serializable
-    //  */
-    // public addToGlobalState(context: ExtensionContext, key: GlobalStorageKeys, value: any) {
-    //     context.globalState.update(key, value);
-    // }
 
     /**
      * Read a value from the global storage
@@ -283,36 +273,25 @@ export class Store {
         }
     }
 
-    // /**
-    //  * Add a repository to global storage
-    //  *
-    //  * @async
-    //  * @param {ExtensionContext} context Extension context
-    //  * @param {string} value Repository full name (owner/name) to add to global storage
-    //  * @returns {Promise<void>}
-    //  */
-    // async addRepoToGlobalStorage(context: ExtensionContext, value: string): Promise<void> {
-    //     let globalStorage = this.getGistFromGlobalState(context);
+    /**
+     * Update the gist object in our in memory store
+     *
+     * @export
+     * @async
+     * @param {TGist} updatedGist The updated gist object to store
+     * @returns {Promise<void>}
+     */
+    async updateStoredGist(updatedGist: TGist): Promise<void> {
+        // @investigate: can this be replaced with addToOrUpdateLocalStorage?
+        let currentGist = store.gists.find((storedGist) => storedGist?.gist.id === updatedGist?.id);
 
-    //     let [owner, repoName] = ["", ""];
-    //     if (value.indexOf("/") === -1) {
-    //         owner = credentials.authenticatedUser.login;
-    //         repoName = value;
-    //     } else {
-    //         [owner, repoName] = value.split("/");
-    //     }
+        currentGist!.gist = updatedGist;
 
-    //     globalStorage.push(`${owner}/${repoName}`);
-    //     context.globalState.update(GlobalStorageKeys.gistGlobalStorage, globalStorage);
-
-    //     this.init();
-
-    //     output?.appendLine(`Added ${value} to global storage`, output.messageType.info);
-    //     output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
-    // }
+        return Promise.resolve();
+    }
 
     async addToGlobalStorage(context: ExtensionContext, globalStorageGroup: string, value: string): Promise<void> {
-        let globalStorage = await readFromGlobalStorage(context, globalStorageGroup);
+        let globalStorage = await this.readFromGlobalStorage(context, globalStorageGroup);
 
         if (globalStorage.includes(value)) {
             window.showInformationMessage(`${value} is already in the list`);
@@ -344,6 +323,32 @@ export class Store {
             }
         });
     }
+
+    removeFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string, gistId: string): void {
+        let globalStorage = context.globalState.get(globalStorageGroup) as string[];
+        if (globalStorage) {
+            globalStorage = globalStorage.filter((id) => id.toLowerCase() !== gistId.toLowerCase());
+            context.globalState.update(globalStorageGroup, globalStorage);
+
+            gistProvider.refresh();
+
+            output?.appendLine(`Removed ${gistId} from ${globalStorageGroup}`, output.messageType.info);
+            output?.appendLine(`Global storage ${globalStorageGroup}: ${globalStorage}`, output.messageType.info);
+        }
+    }
+
+    /**
+     * Get the list of repositories from Global Storage
+     *
+     * @export
+     * @param {ExtensionContext} context Extension context
+     * @returns {string[]}
+     */
+    async readFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string): Promise<string[]> {
+        const followedUsers = context.globalState.get(globalStorageGroup, []) as string[];
+
+        return Promise.resolve(followedUsers);
+    }
 }
 
 /**
@@ -356,114 +361,4 @@ export class Store {
 export class GlobalStorageGroup {
     static followedUsers: string = FOLLOWED_USERS_GLOBAL_STORAGE_KEY;
     static openedGists: string = OPENED_GISTS_GLOBAL_STORAGE_KEY;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-// /**
-//  * Add a followed user or opened gist to Global Storage
-//  *
-//  * @export
-//  * @param {ExtensionContext} context Extension context
-//  * @param {string} value Repository to add
-//  */
-// export async function addToGlobalStorage(context: ExtensionContext, globalStorageGroup: string, value: string): Promise<void> {
-//     let globalStorage = await readFromGlobalStorage(context, globalStorageGroup);
-
-//     if (globalStorage.includes(value)) {
-//         window.showInformationMessage(`${value} is already in the list`);
-//         return Promise.resolve();
-//     }
-
-//     globalStorage.push(value);
-//     context.globalState.update(globalStorageGroup, globalStorage);
-
-//     gistProvider.refresh();
-
-//     output?.appendLine(`Added ${value} to global storage`, output.messageType.info);
-//     output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
-// }
-
-export function removeFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string, gistId: string): void {
-    let globalStorage = context.globalState.get(globalStorageGroup) as string[];
-    if (globalStorage) {
-        globalStorage = globalStorage.filter((id) => id.toLowerCase() !== gistId.toLowerCase());
-        context.globalState.update(globalStorageGroup, globalStorage);
-
-        gistProvider.refresh();
-
-        output?.appendLine(`Removed ${gistId} from ${globalStorageGroup}`, output.messageType.info);
-        output?.appendLine(`Global storage ${globalStorageGroup}: ${globalStorage}`, output.messageType.info);
-    }
-}
-
-/**
- * Get the list of repositories from Global Storage
- *
- * @export
- * @param {ExtensionContext} context Extension context
- * @returns {string[]}
- */
-export async function readFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string): Promise<string[]> {
-    const followedUsers = context.globalState.get(globalStorageGroup, []) as string[];
-
-    return Promise.resolve(followedUsers);
-}
-
-// /**
-//  * Remove all repositories from Global Storage
-//  *
-//  * @export
-//  * @param {ExtensionContext} context
-//  */
-// export function clearGlobalStorage(context: ExtensionContext, globalStorageGroup?: string) {
-//     if (globalStorageGroup) {
-//         context.globalState.update(globalStorageGroup, []);
-//         output?.appendLine(`Cleared global storage ${globalStorageGroup}`, output.messageType.info);
-//     } else {
-//         context.globalState.update(GlobalStorageGroup.followedUsers, []);
-//         context.globalState.update(GlobalStorageGroup.openedGists, []);
-//         output?.appendLine(`Cleared global storage`, output.messageType.info);
-//     }
-
-//     gistProvider.refresh();
-// }
-
-// export async function purgeGlobalStorage(context: ExtensionContext, storageGroup?: GlobalStorageGroup[]) {
-//     let cleanedGlobalStorage: string[] = [];
-//     let cleanedFollowedUsers: string[] = [];
-//     let cleanedOpenedGists: string[] = [];
-
-//     if (!storageGroup) {
-//         storageGroup = [GlobalStorageGroup.followedUsers, GlobalStorageGroup.openedGists];
-//     }
-
-//     for (const group of storageGroup) {
-//         if (group === GlobalStorageGroup.followedUsers) {
-//             cleanedFollowedUsers = (await getFollowedUsers()).map((user) => user.login);
-//             context.globalState.update(GlobalStorageGroup.followedUsers, cleanedFollowedUsers);
-//         }
-
-//         if (group === GlobalStorageGroup.openedGists) {
-//             cleanedOpenedGists = (await getOpenedGists()).map((gist) => gist.id!);
-//             context.globalState.update(GlobalStorageGroup.openedGists, cleanedOpenedGists);
-//         }
-//     }
-// }
-
-/**
- * Update the gist object in our in memory store
- *
- * @export
- * @async
- * @param {TGist} updatedGist The updated gist object to store
- * @returns {Promise<void>}
- */
-export async function updateStoredGist(updatedGist: TGist): Promise<void> {
-    // @investigate: can this be replaced with addToOrUpdateLocalStorage?
-    let currentGist = store.gists.find((storedGist) => storedGist?.gist.id === updatedGist?.id);
-
-    currentGist!.gist = updatedGist;
-
-    return Promise.resolve();
 }

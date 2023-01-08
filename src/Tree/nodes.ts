@@ -1,7 +1,7 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { extensionContext, output, store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import { updateStoredGist, SortType } from "../FileSystem/storage";
+import {  SortType } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
 import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getFollowedUsers, getOpenedGists, getNotepadGist } from "../GitHub/commands";
 import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
@@ -245,7 +245,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 }
 
                 // update storage, we already have gist files content
-                await updateStoredGist(gist);
+                await store.updateStoredGist(gist);
             } else if (element instanceof UserNode) {
                 let userGists = (await getGitHubGistForUser(element.label as string)) as TGist[];
                 childNodes = userGists.map((gist) => new GistNode(gist, GistsGroupType.followedUsers, true));
