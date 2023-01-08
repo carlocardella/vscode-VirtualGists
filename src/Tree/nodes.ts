@@ -1,11 +1,11 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { output, store } from "../extension";
+import { extensionContext, output, store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import { updateStoredGist } from "../FileSystem/storage";
+import { updateStoredGist, SortType } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
 import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getFollowedUsers, getOpenedGists, getNotepadGist } from "../GitHub/commands";
 import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
-import { NOTEPAD_GIST_NAME } from "../GitHub/constants";
+import { GlobalStorageKeys, NOTEPAD_GIST_NAME } from "../GitHub/constants";
 import * as config from "./../config";
 
 /**
@@ -217,6 +217,8 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
      * @returns {*}
      */
     getParent = (node: any) => node.parent;
+    
+    sorting = false;
 
     /**
      * Returns the children of the selected node
@@ -303,6 +305,11 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 }
             }
 
+            // sort
+            const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
+            const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+            childNodes = store.sortGists(sortType, sortDirection, childNodes);
+
             this.refreshing = false;
             return Promise.resolve(childNodes);
         } else {
@@ -331,11 +338,15 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
     /**
      * Refresh the TreeView and its data
      *
-     * @param {?ContentNode} [data] The node to refresh
+     * @param {?ContentNode} [node] The node to refresh
      */
-    refresh(data?: ContentNode): void {
-        output?.appendLine("Refreshing gists", output?.messageType.info);
-        this._onDidChangeTreeData.fire(data);
+    refresh(node?: ContentNode, sorting?: boolean): void {
+        if (sorting) {
+            this.sorting = true;
+        }
+        let message = node ? `Refresh gists: ${node?.name}` : "Refresh gists";
+        output?.appendLine(message, output?.messageType.info);
+        this._onDidChangeTreeData.fire(node);
     }
 
     refreshing = false;

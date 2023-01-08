@@ -1,22 +1,20 @@
-import { GistNode, GistsGroupNode } from "../Tree/nodes";
-import { Extension, ExtensionContext, window } from "vscode";
+import { GistNode, UserNode } from "../Tree/nodes";
+import { ExtensionContext, window } from "vscode";
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys, OPENED_GISTS_GLOBAL_STORAGE_KEY } from "../GitHub/constants";
-import { output, gistProvider, store, extensionContext, credentials } from "../extension";
+import { output, gistProvider, store, extensionContext } from "../extension";
 import { TGist } from "../GitHub/types";
 import { getFollowedUsers, getOpenedGists } from "../GitHub/commands";
 
 export enum SortType {
-    name,
-    stars,
-    forks,
-    creationTime,
-    updateTime,
-    public,
+    name = "name",
+    creationTime = "creationTime",
+    updateTime = "updateTime",
+    public = "public"
 }
 
 export enum SortDirection {
-    ascending,
-    descending,
+    ascending = "ascending",
+    descending = "descending"
 }
 
 /**
@@ -34,6 +32,8 @@ export class Store {
      * @type {((RepoNode | undefined)[])}
      */
     public gists: (GistNode | undefined)[] = [];
+
+    public followedUsers: (UserNode | undefined)[] = [];
 
     /**
      * Indicates whether the repositories are sorted
@@ -180,8 +180,10 @@ export class Store {
      * @param {SortType} sortType Sort by property
      * @param {SortDirection} sortDirection Sort direction
      */
-    sortGists(sortType: SortType, sortDirection: SortDirection) {
-        let gists = this.gists as GistNode[];
+    sortGists(sortType: SortType, sortDirection: SortDirection, gists?: GistNode[]): GistNode[] {
+        if (!gists) {
+            gists = this.gists as GistNode[];
+        }
 
         switch (sortType) {
             case SortType.name:
@@ -212,7 +214,7 @@ export class Store {
         output?.appendLine(`Sorted repos by ${SortType[sortType]} ${SortDirection[sortDirection]}`, output.messageType.info);
 
         this.gists = gists;
-        // return repos;
+        return gists;
     }
 
     /**
