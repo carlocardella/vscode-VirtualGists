@@ -8,6 +8,16 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [0.0.14] - 2023-01-08
+
+### Changed
+
+* Reordered TreeView inline commands
+
+### Added
+
+* Sort gists by name, creation time or last modified time
+
 ## [0.0.13] - 2022-12-27
 
 ### Changed
