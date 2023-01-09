@@ -5,8 +5,8 @@ import { commands, ExtensionContext, workspace, window } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import { readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, Store } from "./FileSystem/storage";
-import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "./GitHub/constants";
+import { GlobalStorageGroup, Store, SortType, SortDirection } from "./FileSystem/storage";
+import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
 export let output: trace.Output;
@@ -41,6 +41,7 @@ import {
     pickUserToFollow,
     followUserOnGitHub,
 } from "./GitHub/commands";
+import { setSortDirectionContext, setSortTypeContext } from "./utils";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 declare global {
@@ -52,6 +53,8 @@ export let store = new Store();
 
 export async function activate(context: ExtensionContext) {
     extensionContext = context;
+    await store.init();
+
     if (config.get("EnableTracing")) {
         output = new trace.Output();
     }
@@ -79,8 +82,8 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.getGlobalStorage", async () => {
-            const followedUsersFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
-            const openedGistsFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.openedGists);
+            const followedUsersFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
+            const openedGistsFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.openedGists);
 
             if (followedUsersFromGlobalStorage.length > 0) {
                 output?.appendLine(`Global storage ${GlobalStorageGroup.followedUsers}: ${followedUsersFromGlobalStorage}`, output.messageType.info);
@@ -93,6 +96,9 @@ export async function activate(context: ExtensionContext) {
             } else {
                 output?.appendLine(`Global storage ${GlobalStorageGroup.openedGists} is empty`, output.messageType.info);
             }
+
+            output?.appendLine(`Sort Type: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType)}`, output.messageType.info);
+            output?.appendLine(`Sort Direction: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection)}`, output.messageType.info);
         })
     );
 
@@ -104,14 +110,14 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.removeFromGlobalStorage", async () => {
-            const gistsFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
+            const gistsFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
             const gistToRemove = await window.showQuickPick(gistsFromGlobalStorage, {
                 placeHolder: "Select gist to remove from global storage",
                 ignoreFocusOut: true,
                 canPickMany: false,
             });
             if (gistToRemove) {
-                removeFromGlobalStorage(context, GlobalStorageGroup.followedUsers, gistToRemove);
+                store.removeFromGlobalStorage(context, GlobalStorageGroup.followedUsers, gistToRemove);
             }
         })
     );
@@ -188,7 +194,7 @@ export async function activate(context: ExtensionContext) {
                     window.showErrorMessage("You cannot follow yourself");
                     return;
                 }
-                output?.appendLine(`Picked repository: ${pick}`, output.messageType.info);
+                output?.appendLine(`Picked gistsitory: ${pick}`, output.messageType.info);
                 await store.addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
                 gistProvider.refresh();
             } else {
@@ -199,7 +205,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.unfollowUser", async (user: UserNode) => {
-            removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
+            store.removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
         })
     );
 
@@ -298,6 +304,82 @@ export async function activate(context: ExtensionContext) {
             cloneGist(gist);
         })
     );
+
+    // sort gists
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortGistByName", async () => {
+            const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+            setSortTypeContext(SortType.name);
+            store.sortGists(SortType.name, sortDirection);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortGistByCreationTime", async () => {
+            const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+            setSortTypeContext(SortType.creationTime);
+            store.sortGists(SortType.creationTime, sortDirection);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+    // context.subscriptions.push(
+    //     commands.registerCommand("VirtualGists.sortGistByForks", async () => {
+    //         const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+    //         setSortTypeContext(SortType.forks);
+    //         store.sortGists(SortType.forks, sortDirection);
+    //         gistProvider.refresh(undefined, true);
+    //     })
+    // );
+    // context.subscriptions.push(
+    //     commands.registerCommand("VirtualGists.sortGistByStars", async () => {
+    //         const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+    //         setSortTypeContext(SortType.stars);
+    //         store.sortGists(SortType.stars, sortDirection);
+    //         gistProvider.refresh(undefined, true);
+    //     })
+    // );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortGistByUpdateTime", async () => {
+            const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+            setSortTypeContext(SortType.updateTime);
+            store.sortGists(SortType.updateTime, sortDirection);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+    // context.subscriptions.push(
+    //     commands.registerCommand("VirtualGists.sortGistByWatchers", async () => {
+    //         const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+    //         setSortTypeContext(SortType.watchers);
+    //         store.sortGists(SortType.watchers, sortDirection);
+    //         gistProvider.refresh(undefined, true);
+    //     })
+    // );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortAscending", async () => {
+            const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
+            setSortDirectionContext(SortDirection.ascending);
+            store.sortGists(sortType, SortDirection.ascending);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortDescending", async () => {
+            const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
+            setSortDirectionContext(SortDirection.descending);
+            store.sortGists(sortType, SortDirection.descending);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+
+    // sort empty
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByNameEmpty", async () => {}));
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByCreationTimeEmpty", async () => {}));
+    // context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByForksEmpty", async () => {}));
+    // context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByStarsEmpty", async () => {}));
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByUpdateTimeEmpty", async () => {}));
+    // context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByWatchersEmpty", async () => {}));
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortAscendingEmpty", async () => {}));
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortDescendingEmpty", async () => {}));
 
     // register global storage
     const keysForSync = [FOLLOWED_USERS_GLOBAL_STORAGE_KEY];

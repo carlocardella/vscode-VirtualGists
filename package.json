@@ -229,6 +229,56 @@
                 "title": "Follow user on GitHub...",
                 "command": "VirtualGists.followUserOnGitHub",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort by name",
+                "command": "VirtualGists.sortGistByNameEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort by name",
+                "command": "VirtualGists.sortGistByName",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort by creation time",
+                "command": "VirtualGists.sortGistByCreationTimeEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort by creation time",
+                "command": "VirtualGists.sortGistByCreationTime",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort by update time",
+                "command": "VirtualGists.sortGistByUpdateTimeEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort by update time",
+                "command": "VirtualGists.sortGistByUpdateTime",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort ascending",
+                "command": "VirtualGists.sortAscendingEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort ascending",
+                "command": "VirtualGists.sortAscending",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort descending",
+                "command": "VirtualGists.sortDescendingEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort descending",
+                "command": "VirtualGists.sortDescending",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -352,6 +402,21 @@
                 {
                     "command": "VirtualGists.openFileOnGitHub",
                     "when": "false"
+                },
+                {
+                    "command": "VirtualGists.sortGistByName"
+                },
+                {
+                    "command": "VirtualGists.sortGistByCreationTime"
+                },
+                {
+                    "command": "VirtualGists.sortGistByUpdateTime"
+                },
+                {
+                    "command": "VirtualGists.sortAscending"
+                },
+                {
+                    "command": "VirtualGists.sortDescending"
                 }
             ],
             "view/title": [
@@ -379,6 +444,56 @@
                     "command": "VirtualGists.refreshTree",
                     "when": "view == virtualGistsView",
                     "group": "navigation@5"
+                },
+                {
+                    "command": "VirtualGists.sortGistByNameEmpty",
+                    "when": "VirtualGists.sortType.name",
+                    "group": "1_sortType@1"
+                },
+                {
+                    "command": "VirtualGists.sortGistByName",
+                    "when": "!VirtualGists.sortType.name",
+                    "group": "1_sortType@1"
+                },
+                {
+                    "command": "VirtualGists.sortGistByCreationTimeEmpty",
+                    "when": "VirtualGists.sortType.creationTime",
+                    "group": "1_sortType@4"
+                },
+                {
+                    "command": "VirtualGists.sortGistByCreationTime",
+                    "when": "!VirtualGists.sortType.creationTime",
+                    "group": "1_sortType@4"
+                },
+                {
+                    "command": "VirtualGists.sortGistByUpdateTimeEmpty",
+                    "when": "VirtualGists.sortType.updateTime",
+                    "group": "1_sortType@5"
+                },
+                {
+                    "command": "VirtualGists.sortGistByUpdateTime",
+                    "when": "!VirtualGists.sortType.updateTime",
+                    "group": "1_sortType@5"
+                },
+                {
+                    "command": "VirtualGists.sortAscendingEmpty",
+                    "when": "VirtualGists.sortDirection.ascending",
+                    "group": "2_sortDirection@1"
+                },
+                {
+                    "command": "VirtualGists.sortAscending",
+                    "when": "!VirtualGists.sortDirection.ascending",
+                    "group": "2_sortDirection@1"
+                },
+                {
+                    "command": "VirtualGists.sortDescendingEmpty",
+                    "when": "VirtualGists.sortDirection.descending",
+                    "group": "2_sortDirection@2"
+                },
+                {
+                    "command": "VirtualGists.sortDescending",
+                    "when": "!VirtualGists.sortDirection.descending",
+                    "group": "2_sortDirection@2"
                 }
             ],
             "view/item/context": [
@@ -546,6 +661,56 @@
                     "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
                     "when": "viewItem =~ /gist./",
                     "group": "9_open@3"
+                },
+                {
+                    "command": "VirtualGists.sortGistByNameEmpty",
+                    "when": "VirtualGists.sortType.name && viewItem == myGistsGroupNode",
+                    "group": "9_sortType@1"
+                },
+                {
+                    "command": "VirtualGists.sortGistByName",
+                    "when": "!VirtualGists.sortType.name && viewITem == myGistsGroupNode",
+                    "group": "9_sortType@1"
+                },
+                {
+                    "command": "VirtualGists.sortGistByCreationTimeEmpty",
+                    "when": "VirtualGists.sortType.creationTime && viewITem == myGistsGroupNode",
+                    "group": "9_sortType@2"
+                },
+                {
+                    "command": "VirtualGists.sortGistByCreationTime",
+                    "when": "!VirtualGists.sortType.creationTime && viewITem == myGistsGroupNode",
+                    "group": "9_sortType@2"
+                },
+                {
+                    "command": "VirtualGists.sortGistByUpdateTimeEmpty",
+                    "when": "VirtualGists.sortType.updateTime && viewITem == myGistsGroupNode",
+                    "group": "9_sortType@3"
+                },
+                {
+                    "command": "VirtualGists.sortGistByUpdateTime",
+                    "when": "!VirtualGists.sortType.updateTime && viewITem == myGistsGroupNode",
+                    "group": "9_sortType@3"
+                },
+                {
+                    "command": "VirtualGists.sortAscendingEmpty",
+                    "when": "VirtualGists.sortDirection.ascending && viewITem == myGistsGroupNode",
+                    "group": "9_sortDirection@1"
+                },
+                {
+                    "command": "VirtualGists.sortAscending",
+                    "when": "!VirtualGists.sortDirection.ascending && viewITem == myGistsGroupNode",
+                    "group": "9_sortDirection@1"
+                },
+                {
+                    "command": "VirtualGists.sortDescendingEmpty",
+                    "when": "VirtualGists.sortDirection.descending && viewITem == myGistsGroupNode",
+                    "group": "9_sortDirection@2"
+                },
+                {
+                    "command": "VirtualGists.sortDescending",
+                    "when": "!VirtualGists.sortDirection.descending && viewITem == myGistsGroupNode",
+                    "group": "9_sortDirection@2"
                 }
             ]
         }
