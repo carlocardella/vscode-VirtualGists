@@ -1,7 +1,7 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { extensionContext, output, store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import {  SortType } from "../FileSystem/storage";
+import { SortType } from "../FileSystem/storage";
 import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
 import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getFollowedUsers, getOpenedGists, getNotepadGist } from "../GitHub/commands";
 import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
@@ -135,6 +135,10 @@ export class UserNode extends TreeItem {
         this.tooltip = user.login;
         this.contextValue = "user";
     }
+
+    get name() {
+        return this.label;
+    }
 }
 
 export class NotepadNode extends TreeItem {
@@ -217,7 +221,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
      * @returns {*}
      */
     getParent = (node: any) => node.parent;
-    
+
     sorting = false;
 
     /**

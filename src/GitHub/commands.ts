@@ -1,5 +1,5 @@
 import { commands, env, ProgressLocation, Uri, window, workspace } from "vscode";
-import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
+import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import {
     getGitHubGist,
@@ -16,7 +16,7 @@ import {
 import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import { addToGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, addToOrUpdateLocalStorage } from "../FileSystem/storage";
+import { GlobalStorageGroup } from "../FileSystem/storage";
 import { MessageType } from "../tracing";
 
 /**
@@ -288,7 +288,7 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
         let notepadGist = await getOrCreateNotepadGist(fileName);
 
         gist = new GistNode(notepadGist, GistsGroupType.notepad, false);
-        addToOrUpdateLocalStorage(gist);
+        store.addToOrUpdateLocalStorage(gist);
     }
 
     let fileUri = fileNameToUri(gist.gist.id!, fileName);
@@ -319,7 +319,7 @@ export async function followUser(username?: string): Promise<void> {
     }
 
     // add username to storage
-    await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, username);
+    await store.addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, username);
 
     return Promise.resolve();
 }
@@ -345,7 +345,7 @@ export async function getGistsForUser(githubUser: string): Promise<TGist[] | und
  * @returns {Promise<string[]>}
  */
 export async function getFollowedUsers(): Promise<TGitHubUser[]> {
-    const users = await readFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
+    const users = await store.readFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
 
     let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
     let validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
@@ -362,7 +362,7 @@ export async function getFollowedUsers(): Promise<TGitHubUser[]> {
  * @returns {Promise<TGist[]>}
  */
 export async function getOpenedGists(): Promise<TGist[]> {
-    const openedGists = await readFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists);
+    const openedGists = await store.readFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists);
 
     let gists = await Promise.all(openedGists.map(async (gist) => await getGitHubGist(gist)));
     let validGists = gists.filter((gist) => gist !== undefined) as TGist[];
@@ -387,7 +387,7 @@ export async function openGist() {
         return Promise.reject();
     }
 
-    addToGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gistId);
+    store.addToGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gistId);
 }
 
 /**
@@ -399,7 +399,7 @@ export async function openGist() {
  * @returns {*}
  */
 export async function closeGist(gist: GistNode) {
-    removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
+    store.removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
     gistProvider.refresh();
 }
 
