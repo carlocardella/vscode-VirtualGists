@@ -421,17 +421,17 @@
             ],
             "view/title": [
                 {
-                    "command": "VirtualGists.newPrivateGist",
+                    "command": "VirtualGists.openGist",
                     "when": "view == virtualGistsView",
                     "group": "navigation@1"
                 },
                 {
-                    "command": "VirtualGists.newPublicGist",
+                    "command": "VirtualGists.newPrivateGist",
                     "when": "view == virtualGistsView",
                     "group": "navigation@2"
                 },
                 {
-                    "command": "VirtualGists.openGist",
+                    "command": "VirtualGists.newPublicGist",
                     "when": "view == virtualGistsView",
                     "group": "navigation@3"
                 },
@@ -508,14 +508,14 @@
                     "group": "inline"
                 },
                 {
-                    "command": "VirtualGists.addFile",
-                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
-                    "group": "inline"
-                },
-                {
                     "command": "VirtualGists.deleteNode",
                     "when": "viewItem == gist.readWrite || viewItem == file.readWrite",
-                    "group": "inline"
+                    "group": "inline@1"
+                },
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
+                    "group": "inline@2"
                 },
                 {
                     "command": "VirtualGists.newPrivateGist",

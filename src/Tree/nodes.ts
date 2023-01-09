@@ -234,6 +234,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
     async getChildren(element?: ContentNode): Promise<any[]> {
         // @update any
         this.refreshing = true;
+        let sort = true;
 
         if (element) {
             let childNodes: any[] = [];
@@ -287,6 +288,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         break;
 
                     case GistsGroupType.followedUsers:
+                        sort = false;
                         const followedUsers = await getFollowedUsers();
                         childNodes = followedUsers.filter((user) => user !== undefined).map((user) => new UserNode(user!));
                         break;
@@ -309,11 +311,13 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 }
             }
 
-            // sort
-            const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
-            const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
-            childNodes = store.sortGists(sortType, sortDirection, childNodes);
-
+            if (sort) {
+                // sort
+                const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
+                const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+                childNodes = store.sortGists(sortType, sortDirection, childNodes);
+            }
+            
             this.refreshing = false;
             return Promise.resolve(childNodes);
         } else {
