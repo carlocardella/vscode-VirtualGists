@@ -90,7 +90,7 @@ export class GistNode extends TreeItem {
         super(gist.description!, TreeItemCollapsibleState.Collapsed);
 
         this.groupType = groupType;
-        this.tooltip = gist.description!;
+
         this.name = gist.description;
         this.gist = gist;
         this.description = Object.values(gist.files!).length.toString();
@@ -115,6 +115,10 @@ export class GistNode extends TreeItem {
         this.iconPath = gist.public ? new ThemeIcon("gist") : new ThemeIcon("gist-secret");
         this.created_at = gist.created_at;
         this.updated_at = gist.updated_at;
+
+        // prettier-ignore
+        let tooltip = ` ${gist.description}${"\n\n"} Created: ${gist.created_at}${"\n"} Updated: ${gist.updated_at}`;
+        this.tooltip = tooltip;
     }
 }
 
@@ -317,7 +321,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
                 childNodes = store.sortGists(sortType, sortDirection, childNodes);
             }
-            
+
             this.refreshing = false;
             return Promise.resolve(childNodes);
         } else {
