@@ -18,7 +18,7 @@ export enum SortDirection {
 }
 
 /**
- * Class to store and manage repositories; used as source for the TreeVIew
+ * Class to store and manage gists; used as source for the TreeVIew
  *
  * @export
  * @class Store
@@ -26,17 +26,17 @@ export enum SortDirection {
  */
 export class Store {
     /**
-     * Repositories array
+     * Gists array
      *
      * @public
-     * @type {((RepoNode | undefined)[])}
+     * @type {((GistNode | undefined)[])}
      */
     public gists: (GistNode | undefined)[] = [];
 
     public followedUsers: (UserNode | undefined)[] = [];
 
     /**
-     * Indicates whether the repositories are sorted
+     * Indicates whether the gists are sorted
      *
      * @public
      * @type {boolean}
@@ -44,7 +44,7 @@ export class Store {
     public isSorted = false;
 
     /**
-     * Repositories sort by property
+     * Gists sort by property
      *
      * @public
      * @type {SortType}
@@ -60,7 +60,7 @@ export class Store {
     }
 
     /**
-     * Repositories sort direction
+     * Gists sort direction
      *
      * @public
      * @type {SortDirection}
@@ -108,9 +108,9 @@ export class Store {
         //             try {
         //                 let branch = await getGitHubBranch(repo!, repo!.default_branch);
         //                 let tree = (await getGitHubTree(repo!, branch!.commit.sha)) ?? undefined;
-        //                 let repoNode = new RepoNode(repo!, tree);
-        //                 await repoNode.init();
-        //                 return repoNode;
+        //                 let gistNode = new GistNode(repo!, tree);
+        //                 await gistNode.init();
+        //                 return gistNode;
         //             } catch (error: any) {
         //                 if (error.name === "HttpError") {
         //                     output?.appendLine(`Error reading repo ${repo!.name}: ${error.response.data.message}`, output.messageType.error);
@@ -165,7 +165,7 @@ export class Store {
     }
 
     /**
-     * Sort repositories
+     * Sort gists
      *
      * @param {SortType} sortType Sort by property
      * @param {SortDirection} sortDirection Sort direction
@@ -338,7 +338,7 @@ export class Store {
     }
 
     /**
-     * Get the list of repositories from Global Storage
+     * Get the list of gists from Global Storage
      *
      * @export
      * @param {ExtensionContext} context Extension context

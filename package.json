@@ -112,12 +112,6 @@
                 "category": "Virtual Gists"
             },
             {
-                "title": "Close Gist",
-                "command": "VirtualGists.closeGist",
-                "icon": "$(close)",
-                "category": "Virtual Gists"
-            },
-            {
                 "title": "New file",
                 "command": "VirtualGists.addFile",
                 "icon": "$(new-file)",
@@ -218,11 +212,6 @@
             {
                 "title": "Copy owner name",
                 "command": "VirtualGists.copyUsername",
-                "category": "Virtual Gists"
-            },
-            {
-                "title": "Fork gist...",
-                "command": "VirtualGists.forkGist",
                 "category": "Virtual Gists"
             },
             {
@@ -661,56 +650,6 @@
                     "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
                     "when": "viewItem =~ /gist./",
                     "group": "9_open@3"
-                },
-                {
-                    "command": "VirtualGists.sortGistByNameEmpty",
-                    "when": "VirtualGists.sortType.name && viewItem == myGistsGroupNode",
-                    "group": "9_sortType@1"
-                },
-                {
-                    "command": "VirtualGists.sortGistByName",
-                    "when": "!VirtualGists.sortType.name && viewITem == myGistsGroupNode",
-                    "group": "9_sortType@1"
-                },
-                {
-                    "command": "VirtualGists.sortGistByCreationTimeEmpty",
-                    "when": "VirtualGists.sortType.creationTime && viewITem == myGistsGroupNode",
-                    "group": "9_sortType@2"
-                },
-                {
-                    "command": "VirtualGists.sortGistByCreationTime",
-                    "when": "!VirtualGists.sortType.creationTime && viewITem == myGistsGroupNode",
-                    "group": "9_sortType@2"
-                },
-                {
-                    "command": "VirtualGists.sortGistByUpdateTimeEmpty",
-                    "when": "VirtualGists.sortType.updateTime && viewITem == myGistsGroupNode",
-                    "group": "9_sortType@3"
-                },
-                {
-                    "command": "VirtualGists.sortGistByUpdateTime",
-                    "when": "!VirtualGists.sortType.updateTime && viewITem == myGistsGroupNode",
-                    "group": "9_sortType@3"
-                },
-                {
-                    "command": "VirtualGists.sortAscendingEmpty",
-                    "when": "VirtualGists.sortDirection.ascending && viewITem == myGistsGroupNode",
-                    "group": "9_sortDirection@1"
-                },
-                {
-                    "command": "VirtualGists.sortAscending",
-                    "when": "!VirtualGists.sortDirection.ascending && viewITem == myGistsGroupNode",
-                    "group": "9_sortDirection@1"
-                },
-                {
-                    "command": "VirtualGists.sortDescendingEmpty",
-                    "when": "VirtualGists.sortDirection.descending && viewITem == myGistsGroupNode",
-                    "group": "9_sortDirection@2"
-                },
-                {
-                    "command": "VirtualGists.sortDescending",
-                    "when": "!VirtualGists.sortDirection.descending && viewITem == myGistsGroupNode",
-                    "group": "9_sortDirection@2"
                 }
             ]
         }

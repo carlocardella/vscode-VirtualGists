@@ -694,7 +694,7 @@ export async function forkGist(gist?: GistNode | string) {
  *
  * @export
  * @async
- * @param {RepoNode} gist The gist to clone
+ * @param {GistNode} gist The gist to clone
  * @returns {*}
  */
 export async function cloneGist(gist: GistNode) {
