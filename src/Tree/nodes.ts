@@ -315,7 +315,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 }
             }
 
-            if (sort) {
+            if (sort && childNodes[0] instanceof GistNode) {
                 // sort
                 const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
                 const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
