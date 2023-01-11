@@ -436,52 +436,52 @@
                 },
                 {
                     "command": "VirtualGists.sortGistByNameEmpty",
-                    "when": "VirtualGists.sortType.name",
+                    "when": "view == virtualGistsView && VirtualGists.sortType.name",
                     "group": "1_sortType@1"
                 },
                 {
                     "command": "VirtualGists.sortGistByName",
-                    "when": "!VirtualGists.sortType.name",
+                    "when": "view == virtualGistsView && !VirtualGists.sortType.name",
                     "group": "1_sortType@1"
                 },
                 {
                     "command": "VirtualGists.sortGistByCreationTimeEmpty",
-                    "when": "VirtualGists.sortType.creationTime",
+                    "when": "view == virtualGistsView && VirtualGists.sortType.creationTime",
                     "group": "1_sortType@4"
                 },
                 {
                     "command": "VirtualGists.sortGistByCreationTime",
-                    "when": "!VirtualGists.sortType.creationTime",
+                    "when": "view == virtualGistsView && !VirtualGists.sortType.creationTime",
                     "group": "1_sortType@4"
                 },
                 {
                     "command": "VirtualGists.sortGistByUpdateTimeEmpty",
-                    "when": "VirtualGists.sortType.updateTime",
+                    "when": "view == virtualGistsView && VirtualGists.sortType.updateTime",
                     "group": "1_sortType@5"
                 },
                 {
                     "command": "VirtualGists.sortGistByUpdateTime",
-                    "when": "!VirtualGists.sortType.updateTime",
+                    "when": "view == virtualGistsView && !VirtualGists.sortType.updateTime",
                     "group": "1_sortType@5"
                 },
                 {
                     "command": "VirtualGists.sortAscendingEmpty",
-                    "when": "VirtualGists.sortDirection.ascending",
+                    "when": "view == virtualGistsView && VirtualGists.sortDirection.ascending",
                     "group": "2_sortDirection@1"
                 },
                 {
                     "command": "VirtualGists.sortAscending",
-                    "when": "!VirtualGists.sortDirection.ascending",
+                    "when": "view == virtualGistsView && !VirtualGists.sortDirection.ascending",
                     "group": "2_sortDirection@1"
                 },
                 {
                     "command": "VirtualGists.sortDescendingEmpty",
-                    "when": "VirtualGists.sortDirection.descending",
+                    "when": "view == virtualGistsView && VirtualGists.sortDirection.descending",
                     "group": "2_sortDirection@2"
                 },
                 {
                     "command": "VirtualGists.sortDescending",
-                    "when": "!VirtualGists.sortDirection.descending",
+                    "when": "view == virtualGistsView && !VirtualGists.sortDirection.descending",
                     "group": "2_sortDirection@2"
                 }
             ],
