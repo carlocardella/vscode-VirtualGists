@@ -54,6 +54,8 @@ export let store = new Store();
 export async function activate(context: ExtensionContext) {
     extensionContext = context;
     await store.init();
+    setSortTypeContext(store.sortType);
+    setSortDirectionContext(store.sortDirection);
 
     if (config.get("EnableTracing")) {
         output = new trace.Output();
@@ -322,22 +324,6 @@ export async function activate(context: ExtensionContext) {
             gistProvider.refresh(undefined, true);
         })
     );
-    // context.subscriptions.push(
-    //     commands.registerCommand("VirtualGists.sortGistByForks", async () => {
-    //         const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
-    //         setSortTypeContext(SortType.forks);
-    //         store.sortGists(SortType.forks, sortDirection);
-    //         gistProvider.refresh(undefined, true);
-    //     })
-    // );
-    // context.subscriptions.push(
-    //     commands.registerCommand("VirtualGists.sortGistByStars", async () => {
-    //         const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
-    //         setSortTypeContext(SortType.stars);
-    //         store.sortGists(SortType.stars, sortDirection);
-    //         gistProvider.refresh(undefined, true);
-    //     })
-    // );
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.sortGistByUpdateTime", async () => {
             const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
@@ -346,14 +332,6 @@ export async function activate(context: ExtensionContext) {
             gistProvider.refresh(undefined, true);
         })
     );
-    // context.subscriptions.push(
-    //     commands.registerCommand("VirtualGists.sortGistByWatchers", async () => {
-    //         const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
-    //         setSortTypeContext(SortType.watchers);
-    //         store.sortGists(SortType.watchers, sortDirection);
-    //         gistProvider.refresh(undefined, true);
-    //     })
-    // );
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.sortAscending", async () => {
             const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
@@ -374,10 +352,7 @@ export async function activate(context: ExtensionContext) {
     // sort empty
     context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByNameEmpty", async () => {}));
     context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByCreationTimeEmpty", async () => {}));
-    // context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByForksEmpty", async () => {}));
-    // context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByStarsEmpty", async () => {}));
     context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByUpdateTimeEmpty", async () => {}));
-    // context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByWatchersEmpty", async () => {}));
     context.subscriptions.push(commands.registerCommand("VirtualGists.sortAscendingEmpty", async () => {}));
     context.subscriptions.push(commands.registerCommand("VirtualGists.sortDescendingEmpty", async () => {}));
 

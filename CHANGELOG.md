@@ -8,6 +8,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [0.0.17] - 2023-01-11
+
+### Fixed
+
+* Set sort type and direction menu toggles at extension startup
+
 ## [0.0.16] - 2023-01-10
 
 ### Fixed
