@@ -60,6 +60,11 @@
                     "type": "boolean",
                     "description": "Use the owner's avatar for opened and starred gists, and followed users",
                     "default": false
+                },
+                "VirtualGists.ShowDecorations": {
+                    "type": "boolean",
+                    "description": "Use the owner's avatar for opened and starred gists, and followed users",
+                    "default": false
                 }
             }
         },

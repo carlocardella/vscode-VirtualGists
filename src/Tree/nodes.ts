@@ -66,6 +66,25 @@ export class GistsGroupNode extends TreeItem {
                 break;
         }
     }
+
+    async init(groupType: GistsGroupType | string) {
+        switch (groupType) {
+            case GistsGroupType.followedUsers:
+                this.description = (await getFollowedUsers())?.length.toString();
+                break;
+            case GistsGroupType.myGists:
+                this.description = (await getOwnedGists())?.length.toString(); // @todo: optimize, save in local storage
+                break;
+            case GistsGroupType.starredGists:
+                this.description = (await getStarredGists())?.length.toString(); // @todo: optimize, save in local storage
+                break;
+            case GistsGroupType.openedGists:
+                this.description = (await getOpenedGists())?.length.toString(); // @todo: optimize, save in local storage
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 /**
@@ -143,6 +162,11 @@ export class UserNode extends TreeItem {
     get name() {
         return this.label;
     }
+
+    async init() {
+        let userGists = (await getGitHubGistForUser(this.tooltip as string)) as TGist[];
+        this.description = userGists.length.toString();
+    }
 }
 
 export class NotepadNode extends TreeItem {
@@ -155,6 +179,12 @@ export class NotepadNode extends TreeItem {
         this.tooltip = "Notepad";
         this.iconPath = new ThemeIcon("pencil");
         this.contextValue = "notepad";
+    }
+
+    async init() {
+        let notepadGist = await getNotepadGist();
+        let notepadFiles = Object.values(notepadGist?.files ?? []);
+        this.description = notepadFiles.length.toString(); // @todo: optimize, save in local storage
     }
 }
 
@@ -294,7 +324,15 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                     case GistsGroupType.followedUsers:
                         sort = false;
                         const followedUsers = await getFollowedUsers();
-                        childNodes = followedUsers.filter((user) => user !== undefined).map((user) => new UserNode(user!));
+                        childNodes = followedUsers
+                            .filter((user) => user !== undefined)
+                            .map(async (user) => {
+                                let userNode = new UserNode(user!);
+                                if (config.get("ShowDecorations")) {
+                                    await userNode.init();
+                                }
+                                return userNode;
+                            });
                         break;
 
                     case GistsGroupType.openedGists:
@@ -332,6 +370,13 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
             let starredGistsNode = new GistsGroupNode(GistsGroupType.starredGists);
             let followedUsersGistsNode = new GistsGroupNode(GistsGroupType.followedUsers);
             let openedGistsNode = new GistsGroupNode(GistsGroupType.openedGists);
+            if (config.get("ShowDecorations")) {
+                await notepadGistsNode.init();
+                await myGistsNode.init(GistsGroupType.myGists);
+                await starredGistsNode.init(GistsGroupType.starredGists);
+                await followedUsersGistsNode.init(GistsGroupType.followedUsers);
+                await openedGistsNode.init(GistsGroupType.openedGists);
+            }
 
             gists.push(notepadGistsNode);
             gists.push(myGistsNode);

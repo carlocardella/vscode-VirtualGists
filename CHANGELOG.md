@@ -8,6 +8,18 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+## [0.0.18] - 2023-02-20
+
+### Changed
+
+* If the new `VirtualGists.ShowDecorations` is set to `true`, show the number of Gists for each group and Followed User
+
+### Added
+
+* New Setting `VirtualGists.ShowDecorations` (default `false`)
+  * If enabled, shows the number of Gists in each group and for each Followed User
+  * **Note**: Depending on the number of Gists or Followed Users, this may have a significant performance impact (increase the load time) due to the additional calls to GitHub needed to get the number of Gists in each group and for each user
+
 ## [0.0.17] - 2023-01-11
 
 ### Fixed

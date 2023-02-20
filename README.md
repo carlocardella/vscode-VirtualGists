@@ -98,6 +98,12 @@ It can be helpful to identify to which user an opened or starred gist belongs to
 
 ![virtualGits_use_owner_avatar](https://user-images.githubusercontent.com/5784415/204113210-2b3c1c64-9205-4ac7-800d-cd449f98df6a.gif)
 
+### Show decorations for Gist groups
+
+You can show the number of Gists and Followed Users enabling `VirtualGists.ShowDecorations` (default: `false`).
+
+**Note**: Depending on the number of Gists or Followed Users, this may have a significant performance impact (increase the load time) due to the additional calls to GitHub needed to get the number of Gists in each group and for each user
+
 ## Tracing
 
 You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Gists` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.

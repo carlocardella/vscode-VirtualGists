@@ -374,6 +374,11 @@ export async function activate(context: ExtensionContext) {
                 gistProvider.refresh();
                 output?.appendLine("UseGistOwnerAvatar changed", output.messageType.info);
             }
+
+            if (e.affectsConfiguration("VirtualGists.ShowDecorations")) {
+                gistProvider.refresh();
+                output?.appendLine("ShowDecorations changed", output.messageType.info);
+            }
         })
     );
 
