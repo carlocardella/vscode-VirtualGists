@@ -83,51 +83,6 @@ export class Store {
     async init() {
         this.sortType = this.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
         this.sortDirection = this.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
-        // await getOrRefreshStarredRepos();
-        // await getOrRefreshFollowedUsers();
-        // const reposFromGlobalStorage = this.getGistFromGlobalState(extensionContext);
-        // if (reposFromGlobalStorage.length === 0) {
-        //     output?.appendLine("No repos found in global storage", output.messageType.info);
-        //     return Promise.resolve([]);
-        // }
-        // let childNodes = this.gists;
-        // let repos = await Promise.all(
-        //     reposFromGlobalStorage?.map(async (repo: string) => {
-        //         let [owner, name] = getRepoDetails(repo);
-        //         let repoFromGitHub = await getGitHubRepository(owner, name);
-        //         if (repoFromGitHub) {
-        //             return Promise.resolve(repoFromGitHub as TGist);
-        //         }
-        //         return Promise.reject();
-        //     })
-        // );
-        // childNodes = await Promise.all(
-        //     repos
-        //         .filter((repo) => repo !== undefined)
-        //         .map(async (repo) => {
-        //             try {
-        //                 let branch = await getGitHubBranch(repo!, repo!.default_branch);
-        //                 let tree = (await getGitHubTree(repo!, branch!.commit.sha)) ?? undefined;
-        //                 let gistNode = new GistNode(repo!, tree);
-        //                 await gistNode.init();
-        //                 return gistNode;
-        //             } catch (error: any) {
-        //                 if (error.name === "HttpError") {
-        //                     output?.appendLine(`Error reading repo ${repo!.name}: ${error.response.data.message}`, output.messageType.error);
-        //                 } else {
-        //                     output?.appendLine(`${repo!.name}: ${error.response}`, output.messageType.error);
-        //                 }
-        //             }
-        //         })
-        // );
-        // this.gists = childNodes;
-        // this.sortType = this.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
-        // this.sortDirection = this.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
-        // let sortType = this.sortType;
-        // let sortDirection = this.sortDirection;
-        // if (sortType !== undefined && sortDirection !== undefined) {
-        //     this.sortGists(sortType, sortDirection);
-        // }
     }
 
     /**

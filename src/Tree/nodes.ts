@@ -1,8 +1,7 @@
 import { Event, EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { extensionContext, output, store } from "../extension";
 import { GistFileSystemProvider } from "../FileSystem/fileSystem";
-import { SortType } from "../FileSystem/storage";
-import { getGitHubGistForUser, getGitHubUser } from "../GitHub/api";
+import { getGitHubGistForUser } from "../GitHub/api";
 import { getGist, getOwnedGists, getStarredGists, fileNameToUri, getFollowedUsers, getOpenedGists, getNotepadGist } from "../GitHub/commands";
 import { TContent, TGist, TGistFile, TGitHubUser } from "../GitHub/types";
 import { GlobalStorageKeys, NOTEPAD_GIST_NAME } from "../GitHub/constants";
@@ -164,8 +163,9 @@ export class UserNode extends TreeItem {
     }
 
     async init() {
-        let userGists = (await getGitHubGistForUser(this.tooltip as string)) as TGist[];
-        this.description = userGists.length.toString();
+        let userGists = await getGitHubGistForUser(this.tooltip as string);
+        this.description = userGists?.length.toString() ?? "0";
+        return;
     }
 }
 
@@ -323,16 +323,18 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                     case GistsGroupType.followedUsers:
                         sort = false;
-                        const followedUsers = await getFollowedUsers();
-                        childNodes = followedUsers
-                            .filter((user) => user !== undefined)
-                            .map(async (user) => {
-                                let userNode = new UserNode(user!);
-                                if (config.get("ShowDecorations")) {
-                                    await userNode.init();
-                                }
-                                return userNode;
-                            });
+                        const followedUsers = await getFollowedUsers(); // @todo: this should not be needed, this was called on L:371
+                        childNodes = await Promise.all(
+                            followedUsers
+                                .filter((user) => user !== undefined)
+                                .map(async (user) => {
+                                    let userNode = new UserNode(user!);
+                                    if (config.get("ShowDecorations")) {
+                                        await userNode.init();
+                                    }
+                                    return Promise.resolve(userNode);
+                                })
+                        );
                         break;
 
                     case GistsGroupType.openedGists:
