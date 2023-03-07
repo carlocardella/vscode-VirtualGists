@@ -8,7 +8,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
-## [0.0.18] - 2023-02-20
+## [0.1.1] - 2023-03-07
+
+### Fixed
+
+* [#46 Followed Users functionality broken](https://github.com/carlocardella/vscode-VirtualGists/issues/46)
+
+## [0.1.0] - 2023-02-20
 
 ### Changed
 
@@ -75,7 +81,7 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 ### Changed
 
 * Improved the `Follow user...` dialog
-  * You can still enter a GitHub username as before, but you can now also select a user from the list of users you already follow on GitHub (https://gist.github.com/username) [#34](https://github.com/carlocardella/vscode-VirtualGists/issues/34), [#28](https://github.com/carlocardella/vscode-VirtualGists/issues/28)
+  * You can still enter a GitHub username as before, but you can now also select a user from the list of users you already follow on GitHub (<https://gist.github.com/username>) [#34](https://github.com/carlocardella/vscode-VirtualGists/issues/34), [#28](https://github.com/carlocardella/vscode-VirtualGists/issues/28)
 * You cannot follow yourself 😄 Why would you anyway? Your gists are already all listed under `My Gists`, no need to duplicate them
 
 ### Fixed
@@ -169,7 +175,7 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 * Enabled `Follow user` command
 
- ### Fixed
+### Fixed
 
 * Fixed [#2](https://github.com/carlocardella/vscode-VirtualGists/issues/2)
 * Other fixes adn improvements
