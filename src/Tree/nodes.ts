@@ -105,11 +105,11 @@ export class GistNode extends TreeItem {
     updated_at: string | undefined;
 
     constructor(gist: TGist, groupType: GistsGroupType, readOnly?: boolean) {
-        super(gist.description!, TreeItemCollapsibleState.Collapsed);
+        super(gist.description || gist.id!, TreeItemCollapsibleState.Collapsed);
 
         this.groupType = groupType;
 
-        this.name = gist.description;
+        this.name = gist.description || gist.id;
         this.gist = gist;
         this.description = Object.values(gist.files!).length.toString();
         this.readOnly = readOnly ?? false;

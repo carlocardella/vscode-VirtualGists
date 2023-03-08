@@ -8,6 +8,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 See the [list of pending enhancements on GitHub](https://github.com/carlocardella/vscode-VirtualGists/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aenhancement)
 
+---
+
+## [0.1.2] - 2023-03-08
+
+### Fixed
+
+* [#47 Cannot read properties of null (reading 'localeCompare')](https://github.com/carlocardella/vscode-VirtualGists/issues/47)
+
 ## [0.1.1] - 2023-03-07
 
 ### Fixed
