@@ -17,7 +17,6 @@ import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete } from "./type
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import { GlobalStorageGroup } from "../FileSystem/storage";
-import { MessageType } from "../tracing";
 
 /**
  * Get the content of a gist file.
@@ -758,19 +757,4 @@ export async function followUserOnGitHub(username: string) {
     await window.withProgress({ title: "Following user...", location: ProgressLocation.Notification }, async () => {
         await followGitHubUser(username);
     });
-}
-
-/**
- * Download a Gist file to a local file.
- *
- * @export
- * @param {Uri} newFileUri Uri of the new file; this is where the file will be downloaded to
- * @param {Uint8Array} fileContent Content of the file to be downloaded
- */
-export function downloadFile(newFileUri: Uri, fileContent: Uint8Array) {
-    try {
-        workspace.fs.writeFile(newFileUri, fileContent);
-    } catch (e) {
-        output?.appendLine(`Error writing file: ${e}`, MessageType.error);
-    }
 }

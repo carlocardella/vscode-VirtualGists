@@ -10,6 +10,12 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.2.0] - 2023-03-21
+
+### Added
+
+* Download gists and files ([#7 Download a gist](https://github.com/carlocardella/vscode-VirtualGists/issues/7))
+
 ## [0.1.2] - 2023-03-08
 
 ### Fixed

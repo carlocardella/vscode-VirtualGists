@@ -105,8 +105,8 @@
                 "icon": "$(repo-forked)"
             },
             {
-                "title": "Download gist",
-                "command": "VirtualGists.downloadGist",
+                "title": "Download...",
+                "command": "VirtualGists.download",
                 "category": "Virtual Gists",
                 "icon": "$(cloud-download)"
             },
@@ -273,6 +273,11 @@
                 "title": "Sort descending",
                 "command": "VirtualGists.sortDescending",
                 "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort descending",
+                "command": "VirtualGists.sortDescending",
+                "category": "Virtual Gists"
             }
         ],
         "viewsContainers": {
@@ -362,7 +367,7 @@
                     "when": "false"
                 },
                 {
-                    "command": "VirtualGists.downloadGist",
+                    "command": "VirtualGists.download",
                     "when": "false"
                 },
                 {
@@ -639,6 +644,11 @@
                 {
                     "command": "VirtualGists.cloneGist",
                     "when": "viewItem =~ /gist./",
+                    "group": "3_copy@4"
+                },
+                {
+                    "command": "VirtualGists.download",
+                    "when": "viewItem =~ /gist.|file./",
                     "group": "3_copy@4"
                 },
                 {

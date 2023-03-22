@@ -42,6 +42,7 @@ import {
     followUserOnGitHub,
 } from "./GitHub/commands";
 import { setSortDirectionContext, setSortTypeContext } from "./utils";
+import { downloadFiles, downloadGist } from "./FileSystem/download";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 declare global {
@@ -304,6 +305,29 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.cloneGist", async (gist: GistNode) => {
             cloneGist(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.download", async (targetNode: GistNode | ContentNode, targetNodes?: GistNode[] | ContentNode[]) => {
+            let destinationFolder = await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                title: "Select download destination",
+            });
+            if (!destinationFolder) {
+                return;
+            }
+
+            const nodes = targetNodes || [targetNode];
+            const gistNodes = nodes.filter((node) => node instanceof GistNode);
+            const contentNodes = nodes.filter((node) => node instanceof ContentNode);
+            if (gistNodes.length > 0) {
+                await downloadGist(gistNodes as GistNode[], destinationFolder[0]);
+            } else {
+                await downloadFiles(contentNodes as ContentNode[], destinationFolder[0]);
+            }
         })
     );
 

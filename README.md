@@ -92,6 +92,14 @@ For a file:
 
 ![file context menu](https://user-images.githubusercontent.com/5784415/203451593-461c6da1-4773-4fd4-a4ba-a93ac0383c32.png)
 
+### Download Gists and files
+
+You can download one or more Gists or files to your local drive.
+
+_Note: Once downloaded, the files are no longer linked to GitHub so you must manually save/sync any changes you make offline._
+
+![save gist and file](https://user-images.githubusercontent.com/5784415/226784693-9949409d-8225-4772-846d-5efcb6a67478.gif)
+
 ### Optionally use the gist owner's avatar as icon
 
 It can be helpful to identify to which user an opened or starred gist belongs to as a glance. Oh the other hand, you may prefer a cleaner list where icons only show the item type without being too distracting. Use `VirtualGists.UseGistOwnerAvatar` to toggle the behavior to your liking:
