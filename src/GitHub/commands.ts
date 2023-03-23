@@ -1,4 +1,4 @@
-import { commands, env, ProgressLocation, Uri, window, workspace } from "vscode";
+import { commands, env, LogOutputChannel, ProgressLocation, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import {

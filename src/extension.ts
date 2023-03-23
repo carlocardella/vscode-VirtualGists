@@ -1,6 +1,4 @@
 import { Credentials } from "./GitHub/authentication";
-import * as config from "./config";
-import * as trace from "./tracing";
 import { commands, ExtensionContext, workspace, window, LogOutputChannel, LogLevel, env } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
@@ -58,12 +56,7 @@ export async function activate(context: ExtensionContext) {
     setSortTypeContext(store.sortType);
     setSortDirectionContext(store.sortDirection);
 
-    // if (config.get("EnableTracing") !== "Off") {
-    //     output = window.createOutputChannel("Virtual Gists", {log: true});
-    // }
-    if (workspace.getConfiguration("VirtualGists").get<string>("TraceLevel") !== "Off") {
-        output = window.createOutputChannel("Virtual Gists", { log: true });
-    }
+    output = window.createOutputChannel("Virtual Gists", { log: true });
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
@@ -389,18 +382,6 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration("VirtualGists.TraceLevel")) {
-                const logLevel = workspace.getConfiguration("VirtualGists").get<string>("EnableTracing");
-                if (logLevel !== "Off") {
-                    output = window.createOutputChannel("Virtual Gists", { log: true });
-                    output.
-                    // output.logLevel = workspace.getConfiguration("VirtualGists").get<string>("TraceLevel")!;
-                    // env.logLevel = LogLevel[logLevel];
-                } else {
-                    output?.dispose();
-                }
-            }
-
             if (e.affectsConfiguration("VirtualGists.UseGistOwnerAvatar")) {
                 gistProvider.refresh();
                 output?.info("UseGistOwnerAvatar changed");
@@ -411,7 +392,6 @@ export async function activate(context: ExtensionContext) {
                 output?.info("ShowDecorations changed");
             }
         })
-
     );
 
     window.createTreeView("virtualGistsView", {

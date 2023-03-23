@@ -46,19 +46,6 @@
         "configuration": {
             "title": "VirtualGists",
             "properties": {
-                "VirtualGists.TraceLevel": {
-                    "type": "string",
-                    "description": "Trace level",
-                    "default": "Off",
-                    "enum": [
-                        "Error",
-                        "Warn",
-                        "Info",
-                        "Verbose",
-                        "Debug",
-                        "Off"
-                    ]
-                },
                 "VirtualGists.PullInterval": {
                     "type": "number",
                     "description": "Interval in seconds to pull changes from the remote gists, set to 0 (zero) to disable",
