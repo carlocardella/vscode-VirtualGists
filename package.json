@@ -46,10 +46,18 @@
         "configuration": {
             "title": "VirtualGists",
             "properties": {
-                "VirtualGists.EnableTracing": {
-                    "type": "boolean",
-                    "description": "Enable tracing of the extension",
-                    "default": false
+                "VirtualGists.TraceLevel": {
+                    "type": "string",
+                    "description": "Trace level",
+                    "default": "Off",
+                    "enum": [
+                        "Error",
+                        "Warn",
+                        "Info",
+                        "Verbose",
+                        "Debug",
+                        "Off"
+                    ]
                 },
                 "VirtualGists.PullInterval": {
                     "type": "number",

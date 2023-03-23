@@ -19,7 +19,7 @@ export async function downloadFile(newFileUri: Uri, fileContent: Uint8Array) {
     try {
         await workspace.fs.writeFile(newFileUri, fileContent);
     } catch (e) {
-        output?.appendLine(`Error writing file: ${e}`, MessageType.error);
+        output?.error(`Error writing file: ${e}`);
     }
 }
 
@@ -32,7 +32,7 @@ export async function downloadFiles(files: ContentNode[], destinationFolder: Uri
         },
         async (progress, token) => {
             token.onCancellationRequested(() => {
-                output?.appendLine("File download cancelled by user.", MessageType.info);
+                output?.info("File download cancelled by user.");
                 overwrite.cancel();
                 return;
             });
@@ -52,7 +52,7 @@ export async function downloadFiles(files: ContentNode[], destinationFolder: Uri
                     const fileContent = await getGistFileContent(file.nodeContent);
                     await downloadFile(newFileUri, fileContent);
                 } else {
-                    output?.appendLine(`File "${file.name}" download cancelled by user`, MessageType.info);
+                    output?.info(`File "${file.name}" download cancelled by user`);
                 }
             }
         }
@@ -77,7 +77,7 @@ export async function downloadGist(gists: GistNode[], destinationFolder: Uri) {
         },
         async (progress, token) => {
             token.onCancellationRequested(() => {
-                output?.appendLine("Gist download cancelled by user.", MessageType.info);
+                output?.info("Gist download cancelled by user.");
                 overwrite.cancel();
                 return;
             });
@@ -97,7 +97,7 @@ export async function downloadGist(gists: GistNode[], destinationFolder: Uri) {
                         const fileContent = await getGistFileContent(file as TContent);
                         await downloadFile(newFileUri, fileContent);
                     } else {
-                        output?.appendLine(`Gist "${gist.name}" download cancelled by user`, MessageType.info);
+                        output?.info(`Gist "${gist.name}" download cancelled by user`);
                     }
                 }
             }

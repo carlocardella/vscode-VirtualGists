@@ -404,7 +404,8 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
             this.sorting = true;
         }
         let message = node ? `Refresh gists: ${node?.name}` : "Refresh gists";
-        output?.appendLine(message, output?.messageType.info);
+        // output?.appendLine(message, output?.messageType.info);
+        output?.info(message);
         this._onDidChangeTreeData.fire(node);
     }
 

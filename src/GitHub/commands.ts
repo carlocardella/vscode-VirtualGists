@@ -228,7 +228,8 @@ export async function createGist(publicGist: boolean) {
     if (fileName) {
         // Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.
         if (fileName.match(/gistfile(\d+)/gi)) {
-            output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+            // output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+            output?.error(`The file name '${fileName}' is not allowed.`);
             window.showErrorMessage(
                 `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
             );
@@ -270,14 +271,16 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
 
     // Validate file name // @todo: move to a helper function
     if (fileName.match(/gistfile(\d+)/gi)) {
-        output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        // output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        output?.error(`The file name '${fileName}' is not allowed.`);
         window.showErrorMessage(
             `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
         );
         return Promise.reject();
     }
     if (fileName.indexOf("/") !== -1) {
-        output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        // output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        output?.error(`The file name '${fileName}' is not allowed.`);
         window.showErrorMessage(`"/" is not allowed in a file name.`);
         return Promise.reject();
     }
@@ -422,7 +425,8 @@ export async function renameFile(gistFile: ContentNode) {
 
     // Validate file name
     if (fileName.match(/gistfile(\d+)/gi)) {
-        output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        // output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        output?.error(`The file name '${fileName}' is not allowed.`);
         window.showErrorMessage(
             `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
         );
@@ -697,7 +701,8 @@ export async function forkGist(gist?: GistNode | string) {
  * @returns {*}
  */
 export async function cloneGist(gist: GistNode) {
-    output?.appendLine(`Cloning ${gist.gist.git_pull_url}`, output.messageType.info);
+    // output?.appendLine(`Cloning ${gist.gist.git_pull_url}`, output.messageType.info);
+    output?.info(`Cloning ${gist.gist.git_pull_url}`);
     commands.executeCommand("git.clone", gist.gist.git_pull_url);
 }
 
@@ -738,7 +743,8 @@ export async function pickUserToFollow(): Promise<string | undefined> {
                 quickPick.items = followedUsers!.map((followedUser) => ({ label: `${followedUser.login}` }));
                 quickPick.show();
             } else {
-                output?.appendLine(`onDidAccept: ${pick}`, output.messageType.debug);
+                // output?.appendLine(`onDidAccept: ${pick}`, output.messageType.debug);
+                output?.debug(`onDidAccept: ${pick}`);
                 quickPick.hide();
                 resolve(pick);
             }
@@ -746,7 +752,8 @@ export async function pickUserToFollow(): Promise<string | undefined> {
 
         quickPick.onDidChangeSelection(async (selection) => {
             pick = selection[0].label;
-            output?.appendLine(`onDidChangeSelection: ${pick}`, output.messageType.debug);
+            // output?.appendLine(`onDidChangeSelection: ${pick}`, output.messageType.debug);
+            output?.debug(`onDidChangeSelection: ${pick}`);
         });
 
         // @todo: refresh the list of followed users

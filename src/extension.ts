@@ -1,7 +1,7 @@
 import { Credentials } from "./GitHub/authentication";
 import * as config from "./config";
 import * as trace from "./tracing";
-import { commands, ExtensionContext, workspace, window } from "vscode";
+import { commands, ExtensionContext, workspace, window, LogOutputChannel, LogLevel, env } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
@@ -9,7 +9,7 @@ import { GlobalStorageGroup, Store, SortType, SortDirection } from "./FileSystem
 import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
-export let output: trace.Output;
+export let output: LogOutputChannel;
 export const credentials = new Credentials();
 export let gitHubAuthenticatedUser: TGitHubUser;
 export let extensionContext: ExtensionContext;
@@ -58,13 +58,16 @@ export async function activate(context: ExtensionContext) {
     setSortTypeContext(store.sortType);
     setSortDirectionContext(store.sortDirection);
 
-    if (config.get("EnableTracing")) {
-        output = new trace.Output();
+    // if (config.get("EnableTracing") !== "Off") {
+    //     output = window.createOutputChannel("Virtual Gists", {log: true});
+    // }
+    if (workspace.getConfiguration("VirtualGists").get<string>("TraceLevel") !== "Off") {
+        output = window.createOutputChannel("Virtual Gists", { log: true });
     }
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
-    output?.appendLine("Virtual Gists extension is active", output.messageType.info);
+    output?.info("Virtual Gists extension is active");
 
     await credentials.initialize(context);
     if (!credentials.isAuthenticated) {
@@ -74,7 +77,7 @@ export async function activate(context: ExtensionContext) {
         const octokit = await credentials.getOctokit();
         const userInfo = await octokit.users.getAuthenticated();
 
-        output?.appendLine(`Logged to GitHub as ${userInfo.data.login}`, output.messageType.info);
+        output?.info(`Logged to GitHub as ${userInfo.data.login}`);
     });
 
     context.subscriptions.push(
@@ -89,19 +92,19 @@ export async function activate(context: ExtensionContext) {
             const openedGistsFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.openedGists);
 
             if (followedUsersFromGlobalStorage.length > 0) {
-                output?.appendLine(`Global storage ${GlobalStorageGroup.followedUsers}: ${followedUsersFromGlobalStorage}`, output.messageType.info);
+                output?.info(`Global storage ${GlobalStorageGroup.followedUsers}: ${followedUsersFromGlobalStorage}`);
             } else {
-                output?.appendLine(`Global storage ${GlobalStorageGroup.followedUsers} is empty`, output.messageType.info);
+                output?.info(`Global storage ${GlobalStorageGroup.followedUsers} is empty`);
             }
 
             if (openedGistsFromGlobalStorage.length > 0) {
-                output?.appendLine(`Global storage ${GlobalStorageGroup.openedGists}: ${openedGistsFromGlobalStorage}`, output.messageType.info);
+                output?.info(`Global storage ${GlobalStorageGroup.openedGists}: ${openedGistsFromGlobalStorage}`);
             } else {
-                output?.appendLine(`Global storage ${GlobalStorageGroup.openedGists} is empty`, output.messageType.info);
+                output?.info(`Global storage ${GlobalStorageGroup.openedGists} is empty`);
             }
 
-            output?.appendLine(`Sort Type: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType)}`, output.messageType.info);
-            output?.appendLine(`Sort Direction: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection)}`, output.messageType.info);
+            output?.info(`Sort Type: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType)}`);
+            output?.info(`Sort Direction: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection)}`);
         })
     );
 
@@ -180,11 +183,11 @@ export async function activate(context: ExtensionContext) {
             gistProvider.refresh();
 
             while (gistProvider.refreshing) {
-                output?.appendLine(`waiting`, output.messageType.debug);
+                output?.debug("waiting...");
                 await new Promise((resolve) => setTimeout(resolve, 500));
             }
 
-            output?.appendLine(`open ${newFileUri}`, output.messageType.debug);
+            output?.debug(`open ${newFileUri}`);
             commands.executeCommand("vscode.open", newFileUri);
         })
     );
@@ -197,11 +200,11 @@ export async function activate(context: ExtensionContext) {
                     window.showErrorMessage("You cannot follow yourself");
                     return;
                 }
-                output?.appendLine(`Picked gistsitory: ${pick}`, output.messageType.info);
+                output?.info(`Picked gistsitory: ${pick}`);
                 await store.addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
                 gistProvider.refresh();
             } else {
-                output?.appendLine("'Follow user' cancelled by user", output.messageType.info);
+                output?.info("'Follow user' cancelled by user");
             }
         })
     );
@@ -386,9 +389,13 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration("VirtualGists.EnableTracing")) {
-                if (config.get("EnableTracing")) {
-                    output = new trace.Output();
+            if (e.affectsConfiguration("VirtualGists.TraceLevel")) {
+                const logLevel = workspace.getConfiguration("VirtualGists").get<string>("EnableTracing");
+                if (logLevel !== "Off") {
+                    output = window.createOutputChannel("Virtual Gists", { log: true });
+                    output.
+                    // output.logLevel = workspace.getConfiguration("VirtualGists").get<string>("TraceLevel")!;
+                    // env.logLevel = LogLevel[logLevel];
                 } else {
                     output?.dispose();
                 }
@@ -396,14 +403,15 @@ export async function activate(context: ExtensionContext) {
 
             if (e.affectsConfiguration("VirtualGists.UseGistOwnerAvatar")) {
                 gistProvider.refresh();
-                output?.appendLine("UseGistOwnerAvatar changed", output.messageType.info);
+                output?.info("UseGistOwnerAvatar changed");
             }
 
             if (e.affectsConfiguration("VirtualGists.ShowDecorations")) {
                 gistProvider.refresh();
-                output?.appendLine("ShowDecorations changed", output.messageType.info);
+                output?.info("ShowDecorations changed");
             }
         })
+
     );
 
     window.createTreeView("virtualGistsView", {
