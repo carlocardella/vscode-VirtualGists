@@ -1,7 +1,5 @@
 import { ProgressLocation, Uri, window, workspace } from "vscode";
 import { output, store } from "../extension";
-import { MessageType } from "../tracing";
-import * as config from "./../config";
 import { GistNode, ContentNode } from "../Tree/nodes";
 import { getGitHubGist } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";

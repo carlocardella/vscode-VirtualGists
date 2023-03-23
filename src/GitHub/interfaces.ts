@@ -1,7 +1,5 @@
 import { QuickPickItem } from "vscode";
 
-// import { TContentFile } from "./types";
-
 export interface Tree {
     sha: string;
     url: string;

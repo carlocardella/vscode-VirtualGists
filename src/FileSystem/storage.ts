@@ -156,7 +156,6 @@ export class Store {
         this.addToGlobalState(extensionContext, GlobalStorageKeys.sortDirection, sortDirection);
         this.isSorted = true;
 
-        // output?.appendLine(`Sorted repos by ${SortType[sortType]} ${SortDirection[sortDirection]}`, output.messageType.info);
         output?.info(`Sorted repos by ${SortType[sortType]} ${SortDirection[sortDirection]}`);
 
         this.gists = gists;
@@ -178,12 +177,10 @@ export class Store {
     clearGlobalStorage(context: ExtensionContext, globalStorageGroup?: string) {
         if (globalStorageGroup) {
             context.globalState.update(globalStorageGroup, []);
-            // output?.appendLine(`Cleared global storage ${globalStorageGroup}`, output.messageType.info);
             output?.info(`Cleared global storage ${globalStorageGroup}`);
         } else {
             context.globalState.update(GlobalStorageGroup.followedUsers, []);
             context.globalState.update(GlobalStorageGroup.openedGists, []);
-            // output?.appendLine(`Cleared global storage`, output.messageType.info);
             output?.info(`Cleared global storage`);;
         }
 
@@ -226,9 +223,7 @@ export class Store {
 
             this.init();
 
-            // output?.appendLine(`Removed ${repoFullName} from global storage`, output.messageType.info);
             output?.info(`Removed ${repoFullName} from global storage`);
-            // output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
             output?.info(`Global storage: ${globalStorage}`);
         }
     }
@@ -263,9 +258,7 @@ export class Store {
 
         gistProvider.refresh();
 
-        // output?.appendLine(`Added ${value} to global storage`, output.messageType.info);
         output?.info(`Added ${value} to global storage`)
-        // output?.appendLine(`Global storage: ${globalStorage}`, output.messageType.info);
         output?.info(`Global storage: ${globalStorage}`)
     }
 
@@ -294,9 +287,7 @@ export class Store {
 
             gistProvider.refresh();
 
-            // output?.appendLine(`Removed ${gistId} from ${globalStorageGroup}`, output.messageType.info);
             output?.info(`Removed ${gistId} from ${globalStorageGroup}`);
-            // output?.appendLine(`Global storage ${globalStorageGroup}: ${globalStorage}`, output.messageType.info);
             output?.info(`Global storage ${globalStorageGroup}: ${globalStorage}`);
         }
     }

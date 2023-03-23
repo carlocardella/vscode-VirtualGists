@@ -1,5 +1,5 @@
 import { Credentials } from "./GitHub/authentication";
-import { commands, ExtensionContext, workspace, window, LogOutputChannel, LogLevel, env } from "vscode";
+import { commands, ExtensionContext, workspace, window, LogOutputChannel } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";

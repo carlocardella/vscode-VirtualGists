@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 
 const CONFIG_SECTION = "VirtualGists";
 
-// export function get(key: "EnableTracing"): boolean;
 export function get(key: "PullInterval"): number;
 export function get(key: "UseGistOwnerAvatar"): boolean;
 export function get(key: "ShowDecorations"): boolean;
