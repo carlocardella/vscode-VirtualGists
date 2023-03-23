@@ -4,7 +4,7 @@ import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from ".
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
 import { GlobalStorageGroup, Store, SortType, SortDirection } from "./FileSystem/storage";
-import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys } from "./GitHub/constants";
+import { EXTENSION_NAME, FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
 export let output: LogOutputChannel;
@@ -56,7 +56,7 @@ export async function activate(context: ExtensionContext) {
     setSortTypeContext(store.sortType);
     setSortDirectionContext(store.sortDirection);
 
-    output = window.createOutputChannel("Virtual Gists", { log: true });
+    output = window.createOutputChannel(EXTENSION_NAME, { log: true });
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
