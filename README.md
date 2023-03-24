@@ -114,9 +114,13 @@ You can show the number of Gists and Followed Users enabling `VirtualGists.ShowD
 
 ## Tracing
 
-You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Gists` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
+The extension uses the built-in Output Channel to enable local tracing to a channel called "Virtual Gists". This data is local only, it does not leave your machine.
 
-![image](https://user-images.githubusercontent.com/5784415/197569014-153f751e-6f37-4dd8-a5e6-3d50dc67b3de.png)
+![image](https://user-images.githubusercontent.com/5784415/227404816-c21ba9d7-1ebd-4bd3-9d9d-3b407c2bb891.png)
+
+You can control the tracing level or disable, for all Output Channels or for specific extensions, using the built-in command `Developer: Set Log Level...`:
+
+![image](https://user-images.githubusercontent.com/5784415/227405552-0fc515d4-bb0a-42ca-9358-334fb7cd9dd0.png)
 
 ## GitHub authentication scopes
 
