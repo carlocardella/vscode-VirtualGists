@@ -1,5 +1,5 @@
 import { Credentials } from "./GitHub/authentication";
-import { commands, ExtensionContext, workspace, window, LogOutputChannel } from "vscode";
+import { commands, ExtensionContext, workspace, window, LogOutputChannel, version } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
@@ -56,7 +56,9 @@ export async function activate(context: ExtensionContext) {
     setSortTypeContext(store.sortType);
     setSortDirectionContext(store.sortDirection);
 
-    output = window.createOutputChannel(EXTENSION_NAME, { log: true });
+     if (parseFloat(version) >= 1.74) {
+         output = window.createOutputChannel(EXTENSION_NAME, { log: true });
+     }
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
