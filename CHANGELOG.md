@@ -10,6 +10,14 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.3.0] - 2023-03-23
+
+### Changed
+
+* Updated minimum VSCode required version to 1.66 so support the updated GitHub authentication flow
+* For VSCode version 1.74 or higher, use the built-in [Log Output Channel](https://code.visualstudio.com/updates/v1_74#_log-output-channel)
+* Removed custom tracing logic for VSCode versions older than 1.74
+
 ## [0.2.0] - 2023-03-21
 
 ### Added
