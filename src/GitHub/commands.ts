@@ -710,7 +710,7 @@ export async function pickUserToFollow(): Promise<string | undefined> {
 
         let quickPick = window.createQuickPick();
         quickPick.onDidHide(() => quickPick.dispose());
-        quickPick.title = "Select or type the repository you would like to open";
+        quickPick.title = "Select or type the gist you would like to open";
         quickPick.canSelectMany = false;
 
         quickPick.show();

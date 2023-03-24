@@ -156,7 +156,7 @@ export class Store {
         this.addToGlobalState(extensionContext, GlobalStorageKeys.sortDirection, sortDirection);
         this.isSorted = true;
 
-        output?.info(`Sorted repos by ${SortType[sortType]} ${SortDirection[sortDirection]}`);
+        output?.info(`Sorted gists by ${SortType[sortType]} ${SortDirection[sortDirection]}`);
 
         this.gists = gists;
         return gists;
@@ -210,10 +210,10 @@ export class Store {
     }
 
     /**
-     * Remove a repository from global storage
+     * Remove a gist from global storage
      *
      * @param {ExtensionContext} context Extension context
-     * @param {string} repoFullName Full name (owner/name) or the repository to remove from global storage
+     * @param {string} repoFullName Full name (owner/name) or the gist to remove from global storage
      */
     removeRepoFromGlobalStorage(context: ExtensionContext, repoFullName: string): void {
         let globalStorage = context.globalState.get(GlobalStorageKeys.gistGlobalStorage) as string[];
