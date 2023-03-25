@@ -733,7 +733,7 @@ export async function pickUserToFollow(): Promise<string | undefined> {
                 quickPick.placeholder = "Enter the username to follow";
                 const followedUsers = await getGitHubFollowedUsers();
                 quickPick.busy = false;
-                quickPick.items = followedUsers!.map((followedUser) => ({ label: `${followedUser.login}` }));
+                quickPick.items = followedUsers!.map((followedUser) => ({ label: `${followedUser.login}` })).sort((a, b) => a.label.localeCompare(b.label));
                 quickPick.show();
             } else {
                 output?.debug(`onDidAccept: ${pick}`);
@@ -744,7 +744,7 @@ export async function pickUserToFollow(): Promise<string | undefined> {
 
         quickPick.onDidChangeSelection(async (selection) => {
             pick = selection[0].label;
-            output?.debug(`onDidChangeSelection: ${pick}`);
+            output?.debug(`onDidChangeSelection: ${pick}`); // @fix: rejected promise not handled within 1 second
         });
 
         // @todo: refresh the list of followed users

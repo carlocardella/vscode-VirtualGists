@@ -195,7 +195,7 @@ export async function activate(context: ExtensionContext) {
                     window.showErrorMessage("You cannot follow yourself");
                     return;
                 }
-                output?.info(`Picked gistsitory: ${pick}`);
+                output?.info(`Picked user: ${pick}`);
                 await store.addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
                 gistProvider.refresh();
             } else {
