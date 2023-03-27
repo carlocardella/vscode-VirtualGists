@@ -1,6 +1,6 @@
 import { Credentials } from "./GitHub/authentication";
 import { commands, ExtensionContext, workspace, window, LogOutputChannel, version } from "vscode";
-import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupNode } from "./Tree/nodes";
+import { GistNode, GistProvider, ContentNode, UserNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
 import { GlobalStorageGroup, Store, SortType, SortDirection } from "./FileSystem/storage";
@@ -36,7 +36,6 @@ import {
     copyUserName,
     forkGist,
     cloneGist,
-    pickUserToFollow,
     followUserOnGitHub,
 } from "./GitHub/commands";
 import { setSortDirectionContext, setSortTypeContext } from "./utils";
@@ -56,9 +55,9 @@ export async function activate(context: ExtensionContext) {
     setSortTypeContext(store.sortType);
     setSortDirectionContext(store.sortDirection);
 
-     if (parseFloat(version) >= 1.74) {
-         output = window.createOutputChannel(EXTENSION_NAME, { log: true });
-     }
+    if (parseFloat(version) >= 1.74) {
+        output = window.createOutputChannel(EXTENSION_NAME, { log: true });
+    }
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
@@ -189,14 +188,16 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.followUser", async (gist?: GistNode) => {
-            const pick = gist instanceof GistsGroupNode || !gist ? await pickUserToFollow() : gist!.gist!.owner!.login;
+            let pick: string | undefined;
+            pick = await window.showInputBox({ ignoreFocusOut: true, placeHolder: "username", title: "Enter the username to follow" });
+
             if (pick) {
                 if (pick === credentials.authenticatedUser.login) {
                     window.showErrorMessage("You cannot follow yourself");
                     return;
                 }
                 output?.info(`Picked user: ${pick}`);
-                await store.addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
+                await followUserOnGitHub(pick);
                 gistProvider.refresh();
             } else {
                 output?.info("'Follow user' cancelled by user");
@@ -207,12 +208,6 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.unfollowUser", async (user: UserNode) => {
             store.removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
-        })
-    );
-
-    context.subscriptions.push(
-        commands.registerCommand("VirtualGists.followUserOnGitHub", async (user: UserNode) => {
-            await followUserOnGitHub(user!.label as string);
         })
     );
 

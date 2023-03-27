@@ -16,7 +16,7 @@ import {
 import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import { GlobalStorageGroup } from "../FileSystem/storage";
+import { GlobalStorageGroup, LocalStorageType } from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -342,10 +342,17 @@ export async function getGistsForUser(githubUser: string): Promise<TGist[] | und
  * @returns {Promise<string[]>}
  */
 export async function getFollowedUsers(): Promise<TGitHubUser[]> {
-    const users = await store.readFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
+    // let users = await store.readFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
+    // let users = store.getFromLocalStorage(LocalStorageType.followedUsers) as UserNode[];
+
+    // let tUsers = await getGitHubFollowedUsers();
+    // if (users.length === 0) {
+    let users = (await getGitHubFollowedUsers()).map((user) => user.login);
+    // }
 
     let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
     let validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
+    // store.addToOrUpdateLocalStorage(validUsers);
 
     return Promise.resolve(validUsers);
 }
@@ -697,58 +704,6 @@ export async function forkGist(gist?: GistNode | string) {
 export async function cloneGist(gist: GistNode) {
     output?.info(`Cloning ${gist.gist.git_pull_url}`);
     commands.executeCommand("git.clone", gist.gist.git_pull_url);
-}
-
-enum QuickPickItems {
-    username = "$(account) Enter username",
-    followedGitHubUsers = "$(person-follow) Pick followed GitHub user",
-}
-
-export async function pickUserToFollow(): Promise<string | undefined> {
-    return await new Promise((resolve) => {
-        let pick: string | undefined;
-
-        let quickPick = window.createQuickPick();
-        quickPick.onDidHide(() => quickPick.dispose());
-        quickPick.title = "Select or type the gist you would like to open";
-        quickPick.canSelectMany = false;
-
-        quickPick.show();
-
-        quickPick.items = [{ label: QuickPickItems.username }, { label: QuickPickItems.followedGitHubUsers }];
-        quickPick.title = "GitHub user to follow";
-        quickPick.placeholder = "GitHub username";
-
-        quickPick.onDidAccept(async () => {
-            if (pick === QuickPickItems.username) {
-                let accepted = await window.showInputBox({
-                    ignoreFocusOut: true,
-                    placeHolder: "username",
-                    title: "Enter the username to follow",
-                });
-                quickPick.hide();
-                resolve(accepted);
-            } else if (pick === QuickPickItems.followedGitHubUsers) {
-                quickPick.busy = true;
-                quickPick.placeholder = "Enter the username to follow";
-                const followedUsers = await getGitHubFollowedUsers();
-                quickPick.busy = false;
-                quickPick.items = followedUsers!.map((followedUser) => ({ label: `${followedUser.login}` })).sort((a, b) => a.label.localeCompare(b.label));
-                quickPick.show();
-            } else {
-                output?.debug(`onDidAccept: ${pick}`);
-                quickPick.hide();
-                resolve(pick);
-            }
-        });
-
-        quickPick.onDidChangeSelection(async (selection) => {
-            pick = selection[0].label;
-            output?.debug(`onDidChangeSelection: ${pick}`); // @fix: rejected promise not handled within 1 second
-        });
-
-        // @todo: refresh the list of followed users
-    });
 }
 
 export async function followUserOnGitHub(username: string) {

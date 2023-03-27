@@ -4,6 +4,7 @@ import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys, OPENED_GISTS_GLOB
 import { output, gistProvider, store, extensionContext } from "../extension";
 import { TGist } from "../GitHub/types";
 import { getFollowedUsers, getOpenedGists } from "../GitHub/commands";
+import { isArrayOf, isInstanceOf } from "../utils";
 
 export enum SortType {
     name = "name",
@@ -15,6 +16,11 @@ export enum SortType {
 export enum SortDirection {
     ascending = "ascending",
     descending = "descending",
+}
+
+export enum LocalStorageType {
+    gists = "gists",
+    followedUsers = "followedUsers",
 }
 
 /**
@@ -181,7 +187,7 @@ export class Store {
         } else {
             context.globalState.update(GlobalStorageGroup.followedUsers, []);
             context.globalState.update(GlobalStorageGroup.openedGists, []);
-            output?.info(`Cleared global storage`);;
+            output?.info(`Cleared global storage`);
         }
 
         gistProvider.refresh();
@@ -258,25 +264,41 @@ export class Store {
 
         gistProvider.refresh();
 
-        output?.info(`Added ${value} to global storage`)
-        output?.info(`Global storage: ${globalStorage}`)
+        output?.info(`Added ${value} to global storage`);
+        output?.info(`Global storage: ${globalStorage}`);
     }
 
     /**
      * Add a gist to our in memory store
      *
      * @export
-     * @param {...GistNode[]} gistNode The gist to add to the store
+     * @param {...GistNode[]} nodes The gist to add to the store
      */
-    addToOrUpdateLocalStorage(...gistNode: GistNode[]) {
-        gistNode.forEach((gist) => {
-            let gistIndex = store.gists.findIndex((storedGist) => storedGist?.gist.id === gist.gist.id);
-            if (gistIndex > -1) {
-                store.gists[gistIndex] = gist;
-            } else {
-                store.gists.push(gist);
-            }
-        });
+    addToOrUpdateLocalStorage(...nodes: GistNode[] | UserNode[]) {
+        const isGistNode = isArrayOf(isInstanceOf(GistNode));
+        const isUserNode = isArrayOf(isInstanceOf(UserNode));
+
+        if (isGistNode(nodes)) {
+            nodes.forEach((node) => {
+                let gistIndex = store.gists.findIndex((storedGist) => storedGist?.gist.id === node.gist.id);
+                if (gistIndex > -1) {
+                    store.gists[gistIndex] = node;
+                } else {
+                    store.gists.push(node);
+                }
+            });
+        }
+
+        if (isUserNode(nodes)) {
+            nodes.forEach((node) => {
+                let userIndex = store.followedUsers.findIndex((storedUser) => storedUser?.login === node.login);
+                if (userIndex > -1) {
+                    store.followedUsers[userIndex] = node;
+                } else {
+                    store.followedUsers.push(node);
+                }
+            });
+        }
     }
 
     removeFromGlobalStorage(context: ExtensionContext, globalStorageGroup: string, gistId: string): void {

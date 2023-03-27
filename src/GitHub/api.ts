@@ -137,6 +137,7 @@ export async function deleteGistFile(gist: TGist, files: TFileToDelete): Promise
     });
 
     try {
+        output?.trace(`Deleting "${Object.keys(files)}" from gist "${gist.description}"`);
         let { data } = await octokit.gists.update({
             gist_id: gist.id!,
             files: files,
@@ -168,6 +169,7 @@ export async function createGitHubGist(gist: TGist, publicGist: boolean): Promis
 
     const fileName = Object.keys(gist.files!)[0];
     try {
+        output?.trace(`Creating gist "${gist.description}"`);
         const { data } = await octokit.gists.create({
             description: gist.description!,
             files: {
@@ -200,6 +202,7 @@ export async function deleteGitHubGist(gist: TGist): Promise<void> {
     });
 
     try {
+        output?.trace(`Deleting gist "${gist.description}", id "${gist.id}"`);
         await octokit.gists.delete({
             gist_id: gist.id!,
             headers: { Accept: "application/vnd.github+json" },
@@ -227,6 +230,7 @@ export async function getGitHubGistForUser(githubUsername: string): Promise<TGis
     });
 
     try {
+        output?.trace(`Getting gists for GitHub user "${githubUsername}"`);
         let data = await octokit.paginate(
             octokit.gists.listForUser,
             { username: githubUsername, headers: { accept: "application/vnd.github+json" } },
@@ -257,6 +261,7 @@ export async function getGitHubUser(username: string): Promise<TGitHubUser | und
     });
 
     try {
+        output?.trace(`Getting details for GitHub user "${username}"`);
         const { data } = await octokit.users.getByUsername({ username: username });
         return Promise.resolve(data);
     } catch (e: any) {
@@ -336,6 +341,7 @@ export async function getGitHubFollowedUsers(): Promise<TUser[]> {
     });
 
     try {
+        output?.trace("Getting followed users");
         const data = await octokit.paginate(octokit.users.listFollowedByAuthenticatedUser, (response) => {
             return response.data;
         });

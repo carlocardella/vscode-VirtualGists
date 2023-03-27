@@ -122,12 +122,27 @@ You can control the tracing level or disable, for all Output Channels or for spe
 
 ![image](https://user-images.githubusercontent.com/5784415/227405552-0fc515d4-bb0a-42ca-9358-334fb7cd9dd0.png)
 
+### Log Levels
+
+* Off = 0
+  * No messages are logged with this level.
+* Trace = 1
+  * All messages are logged with this level.
+* Debug = 2
+  * Messages with debug and higher log level are logged with this level.
+* Info = 3
+  * Messages with info and higher log level are logged with this level.
+* Warning = 4
+  * Messages with warning and higher log level are logged with this level.
+* Error = 5
+  * Only error messages are logged with this level.
+
 ## GitHub authentication scopes
 
 The extension uses the following [GitHub authentication scopes](https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps)
 
-- `user`: needed to authenticate to GitHub and to read user's properties
-- `gist`: needed to create and update gists
+* `user`: needed to authenticate to GitHub and to read user's properties
+* `gist`: needed to create and update gists
 
 ## My other extensions
 

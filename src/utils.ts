@@ -38,3 +38,13 @@ export function setSortDirectionContext(sortDirection: SortDirection) {
     store.sortDirection = sortDirection;
     store.addToGlobalState(extensionContext, GlobalStorageKeys.sortDirection, sortDirection);
 }
+
+export const isArrayOf =
+    <T>(elemGuard: (x: any) => x is T) =>
+    (arr: any[]): arr is Array<T> =>
+        arr.every(elemGuard);
+
+export const isInstanceOf =
+    <T>(ctor: new (...args: any) => T) =>
+    (x: any): x is T =>
+        x instanceof ctor;
