@@ -46,7 +46,7 @@ Your starred gists, grouped in one convenient TreeView node
 
 ### Followed Users
 
-Gists from the user you want to explicitly follow, to stay up to date with their latest work
+Gists from the user you follow on GitHub, to stay up to date with their latest work
 
 ![follow user](https://user-images.githubusercontent.com/5784415/200188563-725d6a20-71af-4cb1-8424-2ce6aa25fdd9.gif)
 

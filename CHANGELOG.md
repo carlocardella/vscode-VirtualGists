@@ -10,6 +10,20 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.4.0] - 2023-03-27
+
+### Changed
+
+* Use real names for Followed Users
+* Followed Users shows the actual list of users you follow on GitHub
+* Simplified the `Follow user...` dialog, just enter the GitHub username to follow the person on GitHub and add it to the Followed Users group
+* Updated the tooltip for a user, added mode details read from the user's public profile on GitHub
+
+cl- ### Removed
+
+* `Follow user on GitHub...` has been removed, it is no longer needed
+
+
 ## [0.3.0] - 2023-03-23
 
 ### Changed
