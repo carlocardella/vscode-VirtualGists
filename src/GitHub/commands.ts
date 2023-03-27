@@ -286,7 +286,7 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
         let notepadGist = await getOrCreateNotepadGist(fileName);
 
         gist = new GistNode(notepadGist, GistsGroupType.notepad, false);
-        store.addToOrUpdateLocalStorage(gist);
+        store.addToOrUpdateLocalStorage(LocalStorageType.gists, gist);
     }
 
     let fileUri = fileNameToUri(gist.gist.id!, fileName);

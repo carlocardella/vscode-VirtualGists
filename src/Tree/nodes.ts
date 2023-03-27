@@ -158,7 +158,9 @@ export class UserNode extends TreeItem {
 
         const icon = config.get("UseGistOwnerAvatar") ? Uri.parse(user.avatar_url) : new ThemeIcon("account");
         this.iconPath = icon;
-        this.tooltip = user.login;
+        this.tooltip = `Login: ${user.login}\nCompany: ${user.company ?? ""}\nLocation: ${user.location ?? ""}\nBlog: ${user.blog ?? ""}\nEmail: ${
+            user.email ?? ""
+        }\nTwitter: ${user.twitter_username ?? ""}\nFollowers: ${user.followers ?? ""}\nBio: ${user.bio ?? ""}`;
         this.contextValue = "user";
         this.login = user.login;
         this.name = user.name ?? user.login;
@@ -166,7 +168,7 @@ export class UserNode extends TreeItem {
     }
 
     async init() {
-        let userGists = await getGitHubGistForUser(this.tooltip as string);
+        let userGists = await getGitHubGistForUser(this.login);
         this.description = userGists?.length.toString() ?? "0";
         return;
     }
@@ -292,12 +294,12 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 let userGists = (await getGitHubGistForUser(element.login as string)) as TGist[];
                 childNodes = userGists.map((gist) => new GistNode(gist, GistsGroupType.followedUsers, true));
                 childNodes.sort((a, b) => a.name.localeCompare(b.name));
-                store.addToOrUpdateLocalStorage(...childNodes);
+                store.addToOrUpdateLocalStorage(LocalStorageType.followedUsers, ...childNodes);
             } else if (element instanceof NotepadNode) {
                 let notepadGist = await getNotepadGist();
                 let notepadFiles = Object.values(notepadGist?.files ?? []);
                 childNodes = notepadFiles.map((file) => new ContentNode(file as TGistFile, notepadGist as TGist, false));
-                store.addToOrUpdateLocalStorage(...childNodes);
+                store.addToOrUpdateLocalStorage(LocalStorageType.gists, ...childNodes);
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
                     case GistsGroupType.notepad:
@@ -309,7 +311,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                         childNodes = ownedGists
                             ?.filter((gist) => gist.description !== NOTEPAD_GIST_NAME)
                             ?.map((gist) => new GistNode(gist, element.groupType, false)) ?? [];
-                        store.addToOrUpdateLocalStorage(...childNodes);
+                        store.addToOrUpdateLocalStorage(LocalStorageType.gists, ...childNodes);
                         break;
 
                     case GistsGroupType.starredGists:
@@ -322,7 +324,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                                 }
                                 return starredGist;
                             }) ?? [];
-                        store.addToOrUpdateLocalStorage(...childNodes);
+                        store.addToOrUpdateLocalStorage(LocalStorageType.gists, ...childNodes);
                         break;
 
                     case GistsGroupType.followedUsers:
@@ -340,7 +342,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                                 })
                         );
                         childNodes.sort((a, b) => a.label.localeCompare(b.label));
-                        store.addToOrUpdateLocalStorage(...childNodes);
+                        store.addToOrUpdateLocalStorage(LocalStorageType.gists, ...childNodes);
                         break;
 
                     case GistsGroupType.openedGists:
@@ -353,7 +355,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                             }
                             return openedGist;
                         }) ?? [];
-                        store.addToOrUpdateLocalStorage(...childNodes);
+                        store.addToOrUpdateLocalStorage(LocalStorageType.gists, ...childNodes);
                         break;
 
                     default:
