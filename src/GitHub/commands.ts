@@ -341,18 +341,16 @@ export async function getGistsForUser(githubUser: string): Promise<TGist[] | und
  * @async
  * @returns {Promise<string[]>}
  */
-export async function getFollowedUsers(): Promise<TGitHubUser[]> {
-    // let users = await store.readFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
-    // let users = store.getFromLocalStorage(LocalStorageType.followedUsers) as UserNode[];
-
-    // let tUsers = await getGitHubFollowedUsers();
-    // if (users.length === 0) {
+export async function getFollowedUsers(withDetails: boolean): Promise<TGitHubUser[]> {
     let users = (await getGitHubFollowedUsers()).map((user) => user.login);
-    // }
+    let validUsers: TGitHubUser[] = [];
 
-    let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
-    let validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
-    // store.addToOrUpdateLocalStorage(validUsers);
+    if (withDetails) {
+        let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
+        validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
+    } else {
+        validUsers = users.map((user) => ({ login: user } as TGitHubUser));
+    }
 
     return Promise.resolve(validUsers);
 }
@@ -624,7 +622,12 @@ function getFileUriForCopy(gistFile: ContentNode): string {
  * @returns {*}
  */
 export async function viewGistOwnerProfileOnGitHub(username: string) {
-    const user = await getGitHubUser(username);
+    let user: TGitHubUser | undefined;
+    user = store.followedUsers.find((user) => user?.login === username)?.user;
+    if (!user) {
+        user = await getGitHubUser(username);
+    }
+
     if (user) {
         env.openExternal(Uri.parse(user.html_url));
     }

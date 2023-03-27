@@ -278,8 +278,13 @@ export async function activate(context: ExtensionContext) {
     );
 
     context.subscriptions.push(
-        commands.registerCommand("VirtualGists.viewGistOwnerProfileOnGitHub", async (gist: GistNode) => {
-            await viewGistOwnerProfileOnGitHub(gist.gist.owner!.login);
+        commands.registerCommand("VirtualGists.viewGistOwnerProfileOnGitHub", async (item: GistNode | UserNode) => {
+            if (item instanceof GistNode) {
+                await viewGistOwnerProfileOnGitHub(item.gist.owner!.login);
+            }
+            if (item instanceof UserNode) {
+                await viewGistOwnerProfileOnGitHub(item.login);
+            }
         })
     );
 

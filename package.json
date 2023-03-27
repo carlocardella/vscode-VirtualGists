@@ -644,7 +644,7 @@
                 },
                 {
                     "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
-                    "when": "viewItem =~ /gist./",
+                    "when": "viewItem =~ /gist.|user/",
                     "group": "9_open@3"
                 }
             ]

@@ -70,7 +70,7 @@ export class GistsGroupNode extends TreeItem {
     async init(groupType: GistsGroupType | string) {
         switch (groupType) {
             case GistsGroupType.followedUsers:
-                this.description = (await getFollowedUsers())?.length.toString();
+                this.description = (await getFollowedUsers(false))?.length.toString();
                 break;
             case GistsGroupType.myGists:
                 this.description = (await getOwnedGists())?.length.toString(); // @todo: optimize, save in local storage
@@ -329,7 +329,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
 
                     case GistsGroupType.followedUsers:
                         sort = false;
-                        const followedUsers = await getFollowedUsers();
+                        const followedUsers = await getFollowedUsers(true);
                         childNodes = await Promise.all(
                             followedUsers
                                 .filter((user) => user !== undefined)
@@ -342,7 +342,7 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                                 })
                         );
                         childNodes.sort((a, b) => a.label.localeCompare(b.label));
-                        store.addToOrUpdateLocalStorage(LocalStorageType.gists, ...childNodes);
+                        store.addToOrUpdateLocalStorage(LocalStorageType.followedUsers, ...childNodes);
                         break;
 
                     case GistsGroupType.openedGists:

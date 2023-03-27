@@ -204,7 +204,7 @@ export class Store {
 
         for (const group of storageGroup) {
             if (group === GlobalStorageGroup.followedUsers) {
-                cleanedFollowedUsers = (await getFollowedUsers()).map((user) => user.login);
+                cleanedFollowedUsers = (await getFollowedUsers(false)).map((user) => user.login);
                 context.globalState.update(GlobalStorageGroup.followedUsers, cleanedFollowedUsers);
             }
 
