@@ -39,12 +39,15 @@ export function setSortDirectionContext(sortDirection: SortDirection) {
     store.addToGlobalState(extensionContext, GlobalStorageKeys.sortDirection, sortDirection);
 }
 
-export const isArrayOf =
-    <T>(elemGuard: (x: any) => x is T) =>
-    (arr: any[]): arr is Array<T> =>
-        arr.every(elemGuard);
-
-export const isInstanceOf =
-    <T>(ctor: new (...args: any) => T) =>
-    (x: any): x is T =>
-        x instanceof ctor;
+/**
+ * Returns true if all elements of the passed in array are instances of the specified type
+ *
+ * @export
+ * @template T
+ * @param {unknown[]} arr The array to check
+ * @param {new (...args: any[]) => T} type The type to check against
+ * @returns {boolean}
+ */
+export function isArrayOf<T>(arr: unknown[], type: new (...args: any[]) => T): boolean {
+    return arr.every((elem) => elem instanceof type);
+}

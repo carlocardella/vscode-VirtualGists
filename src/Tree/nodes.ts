@@ -297,9 +297,10 @@ export class GistProvider implements TreeDataProvider<ContentNode> {
                 store.addToOrUpdateLocalStorage(LocalStorageType.followedUsers, ...childNodes);
             } else if (element instanceof NotepadNode) {
                 let notepadGist = await getNotepadGist();
+                let notepadGistNode = [new GistNode(notepadGist as TGist, GistsGroupType.notepad, false)];
                 let notepadFiles = Object.values(notepadGist?.files ?? []);
                 childNodes = notepadFiles.map((file) => new ContentNode(file as TGistFile, notepadGist as TGist, false));
-                store.addToOrUpdateLocalStorage(LocalStorageType.gists, ...childNodes);
+                store.addToOrUpdateLocalStorage(LocalStorageType.gists, ...notepadGistNode);
             } else if (element instanceof GistsGroupNode) {
                 switch (element.label) {
                     case GistsGroupType.notepad:

@@ -10,7 +10,7 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--disable-extensions"],
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--disable-extensions", "--log trace"],
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "preLaunchTask": "${defaultBuildTask}"
         },
@@ -19,7 +19,7 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--log trace"],
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "preLaunchTask": "${defaultBuildTask}"
         },
@@ -28,7 +28,7 @@
             "type": "pwa-extensionHost",
             "debugWebWorkerHost": true,
             "request": "launch",
-            "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--extensionDevelopmentKind=web", "--disable-extensions"],
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--extensionDevelopmentKind=web", "--disable-extensions", "--log trace"],
             "outFiles": ["${workspaceFolder}/dist/web/**/*.js"],
             "preLaunchTask": "npm: watch-web"
         },
@@ -37,7 +37,12 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--extensionTestsPath=${workspaceFolder}/out/test/suite/index", "--disable-extensions"],
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/out/test/suite/index",
+                "--disable-extensions",
+                "--log trace"
+            ],
             "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
             "preLaunchTask": "npm: unit-tests"
         }

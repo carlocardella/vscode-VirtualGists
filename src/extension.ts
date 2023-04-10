@@ -38,7 +38,7 @@ import {
     cloneGist,
     followUserOnGitHub,
 } from "./GitHub/commands";
-import { setSortDirectionContext, setSortTypeContext } from "./utils";
+import { setSortDirectionContext, setSortTypeContext, isArrayOf } from "./utils";
 import { downloadFiles, downloadGist } from "./FileSystem/download";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
@@ -137,9 +137,9 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.deleteNode", async (node: GistNode | ContentNode, nodes?: GistNode[] | ContentNode[]) => {
             const nodesToDelete = nodes || [node];
-            const isGistNode = isArrayOf(isInstanceOf(GistNode));
+            // const isGistNode = isArrayOf(isInstanceOf(GistNode));
 
-            if (isGistNode(nodesToDelete)) {
+            if (isArrayOf(nodesToDelete, GistNode)) {
                 deleteGist(nodesToDelete.filter((x) => x instanceof GistNode) as GistNode[]);
             } else {
                 deleteFiles(nodesToDelete.filter((x) => x instanceof ContentNode) as ContentNode[]);
@@ -147,17 +147,7 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
-    const isArrayOf =
-        <T>(elemGuard: (x: any) => x is T) =>
-        (arr: any[]): arr is Array<T> =>
-            arr.every(elemGuard);
-
-    const isInstanceOf =
-        <T>(ctor: new (...args: any) => T) =>
-        (x: any): x is T =>
-            x instanceof ctor;
-
-    context.subscriptions.push(
+        context.subscriptions.push(
         commands.registerCommand("VirtualGists.newPrivateGist", async () => {
             createGist(false);
         })

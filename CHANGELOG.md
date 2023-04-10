@@ -10,6 +10,12 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.4.1] - 2023-04-10
+
+### Fixed
+
+* Fixed bug where Notepad files could not be opened or created
+
 ## [0.4.0] - 2023-03-27
 
 ### Changed
@@ -22,7 +28,6 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 cl- ### Removed
 
 * `Follow user on GitHub...` has been removed, it is no longer needed
-
 
 ## [0.3.0] - 2023-03-23
 

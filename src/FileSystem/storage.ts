@@ -4,7 +4,7 @@ import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys, OPENED_GISTS_GLOB
 import { output, gistProvider, store, extensionContext } from "../extension";
 import { TGist } from "../GitHub/types";
 import { getFollowedUsers, getOpenedGists } from "../GitHub/commands";
-import { isArrayOf, isInstanceOf } from "../utils";
+import { isArrayOf } from "../utils";
 
 export enum SortType {
     name = "name",
@@ -275,12 +275,9 @@ export class Store {
      * @param {...GistNode[]} nodes The gist to add to the store
      */
     addToOrUpdateLocalStorage(type: LocalStorageType, ...nodes: GistNode[] | UserNode[]) {
-        const isGistNode = isArrayOf(isInstanceOf(GistNode));
-        const isUserNode = isArrayOf(isInstanceOf(UserNode));
-
         if (type === LocalStorageType.gists) {
-            if (isGistNode(nodes)) {
-                nodes.forEach((node) => {
+            if (isArrayOf(nodes, GistNode)) {
+                (nodes as GistNode[]).forEach((node) => {
                     let gistIndex = store.gists.findIndex((storedGist) => storedGist?.gist.id === node.gist.id);
                     if (gistIndex > -1) {
                         store.gists[gistIndex] = node;
@@ -292,8 +289,8 @@ export class Store {
         }
 
         if (type === LocalStorageType.followedUsers) {
-            if (isUserNode(nodes)) {
-                nodes.forEach((node) => {
+            if (isArrayOf(nodes, UserNode)) {
+                (nodes as UserNode[]).forEach((node) => {
                     let userIndex = store.followedUsers.findIndex((storedUser) => storedUser?.login === node.login);
                     if (userIndex > -1) {
                         store.followedUsers[userIndex] = node;
