@@ -235,12 +235,20 @@ export async function createGist(publicGist: boolean) {
             return;
         }
 
+        let gistContent = "";
+        let extension = fileName.lastIndexOf(".") > -1 ? fileName.substring(fileName.lastIndexOf(".") + 1) : "";
+        if (extension === "md") {
+            gistContent = `# ${gistName}`;
+        } else {
+            gistContent = `${gistName}`;
+        }
+
         let gist: TGist = {
             description: gistName,
             public: publicGist,
             files: {
                 [fileName!]: {
-                    content: "",
+                    content: gistContent,
                 },
             },
         };
@@ -259,6 +267,7 @@ export async function createGist(publicGist: boolean) {
  * @returns {Promise<void>}
  */
 export async function addFile(gist: GistNode): Promise<Uri | undefined> {
+    // @todo: transform into a generic fucntion
     const fileName = await window.showInputBox({
         prompt: "Enter the name of the file",
         placeHolder: "File name",
@@ -290,7 +299,16 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
     }
 
     let fileUri = fileNameToUri(gist.gist.id!, fileName);
-    await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(0), { create: true, overwrite: false });
+    let gistContent = "";
+    let fileNameWithoutExtension = fileName.split(".").shift()!;
+    let extension = fileName.lastIndexOf(".") > -1 ? fileName.substring(fileName.lastIndexOf(".") + 1) : "";
+    if (extension === "md") {
+        gistContent = `# ${fileNameWithoutExtension}`;
+    } else {
+        gistContent = fileNameWithoutExtension;
+    }
+    let content = new TextEncoder().encode(gistContent);
+    await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(content), { create: true, overwrite: false });
 
     return Promise.resolve(fileUri);
 }

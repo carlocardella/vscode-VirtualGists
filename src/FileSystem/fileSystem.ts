@@ -138,7 +138,16 @@ export class GistFileSystemProvider implements FileSystemProvider {
                 filename: uri.path.split("/").slice(1).join("/"),
             } as TGistFileNoKey;
             if (!content) {
-                content = new TextEncoder().encode("");
+                let gistContent = "";
+                let fileName = uri.path.split("/").pop()!;
+                let gistName = fileName.split(".").pop()!;
+                let extension = fileName.lastIndexOf(".") > -1 ? fileName.substring(fileName.lastIndexOf(".") + 1) : "";
+                if (extension === "md") {
+                    gistContent = `# ${gistName}`;
+                } else {
+                    gistContent = `${gistName}`;
+                }
+                content = new TextEncoder().encode(gistContent);
             }
         }
 
