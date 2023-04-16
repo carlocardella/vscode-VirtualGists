@@ -25,7 +25,7 @@ const webConfig = /** @type WebpackConfig */ {
             // see https://webpack.js.org/configuration/resolve/#resolvefallback
             // for the list of Node.js core module polyfills.
             assert: require.resolve("assert"),
-            // buffer: require.resolve("buffer"),
+            buffer: require.resolve("buffer"),
             // console: require.resolve("console-browserify"),
             // constants: require.resolve("constants-browserify"),
             // crypto: require.resolve("crypto-browserify"),
@@ -33,8 +33,8 @@ const webConfig = /** @type WebpackConfig */ {
             // events: require.resolve("events"),
             // http: require.resolve("stream-http"),
             // https: require.resolve("https-browserify"),
-            os: require.resolve("os-browserify/browser"),
-            path: require.resolve("path-browserify"),
+            // os: require.resolve("os-browserify/browser"),
+            // path: require.resolve("path-browserify"),
             // punycode: require.resolve("punycode"),
             process: require.resolve("process/browser"),
             // querystring: require.resolve("querystring-es3"),
@@ -65,6 +65,9 @@ const webConfig = /** @type WebpackConfig */ {
     plugins: [
         new webpack.ProvidePlugin({
             process: "process/browser", // provide a shim for the global `process` variable
+            Buffer: ["buffer", "Buffer"],
+            // util: "util",
+            // sys: "util",
         }),
     ],
     externals: {
