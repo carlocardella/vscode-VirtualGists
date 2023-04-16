@@ -10,6 +10,20 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.5.0] - 2023-04-15
+
+### Fixed
+
+* [#1 New gist file invalid character](https://github.com/carlocardella/vscode-VirtualGists/issues/1)
+
+### Added
+
+* Enabled extension in VSCode on the web (GitHub.dev): [#24](https://github.com/carlocardella/vscode-VirtualGists/issues/24)
+
+### Changed
+
+* Update Node modules
+
 ## [0.4.1] - 2023-04-10
 
 ### Fixed
