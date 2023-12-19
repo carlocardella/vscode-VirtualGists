@@ -46,7 +46,7 @@ Your starred gists, grouped in one convenient TreeView node
 
 ### Followed Users
 
-Gists from the user you want to explicitly follow, to stay up to date with their latest work
+Gists from the user you follow on GitHub, to stay up to date with their latest work
 
 ![follow user](https://user-images.githubusercontent.com/5784415/200188563-725d6a20-71af-4cb1-8424-2ce6aa25fdd9.gif)
 
@@ -92,17 +92,57 @@ For a file:
 
 ![file context menu](https://user-images.githubusercontent.com/5784415/203451593-461c6da1-4773-4fd4-a4ba-a93ac0383c32.png)
 
+### Download Gists and files
+
+You can download one or more Gists or files to your local drive.
+
+_Note: Once downloaded, the files are no longer linked to GitHub so you must manually save/sync any changes you make offline._
+
+![save gist and file](https://user-images.githubusercontent.com/5784415/226784693-9949409d-8225-4772-846d-5efcb6a67478.gif)
+
 ### Optionally use the gist owner's avatar as icon
 
 It can be helpful to identify to which user an opened or starred gist belongs to as a glance. Oh the other hand, you may prefer a cleaner list where icons only show the item type without being too distracting. Use `VirtualGists.UseGistOwnerAvatar` to toggle the behavior to your liking:
 
 ![virtualGits_use_owner_avatar](https://user-images.githubusercontent.com/5784415/204113210-2b3c1c64-9205-4ac7-800d-cd449f98df6a.gif)
 
+### Show decorations for Gist groups
+
+You can show the number of Gists and Followed Users enabling `VirtualGists.ShowDecorations` (default: `false`).
+
+**Note**: Depending on the number of Gists or Followed Users, this may have a significant performance impact (increase the load time) due to the additional calls to GitHub needed to get the number of Gists in each group and for each user
+
 ## Tracing
 
-You can enable `VirtualGists.EnableTracing` in your User or Workspace settings to enable tracing in a `Virtual Gists` output channel; this is off by default but it can be useful for troubleshooting errors or if you are curious to see what the extension is doing under the hood.
+The extension uses the built-in Output Channel to enable local tracing to a channel called "Virtual Gists". This data is local only, it does not leave your machine.
 
-![image](https://user-images.githubusercontent.com/5784415/197569014-153f751e-6f37-4dd8-a5e6-3d50dc67b3de.png)
+![image](https://user-images.githubusercontent.com/5784415/227404816-c21ba9d7-1ebd-4bd3-9d9d-3b407c2bb891.png)
+
+You can control the tracing level or disable, for all Output Channels or for specific extensions, using the built-in command `Developer: Set Log Level...`:
+
+![image](https://user-images.githubusercontent.com/5784415/227405552-0fc515d4-bb0a-42ca-9358-334fb7cd9dd0.png)
+
+### Log Levels
+
+* Off = 0
+  * No messages are logged with this level.
+* Trace = 1
+  * All messages are logged with this level.
+* Debug = 2
+  * Messages with debug and higher log level are logged with this level.
+* Info = 3
+  * Messages with info and higher log level are logged with this level.
+* Warning = 4
+  * Messages with warning and higher log level are logged with this level.
+* Error = 5
+  * Only error messages are logged with this level.
+
+## GitHub authentication scopes
+
+The extension uses the following [GitHub authentication scopes](https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps)
+
+* `user`: needed to authenticate to GitHub and to read user's properties
+* `gist`: needed to create and update gists
 
 ## My other extensions
 

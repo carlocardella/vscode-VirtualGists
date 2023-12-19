@@ -1,6 +1,6 @@
 import { Disposable, Event, EventEmitter, FileChangeEvent, FileChangeType, FileStat, FileSystemError, FileSystemProvider, FileType, Uri } from "vscode";
 import { gistProvider, store } from "../extension";
-import { createGitHubGist, createOrUpdateFile, deleteGistFile, deleteGitHubGist } from "../GitHub/api";
+import { createGitHubGist, createOrUpdateFile, deleteGitHubGist } from "../GitHub/api";
 import { getFileNameFromUri, getGistFileContent } from "../GitHub/commands";
 import { TGistFileNoKey, TGist } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
@@ -100,10 +100,6 @@ export class GistFileSystemProvider implements FileSystemProvider {
             // delete the gist
             return await deleteGitHubGist(gist);
         }
-        // } else {
-        //     // delete a file
-        //     await deleteGistFile(gist, uri.path);
-        // }
     }
 
     async rename(oldUri: Uri, newUri: Uri): Promise<void> {
@@ -138,7 +134,16 @@ export class GistFileSystemProvider implements FileSystemProvider {
                 filename: uri.path.split("/").slice(1).join("/"),
             } as TGistFileNoKey;
             if (!content) {
-                content = new TextEncoder().encode("");
+                let gistContent = "";
+                let fileName = uri.path.split("/").pop()!;
+                let gistName = fileName.split(".").pop()!;
+                let extension = fileName.lastIndexOf(".") > -1 ? fileName.substring(fileName.lastIndexOf(".") + 1) : "";
+                if (extension === "md") {
+                    gistContent = `# ${gistName}`;
+                } else {
+                    gistContent = `${gistName}`;
+                }
+                content = new TextEncoder().encode(gistContent);
             }
         }
 

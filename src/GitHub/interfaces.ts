@@ -1,33 +1,5 @@
 import { QuickPickItem } from "vscode";
 
-// import { TContentFile } from "./types";
-export interface Repo {
-    archived: boolean;
-    branches: string[];
-    createdAt: string;
-    defaultBranch: string;
-    description: string | boolean | undefined;
-    disabled: boolean;
-    fork: boolean;
-    forksCount: number;
-    language: string;
-    license: License;
-    name: string;
-    openIssues: number;
-    openIssuesCount: number;
-    owner: Owner;
-    permissions: Permission;
-    private: boolean;
-    pushedAt: string;
-    sha: string;
-    size: number;
-    tags: string[];
-    topics: string[];
-    tree: Tree;
-    updatedAt: string;
-    visibility: string;
-}
-
 export interface Tree {
     sha: string;
     url: string;

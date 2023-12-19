@@ -1,5 +1,5 @@
 import { commands, env, ProgressLocation, Uri, window, workspace } from "vscode";
-import { extensionContext, gistFileSystemProvider, gistProvider, output } from "../extension";
+import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
 import { GIST_SCHEME } from "../FileSystem/fileSystem";
 import {
     getGitHubGist,
@@ -16,8 +16,7 @@ import {
 import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
-import { addToGlobalStorage, readFromGlobalStorage, GlobalStorageGroup, removeFromGlobalStorage, addToOrUpdateLocalStorage } from "../FileSystem/storage";
-import { MessageType } from "../tracing";
+import { GlobalStorageGroup, LocalStorageType } from "../FileSystem/storage";
 
 /**
  * Get the content of a gist file.
@@ -148,17 +147,28 @@ function charCodeAt(c: string) {
  *
  * @export
  * @async
- * @param {TGist} gist The gist to delete
+ * @param {TGist} gistsToDelete The gist to delete
  * @returns {*}
  */
-export async function deleteGist(gist: TGist) {
-    const confirm = await window.showWarningMessage(`Are you sure you want to delete '${gist.description}'?`, { modal: true }, "Yes", "No");
+export async function deleteGist(gistsToDelete: GistNode[]) {
+    let confirm: "Yes" | "No" | undefined = undefined;
+    let message: string;
+    gistsToDelete.length === 1
+        ? (message = `Are you sure you want to delete '${gistsToDelete[0].name}'?`)
+        : (message = `Are you sure you want to delete ${gistsToDelete.length} gists?`);
+
+    confirm = await window.showWarningMessage(message, { modal: true }, "Yes", "No");
     if (confirm !== "Yes") {
         return;
     }
 
-    const gistUri = fileNameToUri(gist.id!);
-    await gistFileSystemProvider.delete(gistUri);
+    await Promise.all(
+        gistsToDelete.map(async (gist) => {
+            const gistUri = fileNameToUri(gist.gist.id!);
+            await gistFileSystemProvider.delete(gistUri);
+        })
+    );
+
     gistProvider.refresh();
 }
 
@@ -218,11 +228,19 @@ export async function createGist(publicGist: boolean) {
     if (fileName) {
         // Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.
         if (fileName.match(/gistfile(\d+)/gi)) {
-            output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+            output?.error(`The file name '${fileName}' is not allowed.`);
             window.showErrorMessage(
                 `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
             );
             return;
+        }
+
+        let gistContent = "";
+        let extension = fileName.lastIndexOf(".") > -1 ? fileName.substring(fileName.lastIndexOf(".") + 1) : "";
+        if (extension === "md") {
+            gistContent = `# ${gistName}`;
+        } else {
+            gistContent = `${gistName}`;
         }
 
         let gist: TGist = {
@@ -230,7 +248,7 @@ export async function createGist(publicGist: boolean) {
             public: publicGist,
             files: {
                 [fileName!]: {
-                    content: "",
+                    content: gistContent,
                 },
             },
         };
@@ -249,6 +267,7 @@ export async function createGist(publicGist: boolean) {
  * @returns {Promise<void>}
  */
 export async function addFile(gist: GistNode): Promise<Uri | undefined> {
+    // @todo: transform into a generic fucntion
     const fileName = await window.showInputBox({
         prompt: "Enter the name of the file",
         placeHolder: "File name",
@@ -260,29 +279,36 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
 
     // Validate file name // @todo: move to a helper function
     if (fileName.match(/gistfile(\d+)/gi)) {
-        output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        output?.error(`The file name '${fileName}' is not allowed.`);
         window.showErrorMessage(
             `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
         );
         return Promise.reject();
     }
     if (fileName.indexOf("/") !== -1) {
-        output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        output?.error(`The file name '${fileName}' is not allowed.`);
         window.showErrorMessage(`"/" is not allowed in a file name.`);
         return Promise.reject();
     }
 
     if (gist instanceof NotepadNode) {
-        // await addNotepadFile(fileName);
         let notepadGist = await getOrCreateNotepadGist(fileName);
 
         gist = new GistNode(notepadGist, GistsGroupType.notepad, false);
-        addToOrUpdateLocalStorage(gist);
+        store.addToOrUpdateLocalStorage(LocalStorageType.gists, gist);
     }
 
     let fileUri = fileNameToUri(gist.gist.id!, fileName);
-    await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(0), { create: true, overwrite: false });
-    // gistProvider.refresh();
+    let gistContent = "";
+    let fileNameWithoutExtension = fileName.split(".").shift()!;
+    let extension = fileName.lastIndexOf(".") > -1 ? fileName.substring(fileName.lastIndexOf(".") + 1) : "";
+    if (extension === "md") {
+        gistContent = `# ${fileNameWithoutExtension}`;
+    } else {
+        gistContent = fileNameWithoutExtension;
+    }
+    let content = new TextEncoder().encode(gistContent);
+    await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(content), { create: true, overwrite: false });
 
     return Promise.resolve(fileUri);
 }
@@ -308,7 +334,7 @@ export async function followUser(username?: string): Promise<void> {
     }
 
     // add username to storage
-    await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, username);
+    await store.addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, username);
 
     return Promise.resolve();
 }
@@ -333,11 +359,16 @@ export async function getGistsForUser(githubUser: string): Promise<TGist[] | und
  * @async
  * @returns {Promise<string[]>}
  */
-export async function getFollowedUsers(): Promise<TGitHubUser[]> {
-    const users = await readFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers);
+export async function getFollowedUsers(withDetails: boolean): Promise<TGitHubUser[]> {
+    let users = (await getGitHubFollowedUsers()).map((user) => user.login);
+    let validUsers: TGitHubUser[] = [];
 
-    let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
-    let validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
+    if (withDetails) {
+        let followedUsers = await Promise.all(users.map(async (user) => await getGitHubUser(user)));
+        validUsers = followedUsers.filter((user) => user !== undefined) as TGitHubUser[];
+    } else {
+        validUsers = users.map((user) => ({ login: user } as TGitHubUser));
+    }
 
     return Promise.resolve(validUsers);
 }
@@ -351,7 +382,7 @@ export async function getFollowedUsers(): Promise<TGitHubUser[]> {
  * @returns {Promise<TGist[]>}
  */
 export async function getOpenedGists(): Promise<TGist[]> {
-    const openedGists = await readFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists);
+    const openedGists = await store.readFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists);
 
     let gists = await Promise.all(openedGists.map(async (gist) => await getGitHubGist(gist)));
     let validGists = gists.filter((gist) => gist !== undefined) as TGist[];
@@ -376,7 +407,7 @@ export async function openGist() {
         return Promise.reject();
     }
 
-    addToGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gistId);
+    store.addToGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gistId);
 }
 
 /**
@@ -388,7 +419,7 @@ export async function openGist() {
  * @returns {*}
  */
 export async function closeGist(gist: GistNode) {
-    removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
+    store.removeFromGlobalStorage(extensionContext, GlobalStorageGroup.openedGists, gist.gist.id!);
     gistProvider.refresh();
 }
 
@@ -412,7 +443,7 @@ export async function renameFile(gistFile: ContentNode) {
 
     // Validate file name
     if (fileName.match(/gistfile(\d+)/gi)) {
-        output?.appendLine(`The file name '${fileName}' is not allowed.`, output.messageType.error);
+        output?.error(`The file name '${fileName}' is not allowed.`);
         window.showErrorMessage(
             `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
         );
@@ -609,7 +640,12 @@ function getFileUriForCopy(gistFile: ContentNode): string {
  * @returns {*}
  */
 export async function viewGistOwnerProfileOnGitHub(username: string) {
-    const user = await getGitHubUser(username);
+    let user: TGitHubUser | undefined;
+    user = store.followedUsers.find((user) => user?.login === username)?.user;
+    if (!user) {
+        user = await getGitHubUser(username);
+    }
+
     if (user) {
         env.openExternal(Uri.parse(user.html_url));
     }
@@ -683,83 +719,16 @@ export async function forkGist(gist?: GistNode | string) {
  *
  * @export
  * @async
- * @param {RepoNode} gist The gist to clone
+ * @param {GistNode} gist The gist to clone
  * @returns {*}
  */
 export async function cloneGist(gist: GistNode) {
-    output?.appendLine(`Cloning ${gist.gist.git_pull_url}`, output.messageType.info);
+    output?.info(`Cloning ${gist.gist.git_pull_url}`);
     commands.executeCommand("git.clone", gist.gist.git_pull_url);
-}
-
-enum QuickPickItems {
-    username = "$(account) Enter username",
-    followedGitHubUsers = "$(person-follow) Pick followed GitHub user",
-}
-
-export async function pickUserToFollow(): Promise<string | undefined> {
-    return await new Promise((resolve) => {
-        let pick: string | undefined;
-
-        let quickPick = window.createQuickPick();
-        quickPick.onDidHide(() => quickPick.dispose());
-        quickPick.title = "Select or type the repository you would like to open";
-        quickPick.canSelectMany = false;
-
-        quickPick.show();
-
-        quickPick.items = [{ label: QuickPickItems.username }, { label: QuickPickItems.followedGitHubUsers }];
-        quickPick.title = "GitHub user to follow";
-        quickPick.placeholder = "GitHub username";
-
-        quickPick.onDidAccept(async () => {
-            if (pick === QuickPickItems.username) {
-                let accepted = await window.showInputBox({
-                    ignoreFocusOut: true,
-                    placeHolder: "username",
-                    title: "Enter the username to follow",
-                });
-                quickPick.hide();
-                resolve(accepted);
-            } else if (pick === QuickPickItems.followedGitHubUsers) {
-                quickPick.busy = true;
-                quickPick.placeholder = "Enter the username to follow";
-                const followedUsers = await getGitHubFollowedUsers();
-                quickPick.busy = false;
-                quickPick.items = followedUsers!.map((followedUser) => ({ label: `${followedUser.login}` }));
-                quickPick.show();
-            } else {
-                output?.appendLine(`onDidAccept: ${pick}`, output.messageType.debug);
-                quickPick.hide();
-                resolve(pick);
-            }
-        });
-
-        quickPick.onDidChangeSelection(async (selection) => {
-            pick = selection[0].label;
-            output?.appendLine(`onDidChangeSelection: ${pick}`, output.messageType.debug);
-        });
-
-        // @todo: refresh the list of followed users
-    });
 }
 
 export async function followUserOnGitHub(username: string) {
     await window.withProgress({ title: "Following user...", location: ProgressLocation.Notification }, async () => {
         await followGitHubUser(username);
     });
-}
-
-/**
- * Download a Gist file to a local file.
- *
- * @export
- * @param {Uri} newFileUri Uri of the new file; this is where the file will be downloaded to
- * @param {Uint8Array} fileContent Content of the file to be downloaded
- */
-export function downloadFile(newFileUri: Uri, fileContent: Uint8Array) {
-    try {
-        workspace.fs.writeFile(newFileUri, fileContent);
-    } catch (e) {
-        output?.appendLine(`Error writing file: ${e}`, MessageType.error);
-    }
 }

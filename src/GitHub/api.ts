@@ -1,6 +1,5 @@
 import * as rest from "@octokit/rest";
 import { credentials, output } from "../extension";
-import { MessageType } from "../tracing";
 import { GistNode } from "../Tree/nodes";
 import { GistStarOperation } from "./commands";
 import { ZERO_WIDTH_SPACE } from "./constants";
@@ -45,7 +44,7 @@ export async function getGitHubGistsForAuthenticatedUser(starred: boolean): Prom
         return Promise.resolve(data);
     } catch (e: any) {
         let starredText = starred ? "starred " : "";
-        output?.appendLine(`Could not get ${starredText}gists for the authenticated user. ${e.message}`, output.messageType.error);
+        output?.error(`Could not get ${starredText}gists for the authenticated user. ${e.message}`);
     }
 
     return Promise.reject(undefined);
@@ -68,10 +67,8 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
         const { data } = await octokit.gists.get({ gist_id: gistId, headers: { Accept: "application/vnd.github.base64" } });
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Could not read gist "${gistId}". ${e.message}`, output.messageType.error);
+        output?.error(`Could not read gist "${gistId}". ${e.message}`);
     }
-
-    // return Promise.reject(undefined);
 }
 
 /**
@@ -116,10 +113,10 @@ export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, c
             }));
         }
 
-        output?.appendLine(`Updated "${file!.filename!}" in gist "${gist.gist.description}"`, output.messageType.info);
+        output?.info(`Updated "${file!.filename!}" in gist "${gist.gist.description}"`);
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.logError(gist.gist, e);
+        output?.error(gist.gist.description!, e);
     }
 
     return Promise.reject();
@@ -140,16 +137,17 @@ export async function deleteGistFile(gist: TGist, files: TFileToDelete): Promise
     });
 
     try {
+        output?.trace(`Deleting "${Object.keys(files)}" from gist "${gist.description}"`);
         let { data } = await octokit.gists.update({
             gist_id: gist.id!,
             files: files,
         });
 
-        output?.appendLine(`Deleted "${Object.keys(files)}" from gist "${gist.description}"`, output.messageType.info);
+        output?.info(`Deleted "${Object.keys(files)}" from gist "${gist.description}"`);
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Could not delete "${Object.keys(files)}" from gist "${gist.description}". ${e.message}`, output.messageType.error);
-        output?.logError(gist, e);
+        output?.error(`Could not delete "${Object.keys(files)}" from gist "${gist.description}". ${e.message}`);
+        output?.error(gist.description!, e);
     }
 
     return Promise.reject();
@@ -171,6 +169,7 @@ export async function createGitHubGist(gist: TGist, publicGist: boolean): Promis
 
     const fileName = Object.keys(gist.files!)[0];
     try {
+        output?.trace(`Creating gist "${gist.description}"`);
         const { data } = await octokit.gists.create({
             description: gist.description!,
             files: {
@@ -180,10 +179,10 @@ export async function createGitHubGist(gist: TGist, publicGist: boolean): Promis
             headers: { Accept: "application/vnd.github+json" },
         });
 
-        output?.appendLine(`Created gist "${data.description}"`, output.messageType.info);
+        output?.info(`Created gist "${data.description}"`);
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.logError(gist, e);
+        output?.error(gist.description!, e);
     }
 
     return Promise.reject();
@@ -203,14 +202,15 @@ export async function deleteGitHubGist(gist: TGist): Promise<void> {
     });
 
     try {
+        output?.trace(`Deleting gist "${gist.description}", id "${gist.id}"`);
         await octokit.gists.delete({
             gist_id: gist.id!,
             headers: { Accept: "application/vnd.github+json" },
         });
-        output?.appendLine(`Gist "${gist.description}" deleted successfully`, MessageType.info);
+        output?.info(`Gist "${gist.description}" deleted successfully`);
         return Promise.resolve();
     } catch (e: any) {
-        output?.logError(gist, e);
+        output?.error(gist.description!, e);
     }
 
     return Promise.reject();
@@ -230,6 +230,7 @@ export async function getGitHubGistForUser(githubUsername: string): Promise<TGis
     });
 
     try {
+        output?.trace(`Getting gists for GitHub user "${githubUsername}"`);
         let data = await octokit.paginate(
             octokit.gists.listForUser,
             { username: githubUsername, headers: { accept: "application/vnd.github+json" } },
@@ -240,7 +241,7 @@ export async function getGitHubGistForUser(githubUsername: string): Promise<TGis
 
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Could not get gists for user "${githubUsername}". ${e.message}`, output.messageType.warning);
+        output?.warn(`Could not get gists for user "${githubUsername}". ${e.message}`);
     }
 
     return Promise.reject();
@@ -260,10 +261,11 @@ export async function getGitHubUser(username: string): Promise<TGitHubUser | und
     });
 
     try {
+        output?.trace(`Getting details for GitHub user "${username}"`);
         const { data } = await octokit.users.getByUsername({ username: username });
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Could not get GitHub user "${username}". ${e.message}`, output.messageType.error);
+        output?.error(`Could not get GitHub user "${username}". ${e.message}`);
     }
 
     return Promise.reject();
@@ -286,17 +288,17 @@ export async function starGitHubGist(gist: GistNode, operation: GistStarOperatio
     try {
         if (operation === GistStarOperation.star) {
             await octokit.gists.star({ gist_id: gist.gist.id! });
-            output?.appendLine(`Starred gist "${gist.name}"`, output.messageType.info);
+            output?.info(`Starred gist "${gist.name}"`);
         }
 
         if (operation === GistStarOperation.unstar) {
             await octokit.gists.unstar({ gist_id: gist.gist.id! });
-            output?.appendLine(`Unstarred gist "${gist.name}"`, output.messageType.info);
+            output?.info(`Unstarred gist "${gist.name}"`);
         }
 
         return Promise.resolve();
     } catch (e: any) {
-        output?.appendLine(`Cannot unstar gist "${gist.name}". ${e.message}`, output.messageType.error);
+        output?.error(`Cannot unstar gist "${gist.name}". ${e.message}`);
     }
 
     return Promise.reject();
@@ -317,10 +319,10 @@ export async function forkGitHubGist(gist: GistNode): Promise<TForkedGist> {
 
     try {
         let { data } = await octokit.gists.fork({ gist_id: gist.gist.id! });
-        output?.appendLine(`Forked gist "${gist.name}"`, output.messageType.info);
+        output?.info(`Forked gist "${gist.name}"`);
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Cannot fork gist "${gist.name}". ${e.message}`, output.messageType.error);
+        output?.error(`Cannot fork gist "${gist.name}". ${e.message}`);
     }
 
     return Promise.reject();
@@ -339,13 +341,14 @@ export async function getGitHubFollowedUsers(): Promise<TUser[]> {
     });
 
     try {
+        output?.trace("Getting followed users");
         const data = await octokit.paginate(octokit.users.listFollowedByAuthenticatedUser, (response) => {
             return response.data;
         });
 
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Cannot get followed users. ${e.message}`, output.messageType.error);
+        output?.error(`Cannot get followed users. ${e.message}`);
     }
 
     return Promise.reject();
@@ -358,10 +361,10 @@ export async function followGitHubUser(username: string): Promise<void> {
 
     try {
         await octokit.users.follow({ username: username });
-        output?.appendLine(`Followed user "${username}"`, output.messageType.info);
+        output?.info(`Followed user "${username}"`);
         return Promise.resolve();
     } catch (e: any) {
-        output?.appendLine(`Cannot follow user "${username} on GitHub". ${e.message}`, output.messageType.error);
+        output?.error(`Cannot follow user "${username} on GitHub". ${e.message}`);
     }
 }
 

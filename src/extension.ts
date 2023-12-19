@@ -1,31 +1,19 @@
 import { Credentials } from "./GitHub/authentication";
-import * as config from "./config";
-import * as trace from "./tracing";
-import { commands, ExtensionContext, workspace, window } from "vscode";
-import { GistNode, GistProvider, ContentNode, UserNode, GistsGroupType, GistsGroupNode } from "./Tree/nodes";
-import { GistFileSystemProvider, GIST_SCHEME, GistFile } from "./FileSystem/fileSystem";
+import { commands, ExtensionContext, workspace, window, LogOutputChannel, version } from "vscode";
+import { GistNode, GistProvider, ContentNode, UserNode } from "./Tree/nodes";
+import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
-import {
-    clearGlobalStorage,
-    readFromGlobalStorage,
-    GlobalStorageGroup,
-    removeFromGlobalStorage,
-    purgeGlobalStorage,
-    addToGlobalStorage,
-} from "./FileSystem/storage";
-import { FOLLOWED_USERS_GLOBAL_STORAGE_KEY } from "./GitHub/constants";
+import { GlobalStorageGroup, Store, SortType, SortDirection } from "./FileSystem/storage";
+import { EXTENSION_NAME, FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
-export let output: trace.Output;
+export let output: LogOutputChannel;
 export const credentials = new Credentials();
 export let gitHubAuthenticatedUser: TGitHubUser;
 export let extensionContext: ExtensionContext;
 export const gistProvider = new GistProvider();
 export const gistFileSystemProvider = new GistFileSystemProvider();
 
-export const store = {
-    gists: [] as (GistNode | undefined)[],
-};
 import { TextEncoder as _TextEncoder } from "node:util";
 import { TextDecoder as _TextDecoder } from "node:util";
 import {
@@ -34,7 +22,6 @@ import {
     createGist,
     deleteFiles,
     deleteGist,
-    followUser,
     openGist,
     renameFile,
     starGist,
@@ -49,9 +36,10 @@ import {
     copyUserName,
     forkGist,
     cloneGist,
-    pickUserToFollow,
     followUserOnGitHub,
 } from "./GitHub/commands";
+import { setSortDirectionContext, setSortTypeContext, isArrayOf } from "./utils";
+import { downloadFiles, downloadGist } from "./FileSystem/download";
 
 // @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
 declare global {
@@ -59,15 +47,21 @@ declare global {
     var TextDecoder: typeof _TextDecoder;
 }
 
+export let store = new Store();
+
 export async function activate(context: ExtensionContext) {
     extensionContext = context;
-    if (config.get("EnableTracing")) {
-        output = new trace.Output();
+    await store.init();
+    setSortTypeContext(store.sortType);
+    setSortDirectionContext(store.sortDirection);
+
+    if (parseFloat(version) >= 1.74) {
+        output = window.createOutputChannel(EXTENSION_NAME, { log: true });
     }
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
-    output?.appendLine("Virtual Gists extension is active", output.messageType.info);
+    output?.info("Virtual Gists extension is active");
 
     await credentials.initialize(context);
     if (!credentials.isAuthenticated) {
@@ -77,7 +71,7 @@ export async function activate(context: ExtensionContext) {
         const octokit = await credentials.getOctokit();
         const userInfo = await octokit.users.getAuthenticated();
 
-        output?.appendLine(`Logged to GitHub as ${userInfo.data.login}`, output.messageType.info);
+        output?.info(`Logged to GitHub as ${userInfo.data.login}`);
     });
 
     context.subscriptions.push(
@@ -88,46 +82,49 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.getGlobalStorage", async () => {
-            const followedUsersFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
-            const openedGistsFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.openedGists);
+            const followedUsersFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
+            const openedGistsFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.openedGists);
 
             if (followedUsersFromGlobalStorage.length > 0) {
-                output?.appendLine(`Global storage ${GlobalStorageGroup.followedUsers}: ${followedUsersFromGlobalStorage}`, output.messageType.info);
+                output?.info(`Global storage ${GlobalStorageGroup.followedUsers}: ${followedUsersFromGlobalStorage}`);
             } else {
-                output?.appendLine(`Global storage ${GlobalStorageGroup.followedUsers} is empty`, output.messageType.info);
+                output?.info(`Global storage ${GlobalStorageGroup.followedUsers} is empty`);
             }
 
             if (openedGistsFromGlobalStorage.length > 0) {
-                output?.appendLine(`Global storage ${GlobalStorageGroup.openedGists}: ${openedGistsFromGlobalStorage}`, output.messageType.info);
+                output?.info(`Global storage ${GlobalStorageGroup.openedGists}: ${openedGistsFromGlobalStorage}`);
             } else {
-                output?.appendLine(`Global storage ${GlobalStorageGroup.openedGists} is empty`, output.messageType.info);
+                output?.info(`Global storage ${GlobalStorageGroup.openedGists} is empty`);
             }
+
+            output?.info(`Sort Type: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType)}`);
+            output?.info(`Sort Direction: ${store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection)}`);
         })
     );
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.purgeGlobalStorage", async () => {
-            purgeGlobalStorage(extensionContext);
+            store.purgeGlobalStorage(extensionContext);
         })
     );
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.removeFromGlobalStorage", async () => {
-            const gistsFromGlobalStorage = await readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
+            const gistsFromGlobalStorage = await store.readFromGlobalStorage(context, GlobalStorageGroup.followedUsers);
             const gistToRemove = await window.showQuickPick(gistsFromGlobalStorage, {
                 placeHolder: "Select gist to remove from global storage",
                 ignoreFocusOut: true,
                 canPickMany: false,
             });
             if (gistToRemove) {
-                removeFromGlobalStorage(context, GlobalStorageGroup.followedUsers, gistToRemove);
+                store.removeFromGlobalStorage(context, GlobalStorageGroup.followedUsers, gistToRemove);
             }
         })
     );
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.clearGlobalStorage", async () => {
-            clearGlobalStorage(context);
+            store.clearGlobalStorage(context);
         })
     );
 
@@ -140,27 +137,17 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.deleteNode", async (node: GistNode | ContentNode, nodes?: GistNode[] | ContentNode[]) => {
             const nodesToDelete = nodes || [node];
-            const isGistNode = isArrayOf(isInstanceOf(GistNode));
+            // const isGistNode = isArrayOf(isInstanceOf(GistNode));
 
-            if (isGistNode(nodesToDelete)) {
-                deleteGist(node.gist);
+            if (isArrayOf(nodesToDelete, GistNode)) {
+                deleteGist(nodesToDelete.filter((x) => x instanceof GistNode) as GistNode[]);
             } else {
-                deleteFiles(nodesToDelete as ContentNode[]);
+                deleteFiles(nodesToDelete.filter((x) => x instanceof ContentNode) as ContentNode[]);
             }
         })
     );
 
-    const isArrayOf =
-        <T>(elemGuard: (x: any) => x is T) =>
-        (arr: any[]): arr is Array<T> =>
-            arr.every(elemGuard);
-
-    const isInstanceOf =
-        <T>(ctor: new (...args: any) => T) =>
-        (x: any): x is T =>
-            x instanceof ctor;
-
-    context.subscriptions.push(
+        context.subscriptions.push(
         commands.registerCommand("VirtualGists.newPrivateGist", async () => {
             createGist(false);
         })
@@ -175,46 +162,42 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.addFile", async (gist: GistNode) => {
             const newFileUri = await addFile(gist);
-          
+
             gistProvider.refreshing = true;
             gistProvider.refresh();
-          
+
             while (gistProvider.refreshing) {
-                output?.appendLine(`waiting`, output.messageType.debug);
+                output?.debug("waiting...");
                 await new Promise((resolve) => setTimeout(resolve, 500));
             }
-          
-            output?.appendLine(`open ${newFileUri}`, output.messageType.debug);
+
+            output?.debug(`open ${newFileUri}`);
             commands.executeCommand("vscode.open", newFileUri);
         })
     );
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.followUser", async (gist?: GistNode) => {
-            const pick = gist instanceof GistsGroupNode || !gist ? await pickUserToFollow() : gist!.gist!.owner!.login;
+            let pick: string | undefined;
+            pick = await window.showInputBox({ ignoreFocusOut: true, placeHolder: "username", title: "Enter the username to follow" });
+
             if (pick) {
                 if (pick === credentials.authenticatedUser.login) {
                     window.showErrorMessage("You cannot follow yourself");
                     return;
                 }
-                output?.appendLine(`Picked repository: ${pick}`, output.messageType.info);
-                await addToGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, pick);
+                output?.info(`Picked user: ${pick}`);
+                await followUserOnGitHub(pick);
                 gistProvider.refresh();
             } else {
-                output?.appendLine("'Follow user' cancelled by user", output.messageType.info);
+                output?.info("'Follow user' cancelled by user");
             }
         })
     );
 
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.unfollowUser", async (user: UserNode) => {
-            removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
-        })
-    );
-
-    context.subscriptions.push(
-        commands.registerCommand("VirtualGists.followUserOnGitHub", async (user: UserNode) => {
-            await followUserOnGitHub(user!.label as string);
+            store.removeFromGlobalStorage(extensionContext, GlobalStorageGroup.followedUsers, user.label as string);
         })
     );
 
@@ -285,8 +268,13 @@ export async function activate(context: ExtensionContext) {
     );
 
     context.subscriptions.push(
-        commands.registerCommand("VirtualGists.viewGistOwnerProfileOnGitHub", async (gist: GistNode) => {
-            await viewGistOwnerProfileOnGitHub(gist.gist.owner!.login);
+        commands.registerCommand("VirtualGists.viewGistOwnerProfileOnGitHub", async (item: GistNode | UserNode) => {
+            if (item instanceof GistNode) {
+                await viewGistOwnerProfileOnGitHub(item.gist.owner!.login);
+            }
+            if (item instanceof UserNode) {
+                await viewGistOwnerProfileOnGitHub(item.login);
+            }
         })
     );
 
@@ -308,23 +296,92 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.download", async (targetNode: GistNode | ContentNode, targetNodes?: GistNode[] | ContentNode[]) => {
+            let destinationFolder = await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                title: "Select download destination",
+            });
+            if (!destinationFolder) {
+                return;
+            }
+
+            const nodes = targetNodes || [targetNode];
+            const gistNodes = nodes.filter((node) => node instanceof GistNode);
+            const contentNodes = nodes.filter((node) => node instanceof ContentNode);
+            if (gistNodes.length > 0) {
+                await downloadGist(gistNodes as GistNode[], destinationFolder[0]);
+            } else {
+                await downloadFiles(contentNodes as ContentNode[], destinationFolder[0]);
+            }
+        })
+    );
+
+    // sort gists
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortGistByName", async () => {
+            const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+            setSortTypeContext(SortType.name);
+            store.sortGists(SortType.name, sortDirection);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortGistByCreationTime", async () => {
+            const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+            setSortTypeContext(SortType.creationTime);
+            store.sortGists(SortType.creationTime, sortDirection);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortGistByUpdateTime", async () => {
+            const sortDirection = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortDirection);
+            setSortTypeContext(SortType.updateTime);
+            store.sortGists(SortType.updateTime, sortDirection);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortAscending", async () => {
+            const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
+            setSortDirectionContext(SortDirection.ascending);
+            store.sortGists(sortType, SortDirection.ascending);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.sortDescending", async () => {
+            const sortType = store.getFromGlobalState(extensionContext, GlobalStorageKeys.sortType);
+            setSortDirectionContext(SortDirection.descending);
+            store.sortGists(sortType, SortDirection.descending);
+            gistProvider.refresh(undefined, true);
+        })
+    );
+
+    // sort empty
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByNameEmpty", async () => {}));
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByCreationTimeEmpty", async () => {}));
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortGistByUpdateTimeEmpty", async () => {}));
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortAscendingEmpty", async () => {}));
+    context.subscriptions.push(commands.registerCommand("VirtualGists.sortDescendingEmpty", async () => {}));
+
     // register global storage
     const keysForSync = [FOLLOWED_USERS_GLOBAL_STORAGE_KEY];
     context.globalState.setKeysForSync(keysForSync);
 
     context.subscriptions.push(
         workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration("VirtualGists.EnableTracing")) {
-                if (config.get("EnableTracing")) {
-                    output = new trace.Output();
-                } else {
-                    output?.dispose();
-                }
-            }
-
             if (e.affectsConfiguration("VirtualGists.UseGistOwnerAvatar")) {
                 gistProvider.refresh();
-                output?.appendLine("UseGistOwnerAvatar changed", output.messageType.info);
+                output?.info("UseGistOwnerAvatar changed");
+            }
+
+            if (e.affectsConfiguration("VirtualGists.ShowDecorations")) {
+                gistProvider.refresh();
+                output?.info("ShowDecorations changed");
             }
         })
     );
