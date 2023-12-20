@@ -81,7 +81,7 @@ export async function getGitHubGist(gistId: string): Promise<TGist | undefined> 
  * @param {Uint8Array} content The content of the file.
  * @returns {Promise<TGitHubUpdateContent>}
  */
-export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, content?: Uint8Array, newFileName?: string): Promise<TGist> {
+export async function createOrUpdateFile(gist: GistNode, files: TGistFileNoKey[], newFileName?: string): Promise<TGist> {
     // prettier-ignore
     const octokit = new rest.Octokit({
         auth: await credentials.getAccessToken(),
@@ -92,28 +92,30 @@ export async function createOrUpdateFile(gist: GistNode, file: TGistFileNoKey, c
         // @todo update gist description
 
         // write file content
-        if (content) {
-            const fileContentString = content.length > 0 ? new TextDecoder().decode(content) : ZERO_WIDTH_SPACE;
-            file!.content = fileContentString;
+        if (files.length > 0) {
+            const updatedFiles: { [key: string]: { content: string } } = {};
+            files.forEach((f) => {
+                const fileContent = f.content ?? "";
+                const fileContentString = fileContent.length > 0 ? fileContent : ZERO_WIDTH_SPACE;
+                updatedFiles[f.filename!] = { content: fileContentString };
+            });
 
             ({ data } = await octokit.gists.update({
                 gist_id: gist.gist.id!,
+                files: updatedFiles,
+            }));
+        }
+
+        if (newFileName && files.length === 1) {
+            ({ data } = await octokit.gists.update({
+                gist_id: gist.gist.id!,
                 files: {
-                    [file!.filename!]: { content: fileContentString },
+                    [files[0].filename!]: { filename: newFileName },
                 },
             }));
         }
 
-        if (newFileName) {
-            ({ data } = await octokit.gists.update({
-                gist_id: gist.gist.id!,
-                files: {
-                    [file!.filename!]: { filename: newFileName },
-                },
-            }));
-        }
-
-        output?.info(`Updated "${file!.filename!}" in gist "${gist.gist.description}"`);
+        output?.info(`Updated "${files[0].filename!}" in gist "${gist.gist.description}"`);
         return Promise.resolve(data);
     } catch (e: any) {
         output?.error(gist.gist.description!, e);
@@ -368,13 +370,6 @@ export async function followGitHubUser(username: string): Promise<void> {
     }
 }
 
-
-
-
-
-
-
-
 /**
  * Create a new Tree on GitHub
  *
@@ -401,7 +396,7 @@ export async function createGitHubTree(gist: GistNode, newTree: TTreeRename[], d
 
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Error creating new Tree: ${e.message.trim()}`, output.messageType.error);
+        output?.appendLine(`Error creating new Tree: ${e.message.trim()}`);
     }
 
     return Promise.reject(undefined);
@@ -453,7 +448,7 @@ export async function createGitHubCommit(gist: GistNode, message: string, tree: 
     try {
         const { data } = await octokit.git.createCommit({
             owner: gist.owner,
-            repo: gist.name,
+            repo: gist.name ?? "",
             message,
             tree,
             parents,
@@ -461,7 +456,7 @@ export async function createGitHubCommit(gist: GistNode, message: string, tree: 
 
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Error creating new commit: ${e.message.trim()}`, output.messageType.error);
+        output?.appendLine(`Error creating new commit: ${e.message.trim()}`);
     }
 
     return Promise.reject(undefined);
@@ -485,14 +480,14 @@ export async function updateGitHubRef(gist: GistNode, ref: string, sha: string):
     try {
         const { data } = await octokit.git.updateRef({
             owner: gist.owner,
-            repo: gist.name,
+            repo: gist.name ?? "",
             ref,
             sha,
         });
 
         return Promise.resolve(data);
     } catch (e: any) {
-        output?.appendLine(`Error updating ref: ${e.message.trim()}`, output.messageType.error);
+        output?.appendLine(`Error updating ref: ${e.message.trim()}`);
     }
 
     return Promise.reject(undefined);

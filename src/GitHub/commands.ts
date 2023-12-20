@@ -13,10 +13,11 @@ import {
     followGitHubUser,
     deleteGistFile,
 } from "./api";
-import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete } from "./types";
+import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete, TGistFile, TGistFileNoKey } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import { GlobalStorageGroup, LocalStorageType } from "../FileSystem/storage";
+import { convertFromUint8Array, convertToUint8Array } from "../utils";
 
 /**
  * Get the content of a gist file.
@@ -267,7 +268,7 @@ export async function createGist(publicGist: boolean) {
  * @returns {Promise<void>}
  */
 export async function addFile(gist: GistNode): Promise<Uri | undefined> {
-    // @todo: transform into a generic fucntion
+    // @todo: transform into a generic function
     const fileName = await window.showInputBox({
         prompt: "Enter the name of the file",
         placeHolder: "File name",
@@ -307,7 +308,7 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
     } else {
         gistContent = fileNameWithoutExtension;
     }
-    let content = new TextEncoder().encode(gistContent);
+    let content = convertToUint8Array(gistContent);
     await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(content), { create: true, overwrite: false });
 
     return Promise.resolve(fileUri);
@@ -466,11 +467,12 @@ export async function renameFile(gistFile: ContentNode) {
  * @returns {Promise<void>}
  */
 export async function uploadFiles(destination: ContentNode | GistNode): Promise<void> {
-    const files = await window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: false, title: "Select the files to upload" });
+    const files = await window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: true, title: "Select the file(s) to upload" });
     if (!files) {
         return Promise.reject();
     }
 
+    let filesToUpload: TGistFileNoKey[] = [];
     await Promise.all(
         files.map(async (file) => {
             const content = await workspace.fs.readFile(file);
@@ -481,19 +483,20 @@ export async function uploadFiles(destination: ContentNode | GistNode): Promise<
                 authority: destination.gist.id!,
                 path: `${uriPath}/${uriFile}`,
             });
-
-            await gistFileSystemProvider.writeFile(uri, content, {
-                create: true,
-                overwrite: false,
+            filesToUpload.push({
+                filename: uri.path.split("/").slice(1).join("/"),
+                content: convertFromUint8Array(content),
             });
         })
     );
+
+    await gistFileSystemProvider.writeFiles(destination as GistNode, filesToUpload);
 
     return Promise.resolve();
 }
 
 /**
- * Enums star/ubstar operations
+ * Enums star/unstar operations
  *
  * @export
  * @enum {number}

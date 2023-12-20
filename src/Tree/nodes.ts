@@ -104,6 +104,8 @@ export class GistNode extends TreeItem {
     git_pull_url: string | undefined;
     created_at: string | undefined;
     updated_at: string | undefined;
+    tree: any;
+    owner: string = '';
 
     constructor(gist: TGist, groupType: GistsGroupType, readOnly?: boolean) {
         super(gist.description || gist.id!, TreeItemCollapsibleState.Collapsed);

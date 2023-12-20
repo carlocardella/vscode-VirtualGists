@@ -4,6 +4,7 @@ import { createGitHubGist, createOrUpdateFile, deleteGitHubGist } from "../GitHu
 import { getFileNameFromUri, getGistFileContent } from "../GitHub/commands";
 import { TGistFileNoKey, TGist } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
+import { convertFromUint8Array, convertToUint8Array } from "../utils";
 
 export const GIST_SCHEME = "github-gist";
 const GIST_QUERY = `${GIST_SCHEME}=`;
@@ -107,7 +108,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
         let newFileName = getFileNameFromUri(newUri);
 
         if (oldFile && newFileName) {
-            await createOrUpdateFile(gist, oldFile, undefined, newFileName);
+            await createOrUpdateFile(gist, [oldFile], newFileName);
         }
 
         return Promise.resolve();
@@ -118,6 +119,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
     }
 
     readDirectory(uri: Uri): [string, FileType][] {
+        // Folders do not really exist in Git, no action needed
         throw new Error("FileSystem.readDirectory method not implemented.");
     }
 
@@ -143,15 +145,27 @@ export class GistFileSystemProvider implements FileSystemProvider {
                 } else {
                     gistContent = `${gistName}`;
                 }
-                content = new TextEncoder().encode(gistContent);
+                content = convertToUint8Array(gistContent);
+            } else {
+                file.content = convertFromUint8Array(content);
             }
+        } else {
+            file.content = convertFromUint8Array(content);
         }
 
-        createOrUpdateFile(gist, file, content).then(() => {
+        createOrUpdateFile(gist, [file]).then(() => {
             this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri }]);
             gistProvider.refresh();
         });
 
+        return Promise.resolve();
+    }
+
+    async writeFiles(destinationGist: GistNode, files: TGistFileNoKey[]): Promise<void> {
+        await createOrUpdateFile(destinationGist, files).then(() => {
+            this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri: destinationGist.uri }]);
+            gistProvider.refresh();
+        });
         return Promise.resolve();
     }
 

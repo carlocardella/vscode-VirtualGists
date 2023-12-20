@@ -48,6 +48,32 @@ export function setSortDirectionContext(sortDirection: SortDirection) {
  * @param {new (...args: any[]) => T} type The type to check against
  * @returns {boolean}
  */
+/**
+ * Checks if every element in an array is an instance of a specified type.
+ * 
+ * @template T - The type of the elements in the array.
+ * @param arr - The array to check.
+ * @param type - The constructor function of the type to check against.
+ * @returns True if every element in the array is an instance of the specified type, false otherwise.
+ */
 export function isArrayOf<T>(arr: unknown[], type: new (...args: any[]) => T): boolean {
     return arr.every((elem) => elem instanceof type);
+}
+
+/**
+ * Converts a string to a Uint8Array.
+ * @param content The string to be converted.
+ * @returns The Uint8Array representation of the string.
+ */
+export function convertToUint8Array(content: string): Uint8Array {
+    return new TextEncoder().encode(content);
+}
+
+/**
+ * Converts a Uint8Array to a string using the TextDecoder API.
+ * @param content The Uint8Array to convert.
+ * @returns The converted string.
+ */
+export function convertFromUint8Array(content: Uint8Array): string {
+    return new TextDecoder().decode(content);
 }
