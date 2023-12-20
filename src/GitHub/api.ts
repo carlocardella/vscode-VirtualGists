@@ -89,8 +89,6 @@ export async function createOrUpdateFile(gist: GistNode, files: TGistFileNoKey[]
 
     try {
         let data: any;
-        // @todo update gist description
-
         // write file content
         if (files.length > 0) {
             const updatedFiles: { [key: string]: { content: string } } = {};
@@ -122,6 +120,32 @@ export async function createOrUpdateFile(gist: GistNode, files: TGistFileNoKey[]
     }
 
     return Promise.reject();
+}
+
+/**
+ * Updates the description of a gist.
+ * @param gist The gist to update.
+ * @param gistDescription The new description for the gist.
+ * @returns A promise that resolves when the gist description is updated.
+ */
+export async function updateGistDescription(gist: GistNode, gistDescription: string): Promise<void> {
+    // prettier-ignore
+    const octokit = new rest.Octokit({
+        auth: await credentials.getAccessToken(),
+    });
+
+    try {
+        let data: any;
+
+        ({ data } = await octokit.gists.update({
+            gist_id: gist.gist.id!,
+            description: gistDescription,
+        }));
+
+        output?.info(`Renamed gist "${gist.gist.id}" (${gist.description}) to gist "${gistDescription}"`);
+    } catch (e: any) {
+        output?.error(gist.gist.description!, e);
+    }
 }
 
 /**

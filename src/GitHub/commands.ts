@@ -12,8 +12,9 @@ import {
     getGitHubFollowedUsers,
     followGitHubUser,
     deleteGistFile,
+    updateGistDescription,
 } from "./api";
-import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete, TGistFile, TGistFileNoKey } from "./types";
+import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete, TGistFileNoKey } from "./types";
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import { GlobalStorageGroup, LocalStorageType } from "../FileSystem/storage";
@@ -275,7 +276,8 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
     });
 
     if (!fileName) {
-        return Promise.reject();
+        // return Promise.reject();
+        return;
     }
 
     // Validate file name // @todo: move to a helper function
@@ -439,7 +441,7 @@ export async function renameFile(gistFile: ContentNode) {
     });
 
     if (!fileName) {
-        return Promise.reject();
+        return;
     }
 
     // Validate file name
@@ -469,7 +471,7 @@ export async function renameFile(gistFile: ContentNode) {
 export async function uploadFiles(destination: ContentNode | GistNode): Promise<void> {
     const files = await window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: true, title: "Select the file(s) to upload" });
     if (!files) {
-        return Promise.reject();
+        return;
     }
 
     let filesToUpload: TGistFileNoKey[] = [];
@@ -521,6 +523,24 @@ export async function unstarGist(gist: GistNode) {
     }
 
     await starredGist(gist, GistStarOperation.unstar);
+}
+
+/**
+ * Renames a gist.
+ * @param gist The gist to be renamed.
+ * @returns A promise that resolves when the gist is renamed successfully.
+ */
+export async function renameGist(gist: GistNode) {
+    const gistDescription = await window.showInputBox({
+        prompt: "Enter the new gist name",
+        placeHolder: "New gist name",
+        ignoreFocusOut: true,
+    });
+
+    if (gistDescription) {
+        await updateGistDescription(gist, gistDescription!);
+        gistProvider.refresh();
+    }
 }
 
 /**

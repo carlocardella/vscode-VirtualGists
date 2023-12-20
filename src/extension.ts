@@ -37,6 +37,7 @@ import {
     forkGist,
     cloneGist,
     followUserOnGitHub,
+    renameGist,
 } from "./GitHub/commands";
 import { setSortDirectionContext, setSortTypeContext, isArrayOf } from "./utils";
 import { downloadFiles, downloadGist } from "./FileSystem/download";
@@ -147,7 +148,7 @@ export async function activate(context: ExtensionContext) {
         })
     );
 
-        context.subscriptions.push(
+    context.subscriptions.push(
         commands.registerCommand("VirtualGists.newPrivateGist", async () => {
             createGist(false);
         })
@@ -162,6 +163,9 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.addFile", async (gist: GistNode) => {
             const newFileUri = await addFile(gist);
+            if (!newFileUri) {
+                return;
+            }
 
             gistProvider.refreshing = true;
             gistProvider.refresh();
@@ -228,6 +232,12 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand("VirtualGists.unstarGist", async (gist: GistNode) => {
             await unstarGist(gist);
+        })
+    );
+
+    context.subscriptions.push(
+        commands.registerCommand("VirtualGists.renameGist", async (gist: GistNode) => {
+            await renameGist(gist);
         })
     );
 

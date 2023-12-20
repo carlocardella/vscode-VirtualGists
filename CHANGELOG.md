@@ -10,6 +10,17 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.7.0] - 2023-12-19
+
+### Added
+
+* `Rename gist`
+  * This is obtained with [#52 Update gist description](https://github.com/carlocardella/vscode-VirtualGists/issues/52): the gist id is unique and immutable, renaming a gist really means updating its `description`
+
+### Fixed
+
+* Fixed a couple of bugs that were leading to unwanted errors and rejected promises when dialog boxes (e.g. when asking for a new file name) where cancelled
+
 ## [0.6.0] - 2023-12-19
 
 ### Fixed

@@ -1,696 +1,710 @@
 {
-  "name": "vscode-virtualgists",
-  "displayName": "Virtual Gists for Visual Studio Code",
-  "description": "Easily manage your GitHub Gists from VSCode",
-  "publisher": "carlocardella",
-  "author": {
-    "name": "Carlo Cardella",
-    "url": "https://cloudnotes.io"
-  },
-  "version": "0.6.0",
-  "preview": true,
-  "engines": {
-    "vscode": "^1.66.0"
-  },
-  "icon": "assets/notebook.png",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/carlocardella/vscode-VirtualGists.git"
-  },
-  "bugs": {
-    "url": "https://github.com/carlocardella/vscode-VirtualGists/issues"
-  },
-  "categories": [
-    "Other"
-  ],
-  "capabilities": {
-    "untrustedWorkspaces": {
-      "supported": true
-    }
-  },
-  "keywords": [
-    "git",
-    "github",
-    "gist",
-    "gists",
-    "virtual file system",
-    "virtual gists"
-  ],
-  "activationEvents": [
-    "onView:virtualGistsView"
-  ],
-  "main": "./dist/extension-node.js",
-  "browser": "./dist/extension-web.js",
-  "contributes": {
-    "configuration": {
-      "title": "VirtualGists",
-      "properties": {
-        "VirtualGists.PullInterval": {
-          "type": "number",
-          "description": "Interval in seconds to pull changes from the remote gists, set to 0 (zero) to disable",
-          "default": 0
-        },
-        "VirtualGists.UseGistOwnerAvatar": {
-          "type": "boolean",
-          "description": "Use the owner's avatar for opened and starred gists, and followed users",
-          "default": false
-        },
-        "VirtualGists.ShowDecorations": {
-          "type": "boolean",
-          "description": "Use the owner's avatar for opened and starred gists, and followed users",
-          "default": false
-        }
-      }
+    "name": "vscode-virtualgists",
+    "displayName": "Virtual Gists for Visual Studio Code",
+    "description": "Easily manage your GitHub Gists from VSCode",
+    "publisher": "carlocardella",
+    "author": {
+        "name": "Carlo Cardella",
+        "url": "https://cloudnotes.io"
     },
-    "commands": [
-      {
-        "title": "Close gist",
-        "command": "VirtualGists.closeGist",
-        "category": "Virtual Gists",
-        "icon": "$(close)"
-      },
-      {
-        "title": "Remove from Global Storage",
-        "command": "VirtualGists.removeFromGlobalStorage",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "New public gist",
-        "command": "VirtualGists.newPublicGist",
-        "category": "Virtual Gists",
-        "icon": "$(repo-create)"
-      },
-      {
-        "title": "New private gist",
-        "command": "VirtualGists.newPrivateGist",
-        "category": "Virtual Gists",
-        "icon": "$(lock)"
-      },
-      {
-        "title": "Clone gist...",
-        "command": "VirtualGists.cloneGist",
-        "category": "Virtual Gists",
-        "icon": "$(repo-clone)"
-      },
-      {
-        "title": "Fork gist",
-        "command": "VirtualGists.forkGist",
-        "category": "Virtual Gists",
-        "icon": "$(repo-forked)"
-      },
-      {
-        "title": "Download...",
-        "command": "VirtualGists.download",
-        "category": "Virtual Gists",
-        "icon": "$(cloud-download)"
-      },
-      {
-        "title": "Open Gist...",
-        "command": "VirtualGists.openGist",
-        "icon": "$(plug)",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "New file",
-        "command": "VirtualGists.addFile",
-        "icon": "$(new-file)",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Upload file(s)...",
-        "command": "VirtualGists.uploadFile",
-        "icon": "$(cloud-upload)",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Delete...",
-        "command": "VirtualGists.deleteNode",
-        "icon": "$(trash)",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Refresh",
-        "command": "VirtualGists.refreshTree",
-        "icon": "$(refresh)",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Clear global storage",
-        "command": "VirtualGists.clearGlobalStorage",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Get Global Storage",
-        "command": "VirtualGists.getGlobalStorage",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Purge Global Storage",
-        "command": "VirtualGists.purgeGlobalStorage",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Follow User",
-        "command": "VirtualGists.followUser",
-        "category": "Virtual Gists",
-        "icon": "$(person-add)"
-      },
-      {
-        "title": "Unfollow User",
-        "command": "VirtualGists.unfollowUser",
-        "category": "Virtual Gists",
-        "icon": "$(close)"
-      },
-      {
-        "title": "Rename...",
-        "command": "VirtualGists.renameFile",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Unstar gist",
-        "command": "VirtualGists.unstarGist",
-        "category": "Virtual Gists",
-        "icon": "$(close)"
-      },
-      {
-        "title": "Star gist",
-        "command": "VirtualGists.starGist",
-        "category": "Virtual Gists",
-        "icon": "$(star-empty)"
-      },
-      {
-        "title": "Copy gist id",
-        "command": "VirtualGists.copyGistId",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Copy gist URL",
-        "command": "VirtualGists.copyGistUrl",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Open gist in browser",
-        "command": "VirtualGists.openGistOnGitHub",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Copy file URL",
-        "command": "VirtualGists.copyFileUrl",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Open file in browser",
-        "command": "VirtualGists.openFileOnGitHub",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "View user profile on GitHub",
-        "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Copy owner name",
-        "command": "VirtualGists.copyUsername",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "✓ Sort by name",
-        "command": "VirtualGists.sortGistByNameEmpty",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Sort by name",
-        "command": "VirtualGists.sortGistByName",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "✓ Sort by creation time",
-        "command": "VirtualGists.sortGistByCreationTimeEmpty",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Sort by creation time",
-        "command": "VirtualGists.sortGistByCreationTime",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "✓ Sort by update time",
-        "command": "VirtualGists.sortGistByUpdateTimeEmpty",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Sort by update time",
-        "command": "VirtualGists.sortGistByUpdateTime",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "✓ Sort ascending",
-        "command": "VirtualGists.sortAscendingEmpty",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Sort ascending",
-        "command": "VirtualGists.sortAscending",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "✓ Sort descending",
-        "command": "VirtualGists.sortDescendingEmpty",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Sort descending",
-        "command": "VirtualGists.sortDescending",
-        "category": "Virtual Gists"
-      },
-      {
-        "title": "Sort descending",
-        "command": "VirtualGists.sortDescending",
-        "category": "Virtual Gists"
-      }
+    "version": "0.6.0",
+    "preview": true,
+    "engines": {
+        "vscode": "^1.66.0"
+    },
+    "icon": "assets/notebook.png",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/carlocardella/vscode-VirtualGists.git"
+    },
+    "bugs": {
+        "url": "https://github.com/carlocardella/vscode-VirtualGists/issues"
+    },
+    "categories": [
+        "Other"
     ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "VirtualRepositoriesContainer",
-          "title": "Virtual Gists",
-          "icon": "assets/repo.svg"
+    "capabilities": {
+        "untrustedWorkspaces": {
+            "supported": true
         }
-      ]
     },
-    "views": {
-      "VirtualRepositoriesContainer": [
-        {
-          "id": "virtualGistsView",
-          "name": "Virtual Gists",
-          "icon": "assets/repo.svg",
-          "type": "tree",
-          "visibility": "collapsed"
+    "keywords": [
+        "git",
+        "github",
+        "gist",
+        "gists",
+        "virtual file system",
+        "virtual gists"
+    ],
+    "activationEvents": [
+        "onView:virtualGistsView"
+    ],
+    "main": "./dist/extension-node.js",
+    "browser": "./dist/extension-web.js",
+    "contributes": {
+        "configuration": {
+            "title": "VirtualGists",
+            "properties": {
+                "VirtualGists.PullInterval": {
+                    "type": "number",
+                    "description": "Interval in seconds to pull changes from the remote gists, set to 0 (zero) to disable",
+                    "default": 0
+                },
+                "VirtualGists.UseGistOwnerAvatar": {
+                    "type": "boolean",
+                    "description": "Use the owner's avatar for opened and starred gists, and followed users",
+                    "default": false
+                },
+                "VirtualGists.ShowDecorations": {
+                    "type": "boolean",
+                    "description": "Use the owner's avatar for opened and starred gists, and followed users",
+                    "default": false
+                }
+            }
+        },
+        "commands": [
+            {
+                "title": "Close gist",
+                "command": "VirtualGists.closeGist",
+                "category": "Virtual Gists",
+                "icon": "$(close)"
+            },
+            {
+                "title": "Remove from Global Storage",
+                "command": "VirtualGists.removeFromGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "New public gist",
+                "command": "VirtualGists.newPublicGist",
+                "category": "Virtual Gists",
+                "icon": "$(repo-create)"
+            },
+            {
+                "title": "New private gist",
+                "command": "VirtualGists.newPrivateGist",
+                "category": "Virtual Gists",
+                "icon": "$(lock)"
+            },
+            {
+                "title": "Clone gist...",
+                "command": "VirtualGists.cloneGist",
+                "category": "Virtual Gists",
+                "icon": "$(repo-clone)"
+            },
+            {
+                "title": "Fork gist",
+                "command": "VirtualGists.forkGist",
+                "category": "Virtual Gists",
+                "icon": "$(repo-forked)"
+            },
+            {
+                "title": "Download...",
+                "command": "VirtualGists.download",
+                "category": "Virtual Gists",
+                "icon": "$(cloud-download)"
+            },
+            {
+                "title": "Open Gist...",
+                "command": "VirtualGists.openGist",
+                "icon": "$(plug)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "New file",
+                "command": "VirtualGists.addFile",
+                "icon": "$(new-file)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Upload file(s)...",
+                "command": "VirtualGists.uploadFile",
+                "icon": "$(cloud-upload)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Delete...",
+                "command": "VirtualGists.deleteNode",
+                "icon": "$(trash)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Refresh",
+                "command": "VirtualGists.refreshTree",
+                "icon": "$(refresh)",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Clear global storage",
+                "command": "VirtualGists.clearGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Get Global Storage",
+                "command": "VirtualGists.getGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Purge Global Storage",
+                "command": "VirtualGists.purgeGlobalStorage",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Follow User",
+                "command": "VirtualGists.followUser",
+                "category": "Virtual Gists",
+                "icon": "$(person-add)"
+            },
+            {
+                "title": "Unfollow User",
+                "command": "VirtualGists.unfollowUser",
+                "category": "Virtual Gists",
+                "icon": "$(close)"
+            },
+            {
+                "title": "Rename...",
+                "command": "VirtualGists.renameFile",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Rename...",
+                "command": "VirtualGists.renameGist",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Unstar gist",
+                "command": "VirtualGists.unstarGist",
+                "category": "Virtual Gists",
+                "icon": "$(close)"
+            },
+            {
+                "title": "Star gist",
+                "command": "VirtualGists.starGist",
+                "category": "Virtual Gists",
+                "icon": "$(star-empty)"
+            },
+            {
+                "title": "Copy gist id",
+                "command": "VirtualGists.copyGistId",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Copy gist URL",
+                "command": "VirtualGists.copyGistUrl",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Open gist in browser",
+                "command": "VirtualGists.openGistOnGitHub",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Copy file URL",
+                "command": "VirtualGists.copyFileUrl",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Open file in browser",
+                "command": "VirtualGists.openFileOnGitHub",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "View user profile on GitHub",
+                "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Copy owner name",
+                "command": "VirtualGists.copyUsername",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort by name",
+                "command": "VirtualGists.sortGistByNameEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort by name",
+                "command": "VirtualGists.sortGistByName",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort by creation time",
+                "command": "VirtualGists.sortGistByCreationTimeEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort by creation time",
+                "command": "VirtualGists.sortGistByCreationTime",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort by update time",
+                "command": "VirtualGists.sortGistByUpdateTimeEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort by update time",
+                "command": "VirtualGists.sortGistByUpdateTime",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort ascending",
+                "command": "VirtualGists.sortAscendingEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort ascending",
+                "command": "VirtualGists.sortAscending",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "✓ Sort descending",
+                "command": "VirtualGists.sortDescendingEmpty",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort descending",
+                "command": "VirtualGists.sortDescending",
+                "category": "Virtual Gists"
+            },
+            {
+                "title": "Sort descending",
+                "command": "VirtualGists.sortDescending",
+                "category": "Virtual Gists"
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "VirtualRepositoriesContainer",
+                    "title": "Virtual Gists",
+                    "icon": "assets/repo.svg"
+                }
+            ]
+        },
+        "views": {
+            "VirtualRepositoriesContainer": [
+                {
+                    "id": "virtualGistsView",
+                    "name": "Virtual Gists",
+                    "icon": "assets/repo.svg",
+                    "type": "tree",
+                    "visibility": "collapsed"
+                }
+            ]
+        },
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "VirtualGists.copyGistId",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.copyGistUrl",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.copyUsername",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.openGistOnGitHub",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.openGist"
+                },
+                {
+                    "command": "VirtualGists.forkGist"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.newPrivateGist"
+                },
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.starGist"
+                },
+                {
+                    "command": "VirtualGists.renameFile",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.renameGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.uploadFile",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.download",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.forkGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.cloneGist",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.refreshTree"
+                },
+                {
+                    "command": "VirtualGists.clearGlobalStorage"
+                },
+                {
+                    "command": "VirtualGists.purgeGlobalStorage"
+                },
+                {
+                    "command": "VirtualGists.followUser"
+                },
+                {
+                    "command": "VirtualGists.unfollowUser",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.copyFileUrl",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.openFileOnGitHub",
+                    "when": "false"
+                },
+                {
+                    "command": "VirtualGists.sortGistByName"
+                },
+                {
+                    "command": "VirtualGists.sortGistByCreationTime"
+                },
+                {
+                    "command": "VirtualGists.sortGistByUpdateTime"
+                },
+                {
+                    "command": "VirtualGists.sortAscending"
+                },
+                {
+                    "command": "VirtualGists.sortDescending"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "VirtualGists.openGist",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "VirtualGists.newPrivateGist",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "VirtualGists.newPublicGist",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation@3"
+                },
+                {
+                    "command": "VirtualGists.followUser",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation@4"
+                },
+                {
+                    "command": "VirtualGists.refreshTree",
+                    "when": "view == virtualGistsView",
+                    "group": "navigation@5"
+                },
+                {
+                    "command": "VirtualGists.sortGistByNameEmpty",
+                    "when": "view == virtualGistsView && VirtualGists.sortType.name",
+                    "group": "1_sortType@1"
+                },
+                {
+                    "command": "VirtualGists.sortGistByName",
+                    "when": "view == virtualGistsView && !VirtualGists.sortType.name",
+                    "group": "1_sortType@1"
+                },
+                {
+                    "command": "VirtualGists.sortGistByCreationTimeEmpty",
+                    "when": "view == virtualGistsView && VirtualGists.sortType.creationTime",
+                    "group": "1_sortType@4"
+                },
+                {
+                    "command": "VirtualGists.sortGistByCreationTime",
+                    "when": "view == virtualGistsView && !VirtualGists.sortType.creationTime",
+                    "group": "1_sortType@4"
+                },
+                {
+                    "command": "VirtualGists.sortGistByUpdateTimeEmpty",
+                    "when": "view == virtualGistsView && VirtualGists.sortType.updateTime",
+                    "group": "1_sortType@5"
+                },
+                {
+                    "command": "VirtualGists.sortGistByUpdateTime",
+                    "when": "view == virtualGistsView && !VirtualGists.sortType.updateTime",
+                    "group": "1_sortType@5"
+                },
+                {
+                    "command": "VirtualGists.sortAscendingEmpty",
+                    "when": "view == virtualGistsView && VirtualGists.sortDirection.ascending",
+                    "group": "2_sortDirection@1"
+                },
+                {
+                    "command": "VirtualGists.sortAscending",
+                    "when": "view == virtualGistsView && !VirtualGists.sortDirection.ascending",
+                    "group": "2_sortDirection@1"
+                },
+                {
+                    "command": "VirtualGists.sortDescendingEmpty",
+                    "when": "view == virtualGistsView && VirtualGists.sortDirection.descending",
+                    "group": "2_sortDirection@2"
+                },
+                {
+                    "command": "VirtualGists.sortDescending",
+                    "when": "view == virtualGistsView && !VirtualGists.sortDirection.descending",
+                    "group": "2_sortDirection@2"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "VirtualGists.newPrivateGist",
+                    "when": "viewItem == myGistsGroupNode",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.newPublicGist",
+                    "when": "viewItem == myGistsGroupNode",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "viewItem == gist.readWrite || viewItem == file.readWrite",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "VirtualGists.newPrivateGist",
+                    "when": "viewItem == myGistsGroupNode",
+                    "group": "1_gist@1"
+                },
+                {
+                    "command": "VirtualGists.newPublicGist",
+                    "when": "viewItem == myGistsGroupNode",
+                    "group": "1_gist@1"
+                },
+                {
+                    "command": "VirtualGists.addFile",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
+                    "group": "1_gist@1"
+                },
+                {
+                    "command": "VirtualGists.uploadFile",
+                    "when": "viewItem == gist.readWrite",
+                    "group": "1_gist@2"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "viewItem == gist",
+                    "group": "1_gist@1"
+                },
+                {
+                    "command": "VirtualGists.copyFileUrl",
+                    "when": "viewItem =~ /file./",
+                    "group": "1_copy@1"
+                },
+                {
+                    "command": "VirtualGists.openFileOnGitHub",
+                    "when": "viewItem =~ /file./",
+                    "group": "1_copy@2"
+                },
+                {
+                    "command": "VirtualGists.renameFile",
+                    "when": "viewItem == file.readWrite",
+                    "group": "3_delete@1"
+                },
+                {
+                    "command": "VirtualGists.deleteNode",
+                    "when": "viewItem == gist.readWrite || viewItem == file.readWrite",
+                    "group": "3_delete@2"
+                },
+                {
+                    "command": "VirtualGists.renameGist",
+                    "when": "viewItem == gist.readWrite",
+                    "group": "3_delete@1"
+                },
+                {
+                    "command": "VirtualGists.openGist",
+                    "when": "viewItem == openedGistsGroupNode",
+                    "group": "1_open@1"
+                },
+                {
+                    "command": "VirtualGists.followUser",
+                    "when": "viewItem == followedUsersGroupNode",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.followUser",
+                    "when": "viewItem == followedUsersGroupNode",
+                    "group": "1_open@1"
+                },
+                {
+                    "command": "VirtualGists.unfollowUser",
+                    "when": "viewItem == user",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.unfollowUser",
+                    "when": "viewItem == user",
+                    "group": "1_open@1"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "viewItem == gist.openedGists",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.closeGist",
+                    "when": "viewItem == gist.openedGists",
+                    "group": "1_gist@2"
+                },
+                {
+                    "command": "VirtualGists.starGist",
+                    "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.starGist",
+                    "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers",
+                    "group": "1_gist@1"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "viewItem == gist.starredGists",
+                    "group": "inline"
+                },
+                {
+                    "command": "VirtualGists.unstarGist",
+                    "when": "viewItem == gist.starredGists",
+                    "group": "1_gist@1"
+                },
+                {
+                    "command": "VirtualGists.forkGist",
+                    "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers || viewItem == gist.starredGists",
+                    "group": "1_gist@2"
+                },
+                {
+                    "command": "VirtualGists.copyGistId",
+                    "when": "viewItem =~ /gist./",
+                    "group": "3_copy@1"
+                },
+                {
+                    "command": "VirtualGists.copyGistUrl",
+                    "when": "viewItem =~ /gist./",
+                    "group": "3_copy@2"
+                },
+                {
+                    "command": "VirtualGists.openGistOnGitHub",
+                    "when": "viewItem =~ /gist./",
+                    "group": "3_copy@3"
+                },
+                {
+                    "command": "VirtualGists.cloneGist",
+                    "when": "viewItem =~ /gist./",
+                    "group": "3_copy@4"
+                },
+                {
+                    "command": "VirtualGists.download",
+                    "when": "viewItem =~ /gist.|file./",
+                    "group": "3_copy@4"
+                },
+                {
+                    "command": "VirtualGists.followUser",
+                    "when": "viewItem == gist.openedGists || viewItem == gist.starredGists",
+                    "group": "9_open@1"
+                },
+                {
+                    "command": "VirtualGists.copyUsername",
+                    "when": "viewItem =~ /gist./",
+                    "group": "9_open@2"
+                },
+                {
+                    "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
+                    "when": "viewItem =~ /gist.|user/",
+                    "group": "9_open@3"
+                }
+            ]
         }
-      ]
     },
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "VirtualGists.copyGistId",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.copyGistUrl",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.copyUsername",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.openGistOnGitHub",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.closeGist",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.openGist"
-        },
-        {
-          "command": "VirtualGists.forkGist"
-        },
-        {
-          "command": "VirtualGists.closeGist",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.newPrivateGist"
-        },
-        {
-          "command": "VirtualGists.addFile",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.unstarGist",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.starGist"
-        },
-        {
-          "command": "VirtualGists.renameFile",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.uploadFile",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.deleteNode",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.download",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.forkGist",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.cloneGist",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.refreshTree"
-        },
-        {
-          "command": "VirtualGists.clearGlobalStorage"
-        },
-        {
-          "command": "VirtualGists.purgeGlobalStorage"
-        },
-        {
-          "command": "VirtualGists.followUser"
-        },
-        {
-          "command": "VirtualGists.unfollowUser",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.copyFileUrl",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.openFileOnGitHub",
-          "when": "false"
-        },
-        {
-          "command": "VirtualGists.sortGistByName"
-        },
-        {
-          "command": "VirtualGists.sortGistByCreationTime"
-        },
-        {
-          "command": "VirtualGists.sortGistByUpdateTime"
-        },
-        {
-          "command": "VirtualGists.sortAscending"
-        },
-        {
-          "command": "VirtualGists.sortDescending"
-        }
-      ],
-      "view/title": [
-        {
-          "command": "VirtualGists.openGist",
-          "when": "view == virtualGistsView",
-          "group": "navigation@1"
-        },
-        {
-          "command": "VirtualGists.newPrivateGist",
-          "when": "view == virtualGistsView",
-          "group": "navigation@2"
-        },
-        {
-          "command": "VirtualGists.newPublicGist",
-          "when": "view == virtualGistsView",
-          "group": "navigation@3"
-        },
-        {
-          "command": "VirtualGists.followUser",
-          "when": "view == virtualGistsView",
-          "group": "navigation@4"
-        },
-        {
-          "command": "VirtualGists.refreshTree",
-          "when": "view == virtualGistsView",
-          "group": "navigation@5"
-        },
-        {
-          "command": "VirtualGists.sortGistByNameEmpty",
-          "when": "view == virtualGistsView && VirtualGists.sortType.name",
-          "group": "1_sortType@1"
-        },
-        {
-          "command": "VirtualGists.sortGistByName",
-          "when": "view == virtualGistsView && !VirtualGists.sortType.name",
-          "group": "1_sortType@1"
-        },
-        {
-          "command": "VirtualGists.sortGistByCreationTimeEmpty",
-          "when": "view == virtualGistsView && VirtualGists.sortType.creationTime",
-          "group": "1_sortType@4"
-        },
-        {
-          "command": "VirtualGists.sortGistByCreationTime",
-          "when": "view == virtualGistsView && !VirtualGists.sortType.creationTime",
-          "group": "1_sortType@4"
-        },
-        {
-          "command": "VirtualGists.sortGistByUpdateTimeEmpty",
-          "when": "view == virtualGistsView && VirtualGists.sortType.updateTime",
-          "group": "1_sortType@5"
-        },
-        {
-          "command": "VirtualGists.sortGistByUpdateTime",
-          "when": "view == virtualGistsView && !VirtualGists.sortType.updateTime",
-          "group": "1_sortType@5"
-        },
-        {
-          "command": "VirtualGists.sortAscendingEmpty",
-          "when": "view == virtualGistsView && VirtualGists.sortDirection.ascending",
-          "group": "2_sortDirection@1"
-        },
-        {
-          "command": "VirtualGists.sortAscending",
-          "when": "view == virtualGistsView && !VirtualGists.sortDirection.ascending",
-          "group": "2_sortDirection@1"
-        },
-        {
-          "command": "VirtualGists.sortDescendingEmpty",
-          "when": "view == virtualGistsView && VirtualGists.sortDirection.descending",
-          "group": "2_sortDirection@2"
-        },
-        {
-          "command": "VirtualGists.sortDescending",
-          "when": "view == virtualGistsView && !VirtualGists.sortDirection.descending",
-          "group": "2_sortDirection@2"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "VirtualGists.newPrivateGist",
-          "when": "viewItem == myGistsGroupNode",
-          "group": "inline"
-        },
-        {
-          "command": "VirtualGists.newPublicGist",
-          "when": "viewItem == myGistsGroupNode",
-          "group": "inline"
-        },
-        {
-          "command": "VirtualGists.deleteNode",
-          "when": "viewItem == gist.readWrite || viewItem == file.readWrite",
-          "group": "inline@1"
-        },
-        {
-          "command": "VirtualGists.addFile",
-          "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
-          "group": "inline@2"
-        },
-        {
-          "command": "VirtualGists.newPrivateGist",
-          "when": "viewItem == myGistsGroupNode",
-          "group": "1_gist@1"
-        },
-        {
-          "command": "VirtualGists.newPublicGist",
-          "when": "viewItem == myGistsGroupNode",
-          "group": "1_gist@1"
-        },
-        {
-          "command": "VirtualGists.addFile",
-          "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
-          "group": "1_gist@1"
-        },
-        {
-          "command": "VirtualGists.uploadFile",
-          "when": "viewItem == gist.readWrite",
-          "group": "1_gist@2"
-        },
-        {
-          "command": "VirtualGists.closeGist",
-          "when": "viewItem == gist",
-          "group": "1_gist@1"
-        },
-        {
-          "command": "VirtualGists.copyFileUrl",
-          "when": "viewItem =~ /file./",
-          "group": "1_copy@1"
-        },
-        {
-          "command": "VirtualGists.openFileOnGitHub",
-          "when": "viewItem =~ /file./",
-          "group": "1_copy@2"
-        },
-        {
-          "command": "VirtualGists.renameFile",
-          "when": "viewItem == file.readWrite",
-          "group": "3_delete@1"
-        },
-        {
-          "command": "VirtualGists.deleteNode",
-          "when": "viewItem == gist.readWrite || viewItem == file.readWrite",
-          "group": "3_delete@2"
-        },
-        {
-          "command": "VirtualGists.openGist",
-          "when": "viewItem == openedGistsGroupNode",
-          "group": "1_open@1"
-        },
-        {
-          "command": "VirtualGists.followUser",
-          "when": "viewItem == followedUsersGroupNode",
-          "group": "inline"
-        },
-        {
-          "command": "VirtualGists.followUser",
-          "when": "viewItem == followedUsersGroupNode",
-          "group": "1_open@1"
-        },
-        {
-          "command": "VirtualGists.unfollowUser",
-          "when": "viewItem == user",
-          "group": "inline"
-        },
-        {
-          "command": "VirtualGists.unfollowUser",
-          "when": "viewItem == user",
-          "group": "1_open@1"
-        },
-        {
-          "command": "VirtualGists.closeGist",
-          "when": "viewItem == gist.openedGists",
-          "group": "inline"
-        },
-        {
-          "command": "VirtualGists.closeGist",
-          "when": "viewItem == gist.openedGists",
-          "group": "1_gist@2"
-        },
-        {
-          "command": "VirtualGists.starGist",
-          "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers",
-          "group": "inline"
-        },
-        {
-          "command": "VirtualGists.starGist",
-          "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers",
-          "group": "1_gist@1"
-        },
-        {
-          "command": "VirtualGists.unstarGist",
-          "when": "viewItem == gist.starredGists",
-          "group": "inline"
-        },
-        {
-          "command": "VirtualGists.unstarGist",
-          "when": "viewItem == gist.starredGists",
-          "group": "1_gist@1"
-        },
-        {
-          "command": "VirtualGists.forkGist",
-          "when": "viewItem == gist.openedGists || viewItem == gist.followedUsers || viewItem == gist.starredGists",
-          "group": "1_gist@2"
-        },
-        {
-          "command": "VirtualGists.copyGistId",
-          "when": "viewItem =~ /gist./",
-          "group": "3_copy@1"
-        },
-        {
-          "command": "VirtualGists.copyGistUrl",
-          "when": "viewItem =~ /gist./",
-          "group": "3_copy@2"
-        },
-        {
-          "command": "VirtualGists.openGistOnGitHub",
-          "when": "viewItem =~ /gist./",
-          "group": "3_copy@3"
-        },
-        {
-          "command": "VirtualGists.cloneGist",
-          "when": "viewItem =~ /gist./",
-          "group": "3_copy@4"
-        },
-        {
-          "command": "VirtualGists.download",
-          "when": "viewItem =~ /gist.|file./",
-          "group": "3_copy@4"
-        },
-        {
-          "command": "VirtualGists.followUser",
-          "when": "viewItem == gist.openedGists || viewItem == gist.starredGists",
-          "group": "9_open@1"
-        },
-        {
-          "command": "VirtualGists.copyUsername",
-          "when": "viewItem =~ /gist./",
-          "group": "9_open@2"
-        },
-        {
-          "command": "VirtualGists.viewGistOwnerProfileOnGitHub",
-          "when": "viewItem =~ /gist.|user/",
-          "group": "9_open@3"
-        }
-      ]
+    "scripts": {
+        "webpack": "webpack --mode development",
+        "webpack-dev": "webpack --mode development --watch",
+        "test-compile": "tsc -p ./",
+        "unit-tests": "tsc -w -p ./",
+        "vscode:prepublish": "npm run package-web",
+        "compile-web": "webpack",
+        "watch-web": "webpack --watch",
+        "package-web": "webpack --mode production --devtool hidden-source-map",
+        "webpack-web-production": "webpack --mode production"
+    },
+    "devDependencies": {
+        "@types/glob": "^8.1.0",
+        "@types/mocha": "^10.0.6",
+        "@types/node": "16.x",
+        "@types/vscode": "^1.66.0",
+        "@typescript-eslint/eslint-plugin": "^6.15.0",
+        "@typescript-eslint/parser": "^6.15.0",
+        "@vscode/test-electron": "^2.3.8",
+        "@webpack-cli/generators": "^3.0.1",
+        "buffer": "^6.0.3",
+        "eslint": "^8.56.0",
+        "glob": "^8.1.0",
+        "mocha": "^10.2.0",
+        "octokit": "^3.1.2",
+        "ts-loader": "^9.5.1",
+        "typescript": "^5.3.3",
+        "webpack": "^5.89.0",
+        "webpack-cli": "^5.1.4"
+    },
+    "dependencies": {
+        "@octokit/core": "^5.0.2",
+        "@octokit/openapi-types": "^13.13.1",
+        "@octokit/plugin-rest-endpoint-methods": "^6.8.1",
+        "@octokit/request": "^8.1.6",
+        "@octokit/rest": "^20.0.2",
+        "@octokit/types": "^12.4.0",
+        "https-browserify": "^1.0.0",
+        "is-binary-path": "^2.1.0",
+        "os-browserify": "^0.3.0",
+        "path-browserify": "^1.0.1",
+        "process": "^0.11.10"
     }
-  },
-  "scripts": {
-    "webpack": "webpack --mode development",
-    "webpack-dev": "webpack --mode development --watch",
-    "test-compile": "tsc -p ./",
-    "unit-tests": "tsc -w -p ./",
-    "vscode:prepublish": "npm run package-web",
-    "compile-web": "webpack",
-    "watch-web": "webpack --watch",
-    "package-web": "webpack --mode production --devtool hidden-source-map",
-    "webpack-web-production": "webpack --mode production"
-  },
-  "devDependencies": {
-    "@types/glob": "^8.1.0",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "16.x",
-    "@types/vscode": "^1.66.0",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0",
-    "@vscode/test-electron": "^2.3.8",
-    "@webpack-cli/generators": "^3.0.1",
-    "buffer": "^6.0.3",
-    "eslint": "^8.56.0",
-    "glob": "^8.1.0",
-    "mocha": "^10.2.0",
-    "octokit": "^3.1.2",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.3.3",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "@octokit/core": "^5.0.2",
-    "@octokit/openapi-types": "^13.13.1",
-    "@octokit/plugin-rest-endpoint-methods": "^6.8.1",
-    "@octokit/request": "^8.1.6",
-    "@octokit/rest": "^20.0.2",
-    "@octokit/types": "^12.4.0",
-    "https-browserify": "^1.0.0",
-    "is-binary-path": "^2.1.0",
-    "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
-    "process": "^0.11.10"
-  }
 }
