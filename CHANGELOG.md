@@ -10,6 +10,12 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.6.0] - 2023-12-19
+
+### Fixed
+
+* [#16 Upload multiple files](https://github.com/carlocardella/vscode-VirtualGists/issues/16)
+
 ## [0.5.0] - 2023-04-15
 
 ### Fixed
