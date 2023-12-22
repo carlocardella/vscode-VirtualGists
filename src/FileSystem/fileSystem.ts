@@ -108,6 +108,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
         let newFileName = getFileNameFromUri(newUri);
 
         if (oldFile && newFileName) {
+            oldFile.content = convertFromUint8Array(await this.readFile(oldUri));
             await createOrUpdateFile(gist, [oldFile], newFileName);
         }
 
