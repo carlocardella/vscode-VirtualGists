@@ -10,6 +10,12 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.7.1] - 2023-12-22
+
+### Fixed
+
+* [#53 File corruption after changing file extension](https://github.com/carlocardella/vscode-VirtualGists/issues/53)
+
 ## [0.7.0] - 2023-12-19
 
 ### Added
