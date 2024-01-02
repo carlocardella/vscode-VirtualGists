@@ -261,15 +261,10 @@ export async function createGist(publicGist: boolean) {
 }
 
 /**
- * Add a file to a gist
- *
- * @export
- * @async
- * @param {TGist} gist The gist to add the file to
- * @returns {Promise<void>}
+ * Asks the user for the name of the gist file.
+ * @returns A promise that resolves to the entered file name, or undefined if no name was entered.
  */
-export async function addFile(gist: GistNode): Promise<Uri | undefined> {
-    // @todo: transform into a generic function
+export async function askForFileName(): Promise<string | undefined> {
     const fileName = await window.showInputBox({
         prompt: "Enter the name of the file",
         placeHolder: "File name",
@@ -280,17 +275,31 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
         return;
     }
 
-    // Validate file name // @todo: move to a helper function
-    if (fileName.match(/gistfile(\d+)/gi)) {
-        output?.error(`The file name '${fileName}' is not allowed.`);
-        window.showErrorMessage(
-            `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
-        );
-        return Promise.reject();
+    return Promise.resolve(fileName);
+}
+
+/**
+ * Add a file to a gist
+ *
+ * @export
+ * @async
+ * @param {TGist} gist The gist to add the file to
+ * @returns {Promise<void>}
+ */
+export async function addFile(gist: GistNode, dailyNote: boolean = false): Promise<Uri | undefined> {
+    let fileName: string | undefined;
+
+    if (dailyNote) {
+        fileName = getDailyNoteFileName();
+    } else {
+        fileName = await askForFileName().then((fileName) => fileName);
     }
-    if (fileName.indexOf("/") !== -1) {
-        output?.error(`The file name '${fileName}' is not allowed.`);
-        window.showErrorMessage(`"/" is not allowed in a file name.`);
+
+    if (!fileName) {
+        return;
+    }
+
+    if (!(await validateFileName(fileName))) {
         return Promise.reject();
     }
 
@@ -303,8 +312,8 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
 
     let fileUri = fileNameToUri(gist.gist.id!, fileName);
     let gistContent = "";
-    let fileNameWithoutExtension = fileName.split(".").shift()!;
-    let extension = fileName.lastIndexOf(".") > -1 ? fileName.substring(fileName.lastIndexOf(".") + 1) : "";
+    let fileNameWithoutExtension = fileName!.split(".").shift()!;
+    let extension = fileName!.lastIndexOf(".") > -1 ? fileName!.substring(fileName!.lastIndexOf(".") + 1) : "";
     if (extension === "md") {
         gistContent = `# ${fileNameWithoutExtension}`;
     } else {
@@ -314,6 +323,44 @@ export async function addFile(gist: GistNode): Promise<Uri | undefined> {
     await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(content), { create: true, overwrite: false });
 
     return Promise.resolve(fileUri);
+}
+
+/**
+ * Returns the file name for the daily note based on the current date.
+ * The file name format is "YYYY-MM-DD.md".
+ * 
+ * @returns The file name for the daily note.
+ */
+function getDailyNoteFileName(): string {
+    let date = new Date();
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
+
+    return `${year}-${month}-${day}.md`;
+}
+
+/**
+ * Validates the given file name.
+ *
+ * @param fileName - The name of the file to validate.
+ * @returns A promise that resolves to `true` if the file name is valid, or `false` otherwise.
+ */
+export async function validateFileName(fileName: string): Promise<boolean> {
+    if (fileName.match(/gistfile(\d+)/gi)) {
+        output?.error(`The file name '${fileName}' is not allowed.`);
+        window.showErrorMessage(
+            `Don't name your files "gistfile" with a numerical suffix. This is the format of the automatic naming scheme that Gist uses internally.`
+        );
+        return Promise.reject(false);
+    }
+    if (fileName.indexOf("/") !== -1) {
+        output?.error(`The file name '${fileName}' is not allowed.`);
+        window.showErrorMessage(`"/" is not allowed in a file name.`);
+        return Promise.reject(false);
+    }
+
+    return Promise.resolve(true);
 }
 
 /**
