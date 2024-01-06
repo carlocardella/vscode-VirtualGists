@@ -1,6 +1,6 @@
 import { commands, env, ProgressLocation, Uri, window, workspace } from "vscode";
 import { extensionContext, gistFileSystemProvider, gistProvider, output, store } from "../extension";
-import { GIST_SCHEME } from "../FileSystem/fileSystem";
+import { GIST_SCHEME, GistFileSystemProvider } from "../FileSystem/fileSystem";
 import {
     getGitHubGist,
     getGitHubGistsForAuthenticatedUser,
@@ -300,7 +300,7 @@ export async function addFile(gist: GistNode, dailyNote: boolean = false): Promi
     }
 
     if (!(await validateFileName(fileName))) {
-        return Promise.reject();
+        return;
     }
 
     if (gist instanceof NotepadNode) {
@@ -319,8 +319,21 @@ export async function addFile(gist: GistNode, dailyNote: boolean = false): Promi
     } else {
         gistContent = fileNameWithoutExtension;
     }
+
+    // check if the file already exists; if it does, ask the user if they wants to overwrite it
+    let create = false;
+    let overwrite = false;
+    if (GistFileSystemProvider.fileExists(fileUri)) {
+        const confirmOverwrite = new ConfirmOverwrite();
+        const canOverwrite = await confirmOverwrite.confirm(fileUri);
+        if (!canOverwrite) {
+            return;
+        }
+        overwrite = true;
+    }
+
     let content = convertToUint8Array(gistContent);
-    await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(content), { create: true, overwrite: false });
+    await gistFileSystemProvider.writeFile(fileUri, new Uint8Array(content), { create: create, overwrite: overwrite });
 
     return Promise.resolve(fileUri);
 }
@@ -328,7 +341,7 @@ export async function addFile(gist: GistNode, dailyNote: boolean = false): Promi
 /**
  * Returns the file name for the daily note based on the current date.
  * The file name format is "YYYY-MM-DD.md".
- * 
+ *
  * @returns The file name for the daily note.
  */
 function getDailyNoteFileName(): string {
@@ -539,7 +552,25 @@ export async function uploadFiles(destination: ContentNode | GistNode): Promise<
         })
     );
 
-    await gistFileSystemProvider.writeFiles(destination as GistNode, filesToUpload);
+    // check if the file already exists; if it does, ask the user if they wants to overwrite it
+    let confirmedFilesToUpload: TGistFileNoKey[] = [];
+    const confirmOverwrite = new ConfirmOverwrite();
+    filesToUpload.map(async (file) => {
+        const fileUri = fileNameToUri(destination.gist.id!, file.filename);
+        if (GistFileSystemProvider.fileExists(fileUri)) {
+            // if (confirmOverwrite.userChoice !== ConfirmOverwriteOptions.Cancel) {
+            let canOverwrite = await confirmOverwrite.confirm(fileUri);
+            if (canOverwrite) {
+                confirmedFilesToUpload.push(file);
+            }
+            // }
+            if (confirmedFilesToUpload.length === 0) {
+                return;
+            }
+        }
+    });
+
+    await gistFileSystemProvider.writeFiles(destination as GistNode, confirmedFilesToUpload);
 
     return Promise.resolve();
 }
@@ -801,4 +832,99 @@ export async function followUserOnGitHub(username: string) {
     await window.withProgress({ title: "Following user...", location: ProgressLocation.Notification }, async () => {
         await followGitHubUser(username);
     });
+}
+
+/**
+ * Possible answers to the question "Do you want to overwrite the file?"
+ *
+ * @export
+ * @enum {number}
+ */
+export enum ConfirmOverwriteOptions {
+    "Yes" = "Yes",
+    "YesToAll" = "YesToAll",
+    "No" = "No",
+    "NoToAll" = "NoToAll",
+    "Cancel" = "Cancel",
+}
+
+/**
+ * Class to aks and handle the question "Do you want to overwrite the file?"
+ *
+ * @export
+ * @class overwriteFile
+ * @typedef {ConfirmOverwrite}
+ */
+export class ConfirmOverwrite {
+    public userChoice: ConfirmOverwriteOptions | undefined;
+    private _overwrite = false;
+    // private overwriteConfig: string;
+
+    /**
+     * Signals that the user wants to cancel the download operation.
+     *
+     * @public
+     */
+    public cancel() {
+        this.userChoice = ConfirmOverwriteOptions.Cancel;
+    }
+
+    constructor() {}
+
+    /**
+     * Ask the user if he wants to overwrite the file or folder.
+     * If the user already answered "Yas to all" or "No to all", we won't ask again unless a new download command is issued.
+     *
+     * @private
+     * @async
+     * @param {Uri} uri Usi of the file or folder to be overwritten.
+     * @returns {Promise<boolean>}
+     */
+    private async askUser(uri: Uri): Promise<boolean> {
+        let response: string | undefined;
+
+        if (this.userChoice === undefined || this.userChoice === ConfirmOverwriteOptions.Yes || this.userChoice === ConfirmOverwriteOptions.No) {
+            response = await window.showWarningMessage(
+                `"${uri.fsPath}" already exists. Overwrite?`,
+                { modal: true },
+                ConfirmOverwriteOptions.Yes,
+                ConfirmOverwriteOptions.YesToAll,
+                ConfirmOverwriteOptions.No,
+                ConfirmOverwriteOptions.NoToAll
+            );
+            this.userChoice = <ConfirmOverwriteOptions>response ?? ConfirmOverwriteOptions.Cancel;
+        }
+
+        if (this.userChoice === ConfirmOverwriteOptions.Yes || this.userChoice === ConfirmOverwriteOptions.YesToAll) {
+            return Promise.resolve(true);
+        }
+
+        return Promise.resolve(false);
+    }
+
+    /**
+     * Track if the user wants to overwrite the file or folder.
+     *
+     * @public
+     * @async
+     * @param {Uri} uri Uri of the file or folder to be overwritten.
+     * @returns {Promise<boolean>}
+     */
+    public async confirm(uri: Uri): Promise<boolean> {
+        await workspace.fs.stat(uri).then(
+            async (stat) => {
+                if (stat) {
+                    this._overwrite = await this.askUser(uri);
+                }
+            },
+            (err) => {
+                if (err.code === "FileNotFound") {
+                    // the file or folder doesn't exist, so we can just continue the loop
+                    this._overwrite = true;
+                }
+            }
+        );
+
+        return Promise.resolve(this._overwrite);
+    }
 }
