@@ -4,6 +4,7 @@ import { GistNode, ContentNode } from "../Tree/nodes";
 import { getGitHubGist } from "../GitHub/api";
 import { getGistFileContent } from "../GitHub/commands";
 import { TContent } from "../GitHub/types";
+import { ConfirmOverwrite } from "../utils";
 
 /**
  * Download a Gist file to a local file.
@@ -42,7 +43,6 @@ export async function downloadFiles(files: ContentNode[], destinationFolder: Uri
                 await workspace.fs.createDirectory(destinationFolder);
                 let canOverwrite = false;
 
-                // const newFileUri = Uri.joinPath(destinationFolder, file!.name!, file!.name); // @todo: can this be a setting?
                 const newFileUri = Uri.joinPath(destinationFolder, file.name!);
                 // check if the user wants to overwrite the folder
                 canOverwrite = await overwrite.confirm(newFileUri);
@@ -161,109 +161,4 @@ async function ensureGistIsInLocalStore(gist: GistNode): Promise<boolean> {
     }
 
     return false;
-}
-
-/**
- * Possible answers to the question "Do you want to overwrite the file?"
- *
- * @export
- * @enum {number}
- */
-export enum ConfirmOverwriteOptions {
-    "yes" = "yes",
-    "yesToAll" = "yesToAll",
-    "no" = "no",
-    "noToAll" = "noToAll",
-    "cancel" = "cancel",
-}
-
-/**
- * Class to aks and handle the question "Do you want to overwrite the file?"
- *
- * @export
- * @class overwriteFile
- * @typedef {ConfirmOverwrite}
- */
-export class ConfirmOverwrite {
-    public userChoice: ConfirmOverwriteOptions | undefined;
-    private _overwrite = false;
-    // private overwriteConfig: string;
-
-    /**
-     * Signals that the user wants to cancel the download operation.
-     *
-     * @public
-     */
-    public cancel() {
-        this.userChoice = ConfirmOverwriteOptions.cancel;
-    }
-
-    constructor() {
-        // this.overwriteConfig = config.get("downloadOverwrite");
-    }
-
-    /**
-     * Ask the user if he wants to overwrite the file or folder.
-     * If the user already answered "Yas to all" or "No to all", we won't ask again unless a new download command is issued.
-     *
-     * @private
-     * @async
-     * @param {Uri} uri Usi of the file or folder to be overwritten.
-     * @returns {Promise<boolean>}
-     */
-    private async askUser(uri: Uri): Promise<boolean> {
-        let response: string | undefined;
-
-        // if (this.overwriteConfig === "always") {
-        //     this.userChoice = ConfirmOverwriteOptions.yesToAll;
-        // }
-
-        // if (this.overwriteConfig === "never") {
-        //     this.userChoice = ConfirmOverwriteOptions.noToAll;
-        // }
-
-        if (this.userChoice === undefined || this.userChoice === ConfirmOverwriteOptions.yes || this.userChoice === ConfirmOverwriteOptions.no) {
-            response = await window.showWarningMessage(
-                `"${uri.fsPath}" already exists. Overwrite?`,
-                { modal: true },
-                ConfirmOverwriteOptions.yes,
-                ConfirmOverwriteOptions.yesToAll,
-                ConfirmOverwriteOptions.no,
-                ConfirmOverwriteOptions.noToAll
-            );
-            this.userChoice = <ConfirmOverwriteOptions>response ?? ConfirmOverwriteOptions.cancel;
-        }
-
-        if (this.userChoice === ConfirmOverwriteOptions.yes || this.userChoice === ConfirmOverwriteOptions.yesToAll) {
-            return Promise.resolve(true);
-        }
-
-        return Promise.resolve(false);
-    }
-
-    /**
-     * Track if the user wants to overwrite the file or folder.
-     *
-     * @public
-     * @async
-     * @param {Uri} uri Uri of the file or folder to be overwritten.
-     * @returns {Promise<boolean>}
-     */
-    public async confirm(uri: Uri): Promise<boolean> {
-        await workspace.fs.stat(uri).then(
-            async (stat) => {
-                if (stat) {
-                    this._overwrite = await this.askUser(uri);
-                }
-            },
-            (err) => {
-                if (err.code === "FileNotFound") {
-                    // the file or folder doesn't exist, so we can just continue the loop
-                    this._overwrite = true;
-                }
-            }
-        );
-
-        return Promise.resolve(this._overwrite);
-    }
 }

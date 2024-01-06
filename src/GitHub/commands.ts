@@ -18,7 +18,7 @@ import { TContent, TForkedGist, TGist, TGitHubUser, TFileToDelete, TGistFileNoKe
 import { ContentNode, GistNode, GistsGroupType, NotepadNode, UserNode } from "../Tree/nodes";
 import { NOTEPAD_GIST_NAME } from "./constants";
 import { GlobalStorageGroup, LocalStorageType } from "../FileSystem/storage";
-import { convertFromUint8Array, convertToUint8Array } from "../utils";
+import { ConfirmOverwrite, ConfirmOverwriteOptions, convertFromUint8Array, convertToUint8Array } from "../utils";
 
 /**
  * Get the content of a gist file.
@@ -836,99 +836,4 @@ export async function followUserOnGitHub(username: string) {
     await window.withProgress({ title: "Following user...", location: ProgressLocation.Notification }, async () => {
         await followGitHubUser(username);
     });
-}
-
-/**
- * Possible answers to the question "Do you want to overwrite the file?"
- *
- * @export
- * @enum {number}
- */
-export enum ConfirmOverwriteOptions {
-    "Yes" = "Yes",
-    "YesToAll" = "YesToAll",
-    "No" = "No",
-    "NoToAll" = "NoToAll",
-    "Cancel" = "Cancel",
-}
-
-/**
- * Class to aks and handle the question "Do you want to overwrite the file?"
- *
- * @export
- * @class overwriteFile
- * @typedef {ConfirmOverwrite}
- */
-export class ConfirmOverwrite {
-    public userChoice: ConfirmOverwriteOptions | undefined;
-    private _overwrite = false;
-    // private overwriteConfig: string;
-
-    /**
-     * Signals that the user wants to cancel the download operation.
-     *
-     * @public
-     */
-    public cancel() {
-        this.userChoice = ConfirmOverwriteOptions.Cancel;
-    }
-
-    constructor() {}
-
-    /**
-     * Ask the user if he wants to overwrite the file or folder.
-     * If the user already answered "Yas to all" or "No to all", we won't ask again unless a new download command is issued.
-     *
-     * @private
-     * @async
-     * @param {Uri} uri Usi of the file or folder to be overwritten.
-     * @returns {Promise<boolean>}
-     */
-    private async askUser(uri: Uri): Promise<boolean> {
-        let response: string | undefined;
-
-        if (this.userChoice === undefined || this.userChoice === ConfirmOverwriteOptions.Yes || this.userChoice === ConfirmOverwriteOptions.No) {
-            response = await window.showWarningMessage(
-                `"${uri.fsPath}" already exists. Overwrite?`,
-                { modal: true },
-                ConfirmOverwriteOptions.Yes,
-                ConfirmOverwriteOptions.YesToAll,
-                ConfirmOverwriteOptions.No,
-                ConfirmOverwriteOptions.NoToAll
-            );
-            this.userChoice = <ConfirmOverwriteOptions>response ?? ConfirmOverwriteOptions.Cancel;
-        }
-
-        if (this.userChoice === ConfirmOverwriteOptions.Yes || this.userChoice === ConfirmOverwriteOptions.YesToAll) {
-            return Promise.resolve(true);
-        }
-
-        return Promise.resolve(false);
-    }
-
-    /**
-     * Track if the user wants to overwrite the file or folder.
-     *
-     * @public
-     * @async
-     * @param {Uri} uri Uri of the file or folder to be overwritten.
-     * @returns {Promise<boolean>}
-     */
-    public async confirm(uri: Uri): Promise<boolean> {
-        await workspace.fs.stat(uri).then(
-            async (stat) => {
-                if (stat) {
-                    this._overwrite = await this.askUser(uri);
-                }
-            },
-            (err) => {
-                if (err.code === "FileNotFound") {
-                    // the file or folder doesn't exist, so we can just continue the loop
-                    this._overwrite = true;
-                }
-            }
-        );
-
-        return Promise.resolve(this._overwrite);
-    }
 }
