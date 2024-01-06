@@ -531,7 +531,7 @@ export async function renameFile(gistFile: ContentNode) {
 export async function uploadFiles(destination: ContentNode | GistNode): Promise<void> {
     const files = await window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: true, title: "Select the file(s) to upload" });
     if (!files) {
-        return;
+        return Promise.resolve();
     }
 
     let filesToUpload: TGistFileNoKey[] = [];
@@ -555,20 +555,24 @@ export async function uploadFiles(destination: ContentNode | GistNode): Promise<
     // check if the file already exists; if it does, ask the user if they wants to overwrite it
     let confirmedFilesToUpload: TGistFileNoKey[] = [];
     const confirmOverwrite = new ConfirmOverwrite();
-    filesToUpload.map(async (file) => {
+    for (const file of filesToUpload) {
         const fileUri = fileNameToUri(destination.gist.id!, file.filename);
         if (GistFileSystemProvider.fileExists(fileUri)) {
-            // if (confirmOverwrite.userChoice !== ConfirmOverwriteOptions.Cancel) {
-            let canOverwrite = await confirmOverwrite.confirm(fileUri);
+            if (confirmOverwrite.userChoice === ConfirmOverwriteOptions.Cancel || confirmOverwrite.userChoice === ConfirmOverwriteOptions.NoToAll) {
+                confirmedFilesToUpload = [];
+                return Promise.resolve();
+            }
+            let canOverwrite =
+                <ConfirmOverwriteOptions>confirmOverwrite.userChoice === ConfirmOverwriteOptions.YesToAll ? true : await confirmOverwrite.confirm(fileUri);
             if (canOverwrite) {
                 confirmedFilesToUpload.push(file);
             }
-            // }
-            if (confirmedFilesToUpload.length === 0) {
-                return;
-            }
         }
-    });
+    }
+
+    if (confirmedFilesToUpload.length === 0) {
+        return Promise.resolve();
+    }
 
     await gistFileSystemProvider.writeFiles(destination as GistNode, confirmedFilesToUpload);
 
