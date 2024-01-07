@@ -181,6 +181,26 @@ export async function activate(context: ExtensionContext) {
     );
 
     context.subscriptions.push(
+        commands.registerCommand("VirtualGists.addDailyNote", async (gist: GistNode) => {
+            const newFileUri = await addFile(gist, true);
+            if (!newFileUri) {
+                return;
+            }
+
+            gistProvider.refreshing = true;
+            gistProvider.refresh();
+
+            while (gistProvider.refreshing) {
+                output?.debug("waiting...");
+                await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+
+            output?.debug(`open ${newFileUri}`);
+            commands.executeCommand("vscode.open", newFileUri);
+        })
+    );
+
+    context.subscriptions.push(
         commands.registerCommand("VirtualGists.followUser", async (gist?: GistNode) => {
             let pick: string | undefined;
             pick = await window.showInputBox({ ignoreFocusOut: true, placeHolder: "username", title: "Enter the username to follow" });

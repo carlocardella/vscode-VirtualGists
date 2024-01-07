@@ -118,6 +118,12 @@
                 "category": "Virtual Gists"
             },
             {
+                "title": "New daily note",
+                "command": "VirtualGists.addDailyNote",
+                "icon": "$(calendar)",
+                "category": "Virtual Gists"
+            },
+            {
                 "title": "Upload file(s)...",
                 "command": "VirtualGists.uploadFile",
                 "icon": "$(cloud-upload)",
@@ -339,6 +345,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "VirtualGists.addDailyNote",
+                    "when": "false"
+                },
+                {
                     "command": "VirtualGists.unstarGist",
                     "when": "false"
                 },
@@ -512,6 +522,11 @@
                     "group": "inline@2"
                 },
                 {
+                    "command": "VirtualGists.addDailyNote",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
+                    "group": "inline@3"
+                },
+                {
                     "command": "VirtualGists.newPrivateGist",
                     "when": "viewItem == myGistsGroupNode",
                     "group": "1_gist@1"
@@ -527,9 +542,14 @@
                     "group": "1_gist@1"
                 },
                 {
+                    "command": "VirtualGists.addDailyNote",
+                    "when": "viewItem == gist.readWrite || viewItem == notepadGroupNode || viewItem == notepad",
+                    "group": "1_gist@2"
+                },
+                {
                     "command": "VirtualGists.uploadFile",
                     "when": "viewItem == gist.readWrite",
-                    "group": "1_gist@2"
+                    "group": "1_gist@3"
                 },
                 {
                     "command": "VirtualGists.closeGist",
