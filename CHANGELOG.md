@@ -10,6 +10,19 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.8.0] - 2024-01-07
+
+### Added
+
+* Add a new daily note to any gist; the file name will be "yyyy-MM-dd.md"
+  * [#10 Add "daily" Notepad note](https://github.com/carlocardella/vscode-VirtualGists/issues/10)
+
+### Fixed
+
+* Improved behavior for overwriting existing files for all operations: new file, download and upload
+  * [#55 Handle overwrite existing files](https://github.com/carlocardella/vscode-VirtualGists/issues/55)
+
+
 ## [0.7.1] - 2023-12-22
 
 ### Fixed
