@@ -50,7 +50,7 @@ export function setSortDirectionContext(sortDirection: SortDirection) {
  */
 /**
  * Checks if every element in an array is an instance of a specified type.
- * 
+ *
  * @template T - The type of the elements in the array.
  * @param arr - The array to check.
  * @param type - The constructor function of the type to check against.
@@ -77,7 +77,6 @@ export function convertToUint8Array(content: string): Uint8Array {
 export function convertFromUint8Array(content: Uint8Array): string {
     return new TextDecoder().decode(content);
 }
-
 
 /**
  * Possible answers to the question "Do you want to overwrite the file?"
@@ -120,23 +119,18 @@ export class ConfirmOverwrite {
      * Ask the user if he wants to overwrite the file or folder.
      * If the user already answered "Yas to all" or "No to all", we won't ask again unless a new download command is issued.
      *
-     * @private
-     * @async
-     * @param {Uri} uri Usi of the file or folder to be overwritten.
-     * @returns {Promise<boolean>}
+     * @param uri - The URI of the file to be overwritten.
+     * @param multipleFiles - Indicates whether multiple files are being overwritten.
+     * @returns A promise that resolves to a boolean indicating whether the user confirmed the overwrite.
      */
-    private async askUser(uri: Uri): Promise<boolean> {
+    private async askUser(uri: Uri, multipleFiles: boolean): Promise<boolean> {
         let response: string | undefined;
+        let confirmOverwriteOptions = multipleFiles
+            ? [ConfirmOverwriteOptions.Yes, ConfirmOverwriteOptions.YesToAll, ConfirmOverwriteOptions.No, ConfirmOverwriteOptions.NoToAll]
+            : [ConfirmOverwriteOptions.Yes, ConfirmOverwriteOptions.No];
 
         if (this.userChoice === undefined || this.userChoice === ConfirmOverwriteOptions.Yes || this.userChoice === ConfirmOverwriteOptions.No) {
-            response = await window.showWarningMessage(
-                `"${uri.fsPath}" already exists. Overwrite?`,
-                { modal: true },
-                ConfirmOverwriteOptions.Yes,
-                ConfirmOverwriteOptions.YesToAll,
-                ConfirmOverwriteOptions.No,
-                ConfirmOverwriteOptions.NoToAll
-            );
+            response = await window.showWarningMessage(`"${uri.fsPath}" already exists. Overwrite?`, { modal: true }, ...confirmOverwriteOptions);
             this.userChoice = <ConfirmOverwriteOptions>response ?? ConfirmOverwriteOptions.Cancel;
         }
 
@@ -148,18 +142,17 @@ export class ConfirmOverwrite {
     }
 
     /**
-     * Track if the user wants to overwrite the file or folder.
+     * Confirms whether to overwrite a file or folder.
      *
-     * @public
-     * @async
-     * @param {Uri} uri Uri of the file or folder to be overwritten.
-     * @returns {Promise<boolean>}
+     * @param uri - The URI of the file or folder to confirm.
+     * @param multipleFiles - Optional. Indicates whether multiple files are being confirmed. Default is true.
+     * @returns A promise that resolves to a boolean indicating whether to overwrite the file or folder.
      */
-    public async confirm(uri: Uri): Promise<boolean> {
+    public async confirm(uri: Uri, multipleFiles: boolean = true): Promise<boolean> {
         await workspace.fs.stat(uri).then(
             async (stat) => {
                 if (stat) {
-                    this._overwrite = await this.askUser(uri);
+                    this._overwrite = await this.askUser(uri, multipleFiles);
                 }
             },
             (err) => {

@@ -325,7 +325,7 @@ export async function addFile(gist: GistNode, dailyNote: boolean = false): Promi
     let overwrite = false;
     if (GistFileSystemProvider.fileExists(fileUri)) {
         const confirmOverwrite = new ConfirmOverwrite();
-        const canOverwrite = await confirmOverwrite.confirm(fileUri);
+        const canOverwrite = await confirmOverwrite.confirm(fileUri, false);
         if (!canOverwrite) {
             return;
         }
@@ -555,6 +555,7 @@ export async function uploadFiles(destination: ContentNode | GistNode): Promise<
     // check if the file already exists; if it does, ask the user if they wants to overwrite it
     let confirmedFilesToUpload: TGistFileNoKey[] = [];
     const confirmOverwrite = new ConfirmOverwrite();
+    const multipleFiles = filesToUpload.length > 1;
     for (const file of filesToUpload) {
         const fileUri = fileNameToUri(destination.gist.id!, file.filename);
         if (GistFileSystemProvider.fileExists(fileUri)) {
@@ -563,7 +564,7 @@ export async function uploadFiles(destination: ContentNode | GistNode): Promise<
                 return Promise.resolve();
             }
             let canOverwrite =
-                <ConfirmOverwriteOptions>confirmOverwrite.userChoice === ConfirmOverwriteOptions.YesToAll ? true : await confirmOverwrite.confirm(fileUri);
+                <ConfirmOverwriteOptions>confirmOverwrite.userChoice === ConfirmOverwriteOptions.YesToAll ? true : await confirmOverwrite.confirm(fileUri, multipleFiles);
             if (canOverwrite) {
                 confirmedFilesToUpload.push(file);
             }
