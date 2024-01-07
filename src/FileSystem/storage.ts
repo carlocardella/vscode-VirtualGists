@@ -327,6 +327,24 @@ export class Store {
 
         return Promise.resolve(followedUsers);
     }
+
+    async getGist(context: ExtensionContext, gistId: string): Promise<TGist | undefined> {
+        let gist: TGist | undefined;
+
+        const gists = this.gists; //await this.getGists(context);
+        gist = gists.find((gist) => gist?.gist.id === gistId)?.gist;
+
+        return Promise.resolve(gist);
+    }
+
+    async getFile(context: ExtensionContext, gistId: string, fileName: string): Promise<string | null | undefined> {
+        let file: string | null | undefined;
+
+        const gist = await this.getGist(context, gistId);
+        file = gist?.files?.[fileName]?.content ?? undefined;
+
+        return Promise.resolve(file);
+    }
 }
 
 /**

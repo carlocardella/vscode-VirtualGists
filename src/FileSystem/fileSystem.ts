@@ -1,7 +1,20 @@
-import { Disposable, Event, EventEmitter, FileChangeEvent, FileChangeType, FileStat, FileSystemError, FileSystemProvider, FileType, Uri } from "vscode";
+import {
+    Disposable,
+    Event,
+    EventEmitter,
+    FileChangeEvent,
+    FileChangeType,
+    FileStat,
+    FileSystemError,
+    FileSystemProvider,
+    FileType,
+    Uri,
+    window,
+    workspace,
+} from "vscode";
 import { gistProvider, store } from "../extension";
 import { createGitHubGist, createOrUpdateFile, deleteGitHubGist } from "../GitHub/api";
-import { getFileNameFromUri, getGistFileContent } from "../GitHub/commands";
+import { fileNameToUri, getFileNameFromUri, getGistFileContent } from "../GitHub/commands";
 import { TGistFileNoKey, TGist } from "../GitHub/types";
 import { GistNode } from "../Tree/nodes";
 import { convertFromUint8Array, convertToUint8Array } from "../utils";
@@ -50,6 +63,11 @@ export class GistFileSystemProvider implements FileSystemProvider {
         }
 
         return [gistNode!, file];
+    }
+
+    static fileExists(uri: Uri): boolean {
+        const [_, file] = this.findGist(uri);
+        return file ? true : false;
     }
 
     watch(_resource: Uri): Disposable {
@@ -131,7 +149,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
     writeFile(uri: Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
         let [gist, file] = GistFileSystemProvider.findGist(uri)!;
 
-        if (!file) {
+        if (!file || options.create || options.overwrite) {
             // create a new file
             file = {
                 filename: uri.path.split("/").slice(1).join("/"),
@@ -151,7 +169,7 @@ export class GistFileSystemProvider implements FileSystemProvider {
                 file.content = convertFromUint8Array(content);
             }
         } else {
-            file.content = convertFromUint8Array(content);
+            file!.content = convertFromUint8Array(content);
         }
 
         createOrUpdateFile(gist, [file]).then(() => {
