@@ -10,6 +10,18 @@ See the [list of pending enhancements on GitHub](https://github.com/carlocardell
 
 ---
 
+## [0.8.1] - 2026-09-13
+
+### Changed
+
+* Updated npm dependencies and removed unused packages
+* Refactored the extension code for improved readability and maintainability
+
+### Fixed
+
+* Resolved all reported npm security vulnerabilities
+* Restored packaging and execution of the VS Code integration test suite
+
 ## [0.8.0] - 2024-01-07
 
 ### Added

@@ -1,5 +1,5 @@
 import { Credentials } from "./GitHub/authentication";
-import { commands, ExtensionContext, workspace, window, LogOutputChannel, version } from "vscode";
+import { commands, ExtensionContext, workspace, window } from "vscode";
 import { GistNode, GistProvider, ContentNode, UserNode } from "./Tree/nodes";
 import { GistFileSystemProvider, GIST_SCHEME } from "./FileSystem/fileSystem";
 import { TGitHubUser } from "./GitHub/types";
@@ -7,12 +7,37 @@ import { GlobalStorageGroup, Store, SortType, SortDirection } from "./FileSystem
 import { EXTENSION_NAME, FOLLOWED_USERS_GLOBAL_STORAGE_KEY, GlobalStorageKeys } from "./GitHub/constants";
 import { getGitHubAuthenticatedUser } from "./GitHub/api";
 
-export let output: LogOutputChannel;
+type Output = {
+    appendLine(value: string): void;
+    debug(...messages: unknown[]): void;
+    error(...messages: unknown[]): void;
+    info(...messages: unknown[]): void;
+    trace(...messages: unknown[]): void;
+    warn(...messages: unknown[]): void;
+};
+
+export let output: Output;
 export const credentials = new Credentials();
 export let gitHubAuthenticatedUser: TGitHubUser;
 export let extensionContext: ExtensionContext;
 export const gistProvider = new GistProvider();
 export const gistFileSystemProvider = new GistFileSystemProvider();
+
+function createOutput(): Output {
+    const channel = window.createOutputChannel(EXTENSION_NAME);
+    const write = (level: string, messages: unknown[]) => {
+        channel.appendLine(`[${level}] ${messages.map(String).join(" ")}`);
+    };
+
+    return {
+        appendLine: value => channel.appendLine(value),
+        debug: (...messages) => write("debug", messages),
+        error: (...messages) => write("error", messages),
+        info: (...messages) => write("info", messages),
+        trace: (...messages) => write("trace", messages),
+        warn: (...messages) => write("warn", messages),
+    };
+}
 
 import {
     addFile,
@@ -48,9 +73,7 @@ export async function activate(context: ExtensionContext) {
     setSortTypeContext(store.sortType);
     setSortDirectionContext(store.sortDirection);
 
-    if (parseFloat(version) >= 1.74) {
-        output = window.createOutputChannel(EXTENSION_NAME, { log: true });
-    }
+    output = createOutput();
 
     gitHubAuthenticatedUser = await getGitHubAuthenticatedUser();
 
