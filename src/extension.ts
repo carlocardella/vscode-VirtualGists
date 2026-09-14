@@ -14,8 +14,6 @@ export let extensionContext: ExtensionContext;
 export const gistProvider = new GistProvider();
 export const gistFileSystemProvider = new GistFileSystemProvider();
 
-import { TextEncoder as _TextEncoder } from "node:util";
-import { TextDecoder as _TextDecoder } from "node:util";
 import {
     addFile,
     closeGist,
@@ -41,12 +39,6 @@ import {
 } from "./GitHub/commands";
 import { setSortDirectionContext, setSortTypeContext, isArrayOf } from "./utils";
 import { downloadFiles, downloadGist } from "./FileSystem/download";
-
-// @hack https://angularfixing.com/how-to-access-textencoder-as-a-global-instead-of-importing-it-from-the-util-package/
-declare global {
-    var TextEncoder: typeof _TextEncoder;
-    var TextDecoder: typeof _TextDecoder;
-}
 
 export let store = new Store();
 

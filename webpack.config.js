@@ -36,7 +36,7 @@ const webConfig = /** @type WebpackConfig */ {
             // os: require.resolve("os-browserify/browser"),
             // path: require.resolve("path-browserify"),
             // punycode: require.resolve("punycode"),
-            process: require.resolve("process/browser"),
+            process: require.resolve("process/browser.js"),
             // querystring: require.resolve("querystring-es3"),
             // stream: require.resolve("stream-browserify"),
             // string_decoder: require.resolve("string_decoder"),
@@ -64,7 +64,7 @@ const webConfig = /** @type WebpackConfig */ {
     },
     plugins: [
         new webpack.ProvidePlugin({
-            process: "process/browser", // provide a shim for the global `process` variable
+            process: "process/browser.js", // provide a shim for the global `process` variable
             Buffer: ["buffer", "Buffer"],
             // util: "util",
             // sys: "util",
